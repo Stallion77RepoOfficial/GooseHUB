@@ -180,6 +180,7 @@
     "sourceLock": "Resources/engine-lock.json",
     "buildCache": "~/Library/Caches/GooseHUB/Build",
     "engineDestination": "GooseHUB.app/Contents/Resources/Engines",
-    "bundledEngines": false
+    "bundledEngines": false,
+    "sourcePreservation": "Validation/2026-11-13/source-layout.json"
   }
 }

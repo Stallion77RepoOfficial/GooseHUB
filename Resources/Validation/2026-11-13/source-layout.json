@@ -1,0 +1,41 @@
+{
+  "date": "2026-11-13",
+  "allPreexistingCustomRuntimeSourcePreserved": true,
+  "validation": "Pre-migration runtime source patches reverse-check successfully; pre-existing untracked runtime source files are committed. No engine C/C++ runtime implementation was replaced.",
+  "engineCommits": {
+    "wine-adrenalin-edition": {
+      "commit": "cffa31cd62ce05158dae3c68b513cd648d6ca3e1",
+      "trackedFiles": 12075,
+      "trackedEngineBinaries": 0
+    },
+    "fex-adrenalin-edition": {
+      "commit": "8027126f7049dad78ebc9bd69b26fb962f6f36fb",
+      "trackedFiles": 3621,
+      "trackedEngineBinaries": 0
+    },
+    "dxmt-adrenalin-edition": {
+      "commit": "a4c68a951b6c067b771c2b4cbb31ef7084c732ac",
+      "trackedFiles": 473,
+      "trackedEngineBinaries": 0
+    }
+  },
+  "removedGeneratedWineObjects": 1182,
+  "removedFinderMetadata": 825,
+  "buildChanges": [
+    "Native host architecture for DXMT build tools",
+    "Relocatable native link padding",
+    "Single out-of-tree source-build cache"
+  ],
+  "runtimeValidation": {
+    "swiftTests": 15,
+    "installerTests": 4,
+    "x64Guest": "passed",
+    "x86Guest": "passed",
+    "d3d9ConstantChecksPerArchitecture": 21,
+    "x64HIDFeatureReadWrite": "passed",
+    "x86HIDFeatureReadWrite": "passed",
+    "codesignDeepStrict": "passed",
+    "installedAssetChecksums": 2080
+  },
+  "sourcePolicy": "Local forks remain authoritative. Generated runtime files are not included in repository tips."
+}

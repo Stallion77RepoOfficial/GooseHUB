@@ -94,9 +94,10 @@ def fetch_repository(spec, root, *, local=False):
         # A failed clone is owned by this invocation; existing directories are never removed.
         temporary = Path(tempfile.mkdtemp(prefix=f'.{name}-', dir=root))
         try:
-            run(['git', 'clone', '--no-checkout', spec['url'], temporary],
-                env=dict(os.environ, GIT_TERMINAL_PROMPT='0'))
-            git(temporary, 'checkout', '--detach', revision)
+            git(temporary, 'init', capture=False)
+            git(temporary, 'remote', 'add', 'origin', spec['url'])
+            git(temporary, 'fetch', '--depth=1', '--no-tags', 'origin', revision, capture=False)
+            git(temporary, 'checkout', '--detach', 'FETCH_HEAD')
             temporary.rename(path)
         finally:
             if temporary.exists():
