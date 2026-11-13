@@ -105,6 +105,10 @@ struct HubShell: View {
                     }
                 }.padding(.horizontal, 12)
             }
+            HStack {
+                Spacer()
+                AppUpdateMenu()
+            }.padding()
         }.background(Color(red: 0.069, green: 0.074, blue: 0.088))
     }
 

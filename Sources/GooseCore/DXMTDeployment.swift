@@ -105,12 +105,13 @@ enum DXMTDeployment {
             try PathGuard.requireDirectory(destination.deletingLastPathComponent())
             let installed = try fingerprint(copy.source)
             if let prior = oldEntries[copy.destination] {
-                guard try fingerprint(destination) == prior.installedFingerprint else {
+                let current = try fingerprint(destination)
+                guard current == prior.installedFingerprint || current == installed else {
                     throw HubError.deploymentFailed("DLL changed outside Goose HUB; refusing to overwrite \(copy.destination)")
                 }
                 entries.append(DLLDeploymentEntry(destination: copy.destination, originalBackup: prior.originalBackup,
                     originalFingerprint: prior.originalFingerprint, installedFingerprint: installed))
-                if installed != prior.installedFingerprint { changes.append(copy) }
+                if current != installed { changes.append(copy) }
             } else {
                 let present = try PathGuard.attributes(destination) != nil
                 let backup = present ? "Backups/DXMT/original/\(copy.destination)" : nil
@@ -129,8 +130,11 @@ enum DXMTDeployment {
             }
             entries.append(previous)
         }
-        guard !changes.isEmpty else { return }
         let state = DLLDeploymentState(schemaVersion: 1, architecture: bottle.architecture, entries: entries)
+        guard !changes.isEmpty else {
+            if existing != state { try JSONFile.write(state, to: manifest) }
+            return
+        }
         let staging = directory.appendingPathComponent(".dxmt-staging-\(UUID().uuidString.lowercased())", isDirectory: true)
         try PathGuard.makeDirectory(staging, inside: directory)
         var preserveStaging = false

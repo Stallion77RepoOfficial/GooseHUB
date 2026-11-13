@@ -1,7 +1,9 @@
 import importlib.util
+import io
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -98,7 +100,7 @@ class EngineInstallTests(unittest.TestCase):
             path.write_bytes(component.encode())
             path.chmod(0o755)
 
-    def test_independent_install_and_reinstall_preserve_other_components(self):
+    def test_component_replacements_preserve_other_components(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             current = root / 'Engines'
@@ -144,6 +146,77 @@ class EngineInstallTests(unittest.TestCase):
         self.assertIn('credential.helper=', args.args[0])
         self.assertEqual(args.kwargs['env']['GIT_CONFIG_GLOBAL'], '/dev/null')
         self.assertEqual(args.kwargs['env']['GIT_ASKPASS'], '/usr/bin/false')
+
+    def test_latest_source_follows_branch_instead_of_bundled_revision(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            origin = root / 'origin'
+            origin.mkdir()
+            self.git(origin, 'init', '-b', 'main')
+            self.git(origin, 'config', 'user.name', 'Test')
+            self.git(origin, 'config', 'user.email', 'test@example.invalid')
+            (origin / 'source.c').write_text('first\n')
+            self.git(origin, 'add', '.')
+            self.git(origin, 'commit', '-m', 'First')
+            old = self.git(origin, 'rev-parse', 'HEAD')
+            sources = root / 'sources'
+            sources.mkdir()
+            spec = {'directory': 'component', 'url': str(origin), 'revision': old}
+            checkout = installer.fetch_repository(spec, sources)
+            (origin / 'source.c').write_text('second\n')
+            self.git(origin, 'commit', '-am', 'Second')
+            new = self.git(origin, 'rev-parse', 'HEAD')
+            selected = installer.latest_repository(spec, sources)
+            self.assertEqual(selected['revision'], new)
+            self.assertEqual(spec['revision'], old)
+            installer.fetch_repository(selected, sources)
+            self.assertEqual(self.git(checkout, 'rev-parse', 'HEAD'), new)
+            self.assertEqual((checkout / 'source.c').read_text(), 'second\n')
+
+    def test_current_update_does_not_build_fetch_or_replace_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            app = root / 'GooseHUB.app'
+            executable = app / 'Contents/MacOS/GooseHUB'
+            executable.parent.mkdir(parents=True)
+            executable.write_text('launcher')
+            engines = app / 'Contents/Resources/Engines'
+            self.package(engines, 'metalgoose')
+            commit = 'a' * 40
+            manifest = {'schemaVersion': 3, 'components': {'metalgoose': {'commit': commit}}}
+            path = engines / 'manifest.json'
+            path.write_text(json.dumps(manifest))
+            before = path.stat().st_mtime_ns
+            lock = root / 'lock.json'
+            selected = {'revision': commit, 'directory': 'MetalGoose', 'url': 'https://github.com/example/MetalGoose.git'}
+            lock.write_text(json.dumps({'schemaVersion': 2, 'repositories': {'metalgoose': selected}}))
+            argv = ['installer', '--app', str(app), '--component', 'metalgoose', '--update',
+                    '--lockfile', str(lock), '--cache-root', str(root / 'cache'), '--sources-root', str(root / 'sources')]
+            with patch.object(sys, 'argv', argv), patch.object(sys, 'stdout', io.StringIO()) as output, \
+                 patch.object(installer, 'BuildLog', side_effect=lambda console, path: console), \
+                 patch.object(installer, 'latest_repository', return_value=selected), \
+                 patch.object(installer, 'tools') as build_tools, patch.object(installer, 'fetch_repository') as fetch, \
+                 patch.object(installer, 'install') as install:
+                installer.main()
+                self.assertIn('"phase": "up-to-date"', output.getvalue())
+                build_tools.assert_not_called()
+                fetch.assert_not_called()
+                install.assert_not_called()
+            self.assertEqual(path.stat().st_mtime_ns, before)
+            self.assertEqual(json.loads(path.read_text()), manifest)
+
+    def test_dxmt_update_detects_changed_wine_dependency(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.package(root, 'dxmt')
+            old, new, dxmt = 'a' * 40, 'b' * 40, 'c' * 40
+            components = {'wine': {'commit': new}, 'dxmt': {'commit': dxmt, 'dependencies': {'wine': old}}}
+            path = root / 'manifest.json'
+            path.write_text(json.dumps({'schemaVersion': 3, 'components': components}))
+            self.assertFalse(installer.component_current('dxmt', root, {'revision': dxmt}))
+            components['dxmt']['dependencies']['wine'] = new
+            path.write_text(json.dumps({'schemaVersion': 3, 'components': components}))
+            self.assertTrue(installer.component_current('dxmt', root, {'revision': dxmt}))
 
 
 if __name__ == '__main__':

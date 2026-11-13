@@ -127,6 +127,32 @@ def git(path, *args, capture=True, progress=None):
                env=env, capture=capture, progress=progress).strip()
 
 
+def latest_repository(spec, root):
+    branch = spec.get('branch', 'main')
+    ref = 'refs/heads/' + branch
+    result = git(root, 'ls-remote', '--exit-code', spec['url'], ref)
+    revisions = [line.split()[0] for line in result.splitlines()
+                 if len(line.split()) == 2 and line.split()[1] == ref]
+    if len(revisions) != 1 or not re.fullmatch('[a-f0-9]{40}', revisions[0]):
+        raise SetupError(f'Cannot read the latest {branch} commit for {spec["directory"]}.')
+    return dict(spec, revision=revisions[0])
+
+
+def component_current(component, root, selected):
+    components = components_of(read_manifest(root))
+    record = components.get(component, {})
+    if record.get('commit') != selected['revision']:
+        return False
+    if not all((root / name).is_file() for name in REQUIRED_BY_COMPONENT[component]):
+        return False
+    if component == 'dxmt':
+        wine_commit = components.get('wine', {}).get('commit')
+        built_against = record.get('dependencies', {}).get('wine', wine_commit)
+        if wine_commit != built_against:
+            return False
+    return True
+
+
 def fetch_repository(spec, root, *, local=False):
     name, revision = spec['directory'], spec['revision']
     if Path(name).name != name or name in ('', '.', '..'):
@@ -264,9 +290,12 @@ def make(build, env, jobs, targets=(), progress=(18, 70), extra=()):
     run(command, cwd=build, env=env, progress=progress, completed_targets=max(1, total))
 
 
-def build_wine(source, build, env, jobs, entitlements):
+def build_wine(source, build, env, jobs, entitlements, progress=(18, 78)):
     event('wine', 'Building Wine Adrenalin Edition')
+    def span(a, b):
+        return tuple(progress[0] + (v - 18) / 60 * (progress[1] - progress[0]) for v in (a, b))
     build.mkdir(parents=True, exist_ok=True)
+    (build.parent / 'source.commit').unlink(missing_ok=True)
     if not (build / 'Makefile').exists():
         run([source / 'configure', '--enable-archs=arm64ec,aarch64,i386', '--without-x',
              '--without-pulse', '--disable-tests', '--prefix=/usr/local',
@@ -275,7 +304,7 @@ def build_wine(source, build, env, jobs, entitlements):
              f'x86_64_CC={env["GOOSE_LLVM_ROOT"]}/bin/clang', 'CFLAGS=-g -O2',
              'CXXFLAGS=-g -O2', 'LDFLAGS=-Wl,-headerpad_max_install_names'], cwd=build, env=env)
     run(['gmake', 'depend'], cwd=build, env=env)
-    make(build, env, jobs)
+    make(build, env, jobs, progress=span(18, 70))
     # Keep the accelerated PE32 OpenGL module separate from the regular fallback.
     overlay = build.parent / 'legacy-opengl/i386-windows'
     overlay.mkdir(parents=True, exist_ok=True)
@@ -288,16 +317,17 @@ def build_wine(source, build, env, jobs, entitlements):
         for p in objects:
             p.unlink(missing_ok=True)
         try:
-            make(build, env, jobs, ['dlls/opengl32/i386-windows/opengl32.dll'], (70, 73),
+            make(build, env, jobs, ['dlls/opengl32/i386-windows/opengl32.dll'], span(70, 73),
                  ['i386_CFLAGS=-g -O2 -DWINE_OPENGL_BATCHING'])
             shutil.copy2(build / 'dlls/opengl32/i386-windows/opengl32.dll', overlay / 'opengl32.dll')
         finally:
             for p in objects:
                 p.unlink(missing_ok=True)
-        make(build, env, jobs, ['dlls/opengl32/i386-windows/opengl32.dll'], (73, 75))
+        make(build, env, jobs, ['dlls/opengl32/i386-windows/opengl32.dll'], span(73, 75))
         stamp.write_text(source_key + '\n')
     install = build.parent / 'install'
-    run(['gmake', 'install-lib', f'DESTDIR={install}'], cwd=build, env=env, progress=(75, 78))
+    run(['gmake', 'install-lib', f'DESTDIR={install}'], cwd=build, env=env, progress=span(75, 78))
+    (build.parent / 'source.commit').write_text(git(source, 'rev-parse', 'HEAD') + '\n')
     return install / 'usr/local'
 
 
@@ -321,7 +351,7 @@ def build_fex(source, build, env, jobs):
              source / 'Source/Windows/UnixLib/FEXUnixLib.cpp', '-o', native / f'lib{name}.so'], env=env)
 
 
-def build_dxmt(source, build, wine_build, env, prefix, jobs):
+def build_dxmt(source, build, wine_build, env, prefix, jobs, progress=(18, 78)):
     event('dxmt', 'Building DXMT Adrenalin Edition')
     for name, cross in [('arm64ec', 'build-arm64ec.txt'), ('x86', 'build-win32.txt')]:
         output = build / name
@@ -329,7 +359,8 @@ def build_dxmt(source, build, wine_build, env, prefix, jobs):
             run(['meson', 'setup', output, source, '--cross-file', source / cross,
                  '--buildtype=release', '--prefix=/', f'-Dnative_llvm_path={prefix}/opt/llvm',
                  '-Db_lto=false', f'-Dwine_build_path={wine_build}'], env=env)
-        interval = (18, 47) if name == 'arm64ec' else (47, 78)
+        middle = (progress[0] + progress[1]) / 2
+        interval = (progress[0], middle) if name == 'arm64ec' else (middle, progress[1])
         run(['meson', 'compile', '-C', output, '-j', str(jobs)], env=env, progress=interval)
         run(['meson', 'install', '-C', output, '--no-rebuild', '--destdir', build / f'{name}-install'], env=env)
 
@@ -564,6 +595,8 @@ def clone_tree(source, destination):
 
 def merge_component(previous, package, staging, component, record):
     components = components_of(read_manifest(previous))
+    if component == 'wine' and 'dxmt' in components and 'dependencies' not in components['dxmt']:
+        components['dxmt']['dependencies'] = {'wine': components.get('wine', {}).get('commit')}
     if previous.exists():
         clone_tree(previous, staging)
     else:
@@ -627,18 +660,39 @@ def install(app, staging, manifest, entitlements):
         shutil.rmtree(previous)
 
 
+def ensure_wine_build(spec, toolchain, source_root, installed, cache, build, jobs, support):
+    commit = components_of(read_manifest(installed)).get('wine', {}).get('commit')
+    if not commit or not (installed / 'Wine/bin/wine').is_file():
+        raise SetupError('Install Wine first.')
+    stamp = build / 'Wine/source.commit'
+    configured = (build / 'Wine/build/Makefile').is_file()
+    if configured and stamp.is_file() and stamp.read_text().strip() == commit:
+        return False
+    source = source_root / spec['directory']
+    if configured and not stamp.exists() and (source / '.git').exists():
+        if git(source, 'rev-parse', 'HEAD') == commit and not git(source, 'status', '--porcelain', '--ignore-submodules=untracked'):
+            stamp.write_text(commit + '\n')
+            return False
+    source = fetch_repository(dict(spec, revision=commit), source_root)
+    env, _ = tools(cache, toolchain, 'wine')
+    build_wine(source, build / 'Wine/build', env, jobs, support / 'Wine.entitlements', progress=(18, 48))
+    return True
+
+
 def main():
-    global COMPONENT
+    global COMPONENT, PERCENT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--app', type=Path, required=True)
     parser.add_argument('--component', choices=list(REQUIRED_BY_COMPONENT), required=True)
     parser.add_argument('--sources-root', type=Path, default=Path.home() / 'Downloads/Github', help=argparse.SUPPRESS)
     parser.add_argument('--cache-root', type=Path, default=Path.home() / 'Library/Caches/GooseHUB')
     parser.add_argument('--lockfile', type=Path)
+    parser.add_argument('--update', action='store_true', help='Check the public branch and build only when an update is needed')
     parser.add_argument('--local-sources', action='store_true', help='Build existing developer working trees without fetching')
     parser.add_argument('--jobs', type=int, default=min(os.cpu_count() or 4, 8))
     args = parser.parse_args()
     COMPONENT = args.component
+    PERCENT = 0
     app, cache = args.app.resolve(), args.cache_root.expanduser().resolve()
     source_root = args.sources_root.expanduser().resolve()
     support = Path(__file__).resolve().parent
@@ -663,15 +717,15 @@ def main():
         build = cache / 'Build'
         build.mkdir(exist_ok=True)
         installed = resources / 'Engines'
-        if COMPONENT == 'dxmt':
-            previous = components_of(read_manifest(installed))
-            if previous.get('wine', {}).get('commit') != spec['repositories']['wine']['revision']:
-                raise SetupError('Install Wine first.')
-            if not (build / 'Wine/build/Makefile').is_file():
-                raise SetupError('Wine build cache is missing. Reinstall Wine first.')
+        selected = spec['repositories'][COMPONENT]
+        if not args.local_sources:
+            event('checking', 'Checking for updates')
+            selected = latest_repository(selected, source_root)
+            if args.update and component_current(COMPONENT, installed, selected):
+                event('up-to-date', 'Up to date.', 100)
+                return
         env, prefix = tools(cache, spec['toolchain'], COMPONENT)
         event('sources', '', 8)
-        selected = spec['repositories'][COMPONENT]
         source = fetch_repository(selected, source_root, local=args.local_sources)
         install_root = None
         if COMPONENT == 'wine':
@@ -679,7 +733,9 @@ def main():
         elif COMPONENT == 'fex':
             build_fex(source, build / 'FEX', env, args.jobs)
         elif COMPONENT == 'dxmt':
-            build_dxmt(source, build / 'DXMT', build / 'Wine/build', env, prefix, args.jobs)
+            rebuilt = ensure_wine_build(spec['repositories']['wine'], spec['toolchain'], source_root, installed, cache, build, args.jobs, support)
+            build_dxmt(source, build / 'DXMT', build / 'Wine/build', env, prefix, args.jobs,
+                       progress=(48 if rebuilt else 18, 78))
         else:
             run([sys.executable, source / 'Service/build.py', '--output', build / 'MetalGoose'],
                 env=env, progress=(18, 78))
@@ -692,6 +748,10 @@ def main():
                       'commit': git(source, 'rev-parse', 'HEAD')}
             if COMPONENT == 'wine':
                 record['stockDirect3D'] = True
+            if COMPONENT == 'dxmt':
+                record['dependencies'] = {'wine': components_of(read_manifest(installed))['wine']['commit']}
+            if selected['revision'] != spec['repositories'][COMPONENT]['revision']:
+                record['version'] += ' (' + record['commit'][:7] + ')'
             staging = Path(temporary) / 'Engines'
             manifest = merge_component(installed, package, staging, COMPONENT, record)
             verify_runtime(staging, manifest)

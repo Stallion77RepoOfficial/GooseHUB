@@ -7,13 +7,15 @@ import GooseCore
 struct GooseHubApp: App {
     @StateObject private var model = HubModel()
     @StateObject private var setup = EngineSetupModel()
+    @StateObject private var updater = AutoUpdater.shared
 
     var body: some Scene {
         WindowGroup("Goose HUB Adrenalin Edition") {
             Group {
                 if setup.installed { HubShell() }
                 else { EngineSetupView(setup: setup) }
-            }.environmentObject(model).environmentObject(setup)
+            }.environmentObject(model).environmentObject(setup).environmentObject(updater)
+                .modifier(UpdateAlerts(updater: updater))
                 .frame(minWidth: 1080, minHeight: 720)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)
@@ -25,6 +27,10 @@ struct GooseHubApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: 1320, height: 860)
         .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Check for Updates…") { updater.checkForUpdates() }
+                    .disabled(setup.active || !updater.canCheck)
+            }
             CommandGroup(replacing: .newItem) {
                 Button("New Bottle…") { model.showCreate = true }.keyboardShortcut("n").disabled(!setup.installed)
                 Button("Refresh") { Task { await model.refresh(checkEngines: true); await setup.check() } }.keyboardShortcut("r")

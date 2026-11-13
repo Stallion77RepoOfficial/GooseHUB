@@ -21,6 +21,7 @@ struct ComponentInstallation {
     var running = false
     var queued = false
     var failure: String?
+    var lastCheck: String?
 }
 
 @MainActor
@@ -33,6 +34,7 @@ final class EngineSetupModel: ObservableObject {
     private var lineBuffer = Data()
 
     func state(_ component: EngineComponent) -> ComponentInstallation { components[component] ?? ComponentInstallation() }
+    var active: Bool { components.values.contains { $0.running || $0.queued } }
 
     func check() async {
         let status = await HubService().diagnose()
@@ -42,7 +44,7 @@ final class EngineSetupModel: ObservableObject {
             components[component]?.installed = availability[component] == true
             if state(component).installed { components[component]?.percent = 100 }
         }
-        installed = status.isUsable && process == nil && queue.isEmpty
+        installed = status.isUsable
     }
 
     func canInstall(_ component: EngineComponent) -> Bool {
@@ -54,6 +56,7 @@ final class EngineSetupModel: ObservableObject {
     func start(_ component: EngineComponent) {
         guard !state(component).running, !state(component).queued, canInstall(component) else { return }
         components[component]?.failure = nil
+        components[component]?.lastCheck = nil
         components[component]?.percent = 0
         components[component]?.queued = true
         queue.append(component)
@@ -84,6 +87,7 @@ final class EngineSetupModel: ObservableObject {
         } ?? "/usr/bin/python3"
         task.executableURL = URL(fileURLWithPath: python)
         task.arguments = [script.path, "--app", Bundle.main.bundleURL.path, "--component", component.rawValue]
+        if state(component).installed { task.arguments?.append("--update") }
         task.standardOutput = pipe
         task.standardError = pipe
         task.standardInput = FileHandle.nullDevice
@@ -93,7 +97,7 @@ final class EngineSetupModel: ObservableObject {
         lineBuffer.removeAll()
         log = ""
         components[component]?.running = true
-        installed = false
+        if !state(component).installed { installed = false }
         do {
             process = task
             try task.run()
@@ -137,6 +141,12 @@ final class EngineSetupModel: ObservableObject {
                event.component == component.rawValue {
                 components[component]?.percent = event.percent
                 if event.phase == "failed" { components[component]?.failure = event.message }
+                if event.phase == "up-to-date" {
+                    components[component]?.lastCheck = event.message
+                    log += event.message + "\n"
+                } else if event.phase == "complete" {
+                    components[component]?.lastCheck = "Updated."
+                }
             } else {
                 log += line + "\n"
                 if log.count > 24000 { log = String(log.suffix(18000)) }
@@ -160,6 +170,8 @@ struct EngineSetupView: View {
             HStack(spacing: 14) {
                 BrandMark(size: 48)
                 Text("Goose HUB").font(.system(size: 25, weight: .semibold))
+                Spacer()
+                AppUpdateMenu()
             }
             EngineInstallationView(setup: setup)
         }
@@ -170,6 +182,7 @@ struct EngineSetupView: View {
 
 struct EngineInstallationView: View {
     @ObservedObject var setup: EngineSetupModel
+    @EnvironmentObject private var updater: AutoUpdater
     @State private var showLog = false
 
     var body: some View {
@@ -187,11 +200,11 @@ struct EngineInstallationView: View {
                             .monospacedDigit().font(.system(size: 12)).foregroundStyle(Theme.muted)
                             .frame(width: 42, alignment: .trailing)
                         if state.running || state.queued {
-                            Button("Cancel") { setup.cancel(component) }.frame(width: 86)
+                            Button("Cancel") { setup.cancel(component) }.frame(width: 140)
                         } else {
-                            Button(state.failure != nil ? "Retry" : state.installed ? "Reinstall" : "Install") { setup.start(component) }
-                                .disabled(!setup.canInstall(component)).frame(width: 86)
-                                .help(setup.canInstall(component) ? component.title : "Install Wine first")
+                            Button(state.failure != nil ? "Retry" : state.installed ? "Check for updates" : "Install") { setup.start(component) }
+                                .disabled(!setup.canInstall(component) || !updater.canCheck).frame(width: 140)
+                                .help(setup.canInstall(component) ? state.lastCheck ?? component.title : "Install Wine first")
                         }
                     }
                     ProgressView(value: state.percent, total: 100).controlSize(.small)
