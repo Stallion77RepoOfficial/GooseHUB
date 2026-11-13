@@ -80,8 +80,8 @@ struct EngineLayout: Sendable {
     func dxmtReady(_ architecture: BottleArchitecture) -> Bool {
         let primary = architecture == .arm64ec ? "arm64ec" : "x64"
         let unixArch = architecture == .arm64ec ? "aarch64-unix" : "x86_64-unix"
-        let required = ["d3d8.dll", "d3d9.dll", "d3d10.dll", "d3d10_1.dll", "d3d10core.dll",
-                        "d3d11.dll", "d3d12.dll", "dxgi.dll", "winemetal.dll"]
+        // Wine provides d3d10/d3d10_1 entry wrappers; DXMT provides d3d10core.
+        let required = DXMTDeployment.libraries
         return [primary, "x86"].allSatisfy { arch in
             required.allSatisfy { FileManager.default.fileExists(atPath: dxmtDirectory(arch).appendingPathComponent($0).path) }
         } && FileManager.default.fileExists(atPath: dllRoot(architecture)

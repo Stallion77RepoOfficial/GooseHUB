@@ -5,7 +5,7 @@
     "goosehub": {
       "directory": "GooseHUB",
       "url": "https://github.com/Stallion77RepoOfficial/GooseHUB.git",
-      "revision": "v0.3.0"
+      "revision": "v0.3.1"
     },
     "wine": {
       "directory": "wine-adrenalin-edition",
