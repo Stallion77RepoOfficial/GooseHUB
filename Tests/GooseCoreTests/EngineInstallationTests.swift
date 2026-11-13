@@ -10,6 +10,7 @@ final class EngineInstallationTests: XCTestCase {
                      "Wine/lib/wine/aarch64-windows/xtajit64.dll", "Wine/lib/wine/aarch64-windows/xtajit.dll",
                      "Wine/lib/wine/aarch64-unix/libarm64ecfex.so", "Wine/lib/wine/aarch64-unix/libwow64fex.so",
                      "Wine/lib/wine/aarch64-unix/winemetal.so", "MetalGoose/bin/metalgoose-backend",
+                     "MetalGoose/bin/default.metallib",
                      "Vulkan/icd.d/MoltenVK_icd.json", "Dependencies/arm64/libMoltenVK.dylib"]
         // This is the real source build's DXMT layout. The D3D10/10.1 wrappers live in Wine.
         for arch in ["arm64ec", "x86"] {

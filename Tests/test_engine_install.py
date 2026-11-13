@@ -91,6 +91,60 @@ class EngineInstallTests(unittest.TestCase):
             with self.assertRaisesRegex(installer.SetupError, 'checksum failed'):
                 installer.verify_runtime(root, manifest)
 
+    def package(self, root, component):
+        for name in installer.REQUIRED_BY_COMPONENT[component]:
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(component.encode())
+            path.chmod(0o755)
+
+    def test_independent_install_and_reinstall_preserve_other_components(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            current = root / 'Engines'
+            for component in ['fex', 'metalgoose', 'wine', 'dxmt', 'wine']:
+                package = root / ('package-' + component)
+                package.mkdir(exist_ok=True)
+                self.package(package, component)
+                staging = root / 'staging'
+                manifest = installer.merge_component(current, package, staging, component, {'commit': component})
+                installer.verify_runtime(staging, manifest)
+                (staging / 'manifest.json').write_text(json.dumps(manifest))
+                self.assertEqual(manifest['installationComplete'], component == 'dxmt' or len(manifest['components']) == 4)
+                if 'fex' in manifest['components']:
+                    self.assertEqual((staging / installer.FEX_FILES[0]).read_bytes(), b'fex')
+                if 'dxmt' in manifest['components']:
+                    self.assertEqual((staging / installer.BRIDGE_FILES[0]).read_bytes(), b'dxmt')
+                if current.exists():
+                    import shutil
+                    shutil.rmtree(current)
+                staging.rename(current)
+            self.assertEqual(set(manifest['components']), set(installer.REQUIRED_BY_COMPONENT))
+
+    def test_partial_component_is_valid_but_missing_own_files_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.package(root, 'metalgoose')
+            manifest = {'schemaVersion': 3, 'installationComplete': False, 'components': {'metalgoose': {}}, 'assets': []}
+            installer.verify_runtime(root, manifest)
+            (root / 'MetalGoose/bin/default.metallib').unlink()
+            with self.assertRaisesRegex(installer.SetupError, 'default.metallib'):
+                installer.verify_runtime(root, manifest)
+
+    def test_progress_reads_completed_work(self):
+        self.assertEqual(installer.output_fraction('[246/492] Building CXX object'), .5)
+        self.assertEqual(installer.output_fraction('Receiving objects:  37% (37/100)'), .37)
+        self.assertEqual(installer.output_fraction('@metalgoose {"completed": 3, "total": 7}'), 3 / 7)
+        self.assertIsNone(installer.output_fraction('Still compiling'))
+
+    def test_public_git_disables_credentials_and_global_configuration(self):
+        with patch.object(installer, 'run', return_value='') as command:
+            installer.git(Path('/tmp/repo'), 'fetch', 'origin')
+        args = command.call_args
+        self.assertIn('credential.helper=', args.args[0])
+        self.assertEqual(args.kwargs['env']['GIT_CONFIG_GLOBAL'], '/dev/null')
+        self.assertEqual(args.kwargs['env']['GIT_ASKPASS'], '/usr/bin/false')
+
 
 if __name__ == '__main__':
     unittest.main()

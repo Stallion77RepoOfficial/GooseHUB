@@ -51,9 +51,9 @@ struct HubShell: View {
                             presenting: model.deleting) { bottle in
             Button("Move to Trash", role: .destructive) { model.delete(bottle) }
         } message: { _ in
-            Text("Its programs are stopped first. The bottle and everything installed in it stay in the Trash until it is emptied.")
+            Text("Running programs will stop. Installed files move to Trash.")
         }
-        .alert("The operation could not be completed", isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) {
+        .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) {
             Button("OK") { model.error = nil }
         } message: { Text(model.error ?? "") }
         .onReceive(poll) { _ in Task { await model.refresh() } }

@@ -91,15 +91,12 @@ struct BottleDetail: View {
                         .help("Reuse compiled shaders between launches to reduce compilation work.")
                     Spacer(minLength: 0)
                 }.disabled(bottle.renderer != .dxmt)
-                Text(isRunning ? "Stop the bottle to change these settings." : "Applies on the next launch.")
-                    .font(.system(size: 10)).foregroundStyle(Theme.muted)
+                if isRunning {
+                    Text("Stop the bottle to change settings.").font(.system(size: 10)).foregroundStyle(Theme.muted)
+                }
             }.disabled(model.busy || isRunning).panel()
             HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("MetalGoose").font(.system(size: 15, weight: .semibold))
-                    Text("Use the settings from the MetalGoose page.")
-                        .font(.system(size: 11)).foregroundStyle(Theme.muted)
-                }
+                Text("MetalGoose").font(.system(size: 15, weight: .semibold))
                 Spacer()
                 Toggle("MetalGoose", isOn: Binding(get: { bottle.metalGoose.enabled }, set: { model.setMetalGoose($0, for: bottle) }))
                     .toggleStyle(.switch).labelsHidden().disabled(!model.metalGoose.available)
@@ -171,8 +168,6 @@ struct CreateBottleSheet: View {
             Picker("Windows Version", selection: $windowsVersion) {
                 ForEach(WindowsVersion.allCases) { Text($0.title).tag($0) }
             }
-            Text("Wine runs natively on ARM64; FEX translates x86 and x64 programs.").font(.system(size: 11)).foregroundStyle(Theme.muted)
-            if model.engineStatus?.wineAvailable != true { Text("This build has no Wine engine. The Engines page shows what is missing.").font(.system(size: 11)).foregroundStyle(.orange) }
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }.keyboardShortcut(.cancelAction)
@@ -203,7 +198,6 @@ struct RunCommandSheet: View {
             }.padding(14).background(Theme.panel, in: RoundedRectangle(cornerRadius: 8))
             VStack(alignment: .leading, spacing: 7) {
                 Text("Arguments").font(.system(size: 12, weight: .medium))
-                Text("Example: -game cstrike. Use double quotes for paths with spaces.").font(.system(size: 10)).foregroundStyle(Theme.muted)
                 TextEditor(text: $arguments).font(.system(size: 11, design: .monospaced)).frame(height: 80).padding(6).background(Theme.panel)
             }
             Toggle("Add to Library", isOn: $addShortcut).font(.system(size: 12))
@@ -278,7 +272,6 @@ struct EditApplicationSheet: View {
             Text(edit.application.executablePath).font(.system(size: 10)).foregroundStyle(Theme.muted).lineLimit(2).textSelection(.enabled)
             VStack(alignment: .leading, spacing: 7) {
                 Text("Arguments").font(.system(size: 12, weight: .medium))
-                Text("Example: -game cstrike. Use double quotes for paths with spaces.").font(.system(size: 10)).foregroundStyle(Theme.muted)
                 TextEditor(text: $arguments).font(.system(size: 11, design: .monospaced)).frame(height: 80).padding(6).background(Theme.panel)
             }
             HStack {

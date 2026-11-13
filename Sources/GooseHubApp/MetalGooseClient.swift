@@ -128,11 +128,13 @@ final class MetalGooseClient: ObservableObject {
     /// Starts the backend, which reports MetalGoose's settings, and builds the Neural Engine's models
     /// before a session needs them, as MetalGoose does when it launches.
     func prepare() {
+        available = FileManager.default.isExecutableFile(atPath: Self.executable.path)
         guard available, process == nil else { return }
         send("status")
     }
 
     func refresh() {
+        available = FileManager.default.isExecutableFile(atPath: Self.executable.path)
         guard available else { return }
         send("status")
     }

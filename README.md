@@ -1,36 +1,37 @@
 # GooseHUB
 
-A macOS launcher for the Wine, FEX and DXMT Adrenalin forks on Apple Silicon.
-
-Keep one source checkout of each project in the same folder:
+A macOS launcher for [Wine](https://github.com/Stallion77RepoOfficial/wine-adrenalin-edition), [FEX](https://github.com/Stallion77RepoOfficial/fex-adrenalin-edition) and [DXMT](https://github.com/Stallion77RepoOfficial/dxmt-adrenalin-edition) Adrenalin, with [MetalGoose](https://github.com/Stallion77RepoOfficial/MetalGoose) scaling.
 
 ```text
-Github/
+~/Downloads/Github/
   GooseHUB/
   wine-adrenalin-edition/
   fex-adrenalin-edition/
   dxmt-adrenalin-edition/
+  MetalGoose/
 ```
 
-## Build the app
+## Build
 
-Use Xcode with the macOS 27 SDK, Swift 6.2 or newer, and the Metal toolchain.
+Requires Apple Silicon, Xcode with the macOS 27 SDK, Swift 6.2 or newer and the Metal toolchain. Wine/FEX/DXMT setup also uses Homebrew.
 
 ```sh
 ./build.sh
 ```
 
-This creates `dist/Goose HUB latest.app` with the launcher and engine installer. Wine, FEX, DXMT, runtime dependencies and MetalGoose are not packaged in this initial app.
+`dist/Goose HUB latest.app` contains the launcher and installer, with no engines or MetalGoose implementation bundled.
 
-## First launch
+## Install components
 
-Open the app and select **Download and Build**. Setup installs missing Homebrew build/media dependencies, fetches the source revisions in `Resources/engine-lock.json`, builds them and verifies the resulting files. The library becomes available after every required component is installed.
+Each component has its own **Install**, **Cancel** and **Retry** controls. Install Wine before DXMT; FEX and MetalGoose can be installed independently. The library opens after all four components pass verification. Percentages follow Git transfer counts, completed build tasks and file verification.
 
-The default source folder is `~/Downloads/Github`; another folder can be selected before installation. Existing repositories with local changes are preserved and setup stops with an explanation. These repositories are private; Git must already be authenticated with an account that can read them. Credentials stay with Git's credential helper.
+Setup fetches the exact public commits in `Resources/engine-lock.json` without GitHub authentication. Sources live in `~/Downloads/Github`. Existing local edits are preserved; commit them before retrying setup. Compiler tools and build outputs live in `~/Library/Caches/GooseHUB`, outside the source repositories.
 
-Build products and compiler tools live in `~/Library/Caches/GooseHUB`. The single installed runtime lives in the app's `Contents/Resources/Engines`. There is no staged `Engines/` source-tree copy and no duplicate Wine source snapshot. The app re-signs its resources after installing the compiled engines, so it must be in a location writable by your user.
+MetalGoose's `Service/build.py` builds a headless service from the same engine sources as its standalone GUI. GooseHUB fetches that repository directly; it does not copy or launch the GUI app.
 
-Setup records source commits and file checksums in the installed runtime manifest. A failed build does not replace a working runtime. Cancel stops the current build; retry reuses completed build work. Rebuilding the launcher creates a fresh installer app.
+Each installation updates only its component in `Contents/Resources/Engines`, records commits and checksums, and re-signs the app. A failed installation restores the previous runtime. The app must be in a writable location. Rebuilding the launcher creates a fresh installer app.
+
+Windows programs and bottle settings remain in `~/Library/Application Support/GooseHUB`.
 
 ## Validation
 
@@ -39,6 +40,6 @@ xcrun swift test --scratch-path "$HOME/Library/Caches/GooseHUB/GooseHUB/swift"
 python3 -m unittest discover -s Tests -p 'test_*.py'
 ```
 
-The source installer is `scripts/install-engines.py`. Its `--local-sources` option is for development; normal setup fetches the pinned GitHub revisions. Installed Windows programs and bottle settings remain in `~/Library/Application Support/GooseHUB`.
+Developer builds can use `scripts/install-engines.py --component wine --app /path/to/GooseHUB.app` (components: `wine`, `fex`, `dxmt`, `metalgoose`). `--local-sources` skips fetching for working-tree testing; normal setup always fetches the pinned public commits.
 
-The local engine forks remain authoritative. See `ENGINE-POLICY.md`, the component licenses and `Resources/engine-sources.json` for the retained changes and earlier validation.
+The Adrenalin forks remain authoritative. MSync, x87, OpenGL, Direct3D, installer and HID changes are retained. See `ENGINE-POLICY.md`, component licenses and `Resources/engine-sources.json` for provenance and earlier validation.

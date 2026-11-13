@@ -45,11 +45,11 @@ struct LibraryView: View {
             controls
             if model.bottles.isEmpty {
                 EmptyPanel(symbol: "shippingbox", title: "No bottles",
-                           message: "Create a bottle, then add a Windows game or run an installer.",
+                           message: "",
                            button: "Create Bottle") { model.showCreate = true }
             } else if entries.isEmpty {
                 EmptyPanel(symbol: favoritesOnly ? "star" : "gamecontroller", title: "No applications",
-                           message: allEntries.isEmpty ? "Choose a bottle in the sidebar to add a game or installer." : "Try another filter or search.",
+                           message: allEntries.isEmpty ? "Select a bottle to add an app." : "",
                            button: (favoritesOnly || bottleID != nil || !model.search.isEmpty) ? "Clear filters" : "") {
                     favoritesOnly = false; bottleID = nil; model.search = ""
                 }

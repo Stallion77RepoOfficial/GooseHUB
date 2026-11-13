@@ -1,0 +1,93 @@
+{
+  "date": "2026-11-14",
+  "appVersion": "0.4.0",
+  "sourceLockSchema": 2,
+  "runtimeManifestSchema": 3,
+  "componentCommits": {
+    "wine": "cffa31cd62ce05158dae3c68b513cd648d6ca3e1",
+    "fex": "8027126f7049dad78ebc9bd69b26fb962f6f36fb",
+    "dxmt": "a4c68a951b6c067b771c2b4cbb31ef7084c732ac",
+    "metalgoose": "7a968444db82a92f85d00c2941ae20f3540a5f5f"
+  },
+  "forkSourcesUnchanged": [
+    "wine",
+    "fex",
+    "dxmt"
+  ],
+  "retainedFeatures": [
+    "MSync",
+    "global reduced x87 precision with full-precision installer fallback",
+    "global PE32 OpenGL batching",
+    "custom Direct3D bridges",
+    "installer and HID fixes"
+  ],
+  "publicAnonymousSourceAccess": [
+    "GooseHUB",
+    "wine-adrenalin-edition",
+    "fex-adrenalin-edition",
+    "dxmt-adrenalin-edition",
+    "MetalGoose"
+  ],
+  "componentInstallOrder": [
+    "fex",
+    "wine",
+    "dxmt",
+    "metalgoose"
+  ],
+  "allComponentInstallsVerified": true,
+  "cancellationAndRetryVerified": true,
+  "liveProgressVerified": true,
+  "allProgressMonotonic": true,
+  "uiHasIndividualControls": true,
+  "uiStatusIconsAndPercentages": true,
+  "uiSourceChooserRemoved": true,
+  "embeddedMetalGooseSourcesRemoved": true,
+  "metalGooseGUIBuildPassed": true,
+  "metalGooseServiceProtocolPassed": true,
+  "seedBundle": {
+    "bytes": 6284194,
+    "enginePayloadBundled": false,
+    "metalGooseImplementationBundled": false
+  },
+  "installedAssetHashesVerified": 2080,
+  "tests": {
+    "swift": 16,
+    "installer": 8,
+    "runtime": [
+      {
+        "architecture": "x64",
+        "probe": "gpu",
+        "passed": true,
+        "exitCode": 0,
+        "checks": 20
+      },
+      {
+        "architecture": "x64",
+        "probe": "hid",
+        "passed": true,
+        "exitCode": 0,
+        "receiverVisible": true
+      },
+      {
+        "architecture": "x86",
+        "probe": "gpu",
+        "passed": true,
+        "exitCode": 0,
+        "checks": 20
+      },
+      {
+        "architecture": "x86",
+        "probe": "hid",
+        "passed": true,
+        "exitCode": 0,
+        "receiverVisible": true
+      }
+    ]
+  },
+  "legacyGitHubDirectoriesAbsent": [
+    "toolchains",
+    "wine-adrenalin-arm64",
+    "dxmt-adrenalin-edition/GooseHUB"
+  ],
+  "trackedEngineBinaries": 0
+}

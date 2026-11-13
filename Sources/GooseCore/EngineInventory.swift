@@ -93,12 +93,8 @@ struct EngineLayout: Sendable {
         let wineAvailable = (try? requireWine(.arm64ec)) != nil
         let x64Available = (try? requireWine(.x64)) != nil
         let dxmtAvailable = dxmtReady(.arm64ec)
-        let metalGooseCandidates = [
-            root.appendingPathComponent("MetalGoose/bin/metalgoose-backend"),
-            root.deletingLastPathComponent().deletingLastPathComponent()
-                .appendingPathComponent("MacOS/metalgoose-backend")
-        ]
-        let metalGooseAvailable = metalGooseCandidates.contains { fm.isExecutableFile(atPath: $0.path) }
+        let metalGooseAvailable = fm.isExecutableFile(atPath: root.appendingPathComponent("MetalGoose/bin/metalgoose-backend").path)
+            && fm.isReadableFile(atPath: root.appendingPathComponent("MetalGoose/bin/default.metallib").path)
         let fexAvailable = ["aarch64-windows/xtajit64.dll", "aarch64-windows/xtajit.dll",
                             "aarch64-unix/libarm64ecfex.so", "aarch64-unix/libwow64fex.so"].allSatisfy {
             fm.fileExists(atPath: dllRoot(.arm64ec).appendingPathComponent($0).path)

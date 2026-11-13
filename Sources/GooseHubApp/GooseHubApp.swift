@@ -13,7 +13,7 @@ struct GooseHubApp: App {
             Group {
                 if setup.installed { HubShell() }
                 else { EngineSetupView(setup: setup) }
-            }.environmentObject(model)
+            }.environmentObject(model).environmentObject(setup)
                 .frame(minWidth: 1080, minHeight: 720)
                 .preferredColorScheme(.dark)
                 .tint(Theme.accent)

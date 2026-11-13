@@ -18,7 +18,7 @@
     "canonicalSource": "../wine-adrenalin-edition/",
     "baseVersion": "11.11",
     "baseForkCommit": "11114aa",
-    "nativePortPatch": "Sources/Patches/wine-native-arm64.patch",
+    "nativePortPatch": "Resources/Patches/wine-native-arm64.patch",
     "importedFixes": [
       {
         "commit": "81e52628b25ac173d04796e8a9b9cda637d3e233",
@@ -54,13 +54,13 @@
         "id": "bundled-media-library-search-20261108",
         "date": "2026-11-08",
         "scope": "Runtime packaging removes build-machine absolute library search paths before adding bundled dependencies; avoids duplicate GStreamer registries. Wine source is unchanged.",
-        "patch": "Sources/Patches/wine-bundled-media-rpath.patch"
+        "patch": "Resources/Patches/wine-bundled-media-rpath.patch"
       },
       {
         "id": "hid-feature-and-installer-process-checks-20261113",
         "date": "2026-11-13",
         "scope": "Unsupported PowerShell commands fail instead of reporting success; tasklist preserves long executable names and spaced filter operands; macOS exposes external feature-capable HID configuration interfaces and forwards only wholly vendor-defined input report IDs. Mixed/protected reports, built-in controls and ordinary pointer/keyboard interfaces remain on the existing Mac input path.",
-        "patch": "Sources/Patches/wine-hid-installer-20261113.patch",
+        "patch": "Resources/Patches/wine-hid-installer-20261113.patch",
         "validation": "NSIS installer completion, exact positive/negative process detection, ARM64/x86 capability probes, real B6A4:40C1 read/write feature access and vendor input, actual manufacturer UI with device connected and 93% battery."
       }
     ],
@@ -111,22 +111,22 @@
       {
         "id": "incremental-d3d12-compatibility",
         "scope": "Extend the existing D3D12 bridge: owned root signatures, shader bindings and typed resource views, coherent committed/placed buffers, stencil UI, logical flip buffers, queue dependencies, DXBC compute, native SM6 residency caching and WoW64 host ABI. Keep the local DXMT/Wine forks and the delivered D3D9/OpenGL optimizations.",
-        "patch": "Sources/Patches/dxmt-d3d12-compatibility.patch",
+        "patch": "Resources/Patches/dxmt-d3d12-compatibility.patch",
         "validation": "Official unmodified ULTRAKILL Prelude with -force-d3d12 on Apple M4; real GPU readback and API checks on ARM64EC, x64 and x86; D3D9 and D3D11 regression checks. Combat fluidity is user-reported; no repeatable combat FPS comparison or complete D3D12 coverage is claimed."
       },
       {
         "id": "current-system-memory-uploads",
         "date": "2026-11-06",
         "scope": "Read current system-memory data directly into the destination during UpdateTexture and UpdateSurface, including mip levels, cube faces and volume levels. Upload only the requested rectangle, retain newer GPU-written data and reuse format expansion. Fixes the transient green CoD4 Bink video frame without game-name rules.",
-        "patch": "Sources/Patches/dxmt-system-memory-uploads.patch",
+        "patch": "Resources/Patches/dxmt-system-memory-uploads.patch",
         "validation": "20 GPU checks per architecture on x86, x64 and ARM64EC; existing constant, sampler and ProcessVertices fixtures; CoD4 Bog GPU video-plane and pre-presentation readback."
       },
       {
         "id": "d3d12-correctness-and-submission-20261108",
         "date": "2026-11-08",
         "scope": "Geometry stages, placed storage, copy/view lifetime, shader-used UAVs, live GPU-address aliases, real GPU barriers/fences, asynchronous query readback, grouped submissions, complete first-draw pipeline compilation and shared-memory shader constant-expression lowering. No game-name rules.",
-        "patch": "Sources/Patches/dxmt-d3d12-correctness-20261108.patch",
-        "validation": "Sources/Validation/2026-11-08/d3d12/README.md",
+        "patch": "Resources/Patches/dxmt-d3d12-correctness-20261108.patch",
+        "validation": "Resources/Validation/2026-11-08/d3d12/README.md",
         "priorForkSourceTreeSHA256": "802cd7cb1a46553ef6dc8245a063d91fe6df53f2ca29f2b2f950fe2d11484e45",
         "sourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
         "status": "experimental; tested games and fixtures, incomplete API coverage"
@@ -135,8 +135,8 @@
         "id": "d3d12-declared-bindings-20261108",
         "date": "2026-11-08",
         "scope": "Per-stage shader declaration masks avoid unused CBV/SRV/sampler bindings, GPU-address lookups and root-constant uploads. Existing UAV masks and descriptor lifetime preserved. D3D12 DXBC bridge only.",
-        "patch": "Sources/Patches/dxmt-d3d12-declared-bindings-20261108.patch",
-        "validation": "Sources/Validation/2026-11-08/d3d12-bindings/README.md",
+        "patch": "Resources/Patches/dxmt-d3d12-declared-bindings-20261108.patch",
+        "validation": "Resources/Validation/2026-11-08/d3d12-bindings/README.md",
         "priorForkSourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
         "sourceTreeSHA256": "ee3ec3944fcf8b1d14c45c98e31c43d3129c9c33930e3ccef50d9ba3f78a4d5d",
         "status": "69 three-architecture GPU checks passed; isolated submission timing improved; game FPS parity not claimed"
@@ -181,6 +181,13 @@
     "buildCache": "~/Library/Caches/GooseHUB/Build",
     "engineDestination": "GooseHUB.app/Contents/Resources/Engines",
     "bundledEngines": false,
-    "sourcePreservation": "Validation/2026-11-13/source-layout.json"
+    "sourcePreservation": "Resources/Validation/2026-11-13/source-layout.json"
+  },
+  "metalgoose": {
+    "repository": "https://github.com/Stallion77RepoOfficial/MetalGoose",
+    "canonicalSource": "../MetalGoose/",
+    "serviceBuild": "Service/build.py",
+    "serviceSources": "Service/sources.json",
+    "integration": "Fetch the public pinned commit and compile the service from the standalone app engine sources. No copied engine implementation in GooseHUB."
   }
 }
