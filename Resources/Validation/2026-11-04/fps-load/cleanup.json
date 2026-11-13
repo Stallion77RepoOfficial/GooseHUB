@@ -1,0 +1,38 @@
+{
+  "removedOwnedTestArtifacts": [
+    "ProbeEngines",
+    "InlineEngines",
+    "CanonicalEngines",
+    "ReleaseEngines",
+    "ReleaseProbeEngines",
+    "MergeEngines",
+    "FinalEngines",
+    "PreviousEngines",
+    "bottle",
+    "CoD-game",
+    "canonical-fast",
+    "d3d9-before",
+    "wine-probe-before",
+    "wine-before-inline",
+    "canonical-probe-before",
+    "sampler-validation-arm64ec.exe",
+    "gl-batch-validation.exe",
+    "sampler-validation-x64.exe",
+    "process-vertices-validation-x86.exe",
+    "constant-validation-x64.exe",
+    "process-vertices-validation-arm64ec.exe",
+    "ntdll-before-delay-probe.so",
+    "merge-validation.exe",
+    "sampler-validation-x86.exe",
+    "process-vertices-validation-x64.exe",
+    "constant-validation-x86.exe",
+    "winemac-before-nap-probe.so",
+    "constant-validation-arm64ec.exe"
+  ],
+  "productionBottleUnchangedByCleanup": true,
+  "currentApp": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app",
+  "bundleSymlinksChecked": 12,
+  "onlyDistApplication": [
+    "Goose HUB latest.app"
+  ]
+}

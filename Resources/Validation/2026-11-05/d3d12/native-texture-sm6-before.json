@@ -1,0 +1,7 @@
+{
+  "dllSHA256": "4a7a8265f25ec0a1fcd04c827e2e6b3cfd08aa6177881e54e23c11fe1df1a7b4",
+  "exeSHA256": "4dbe86bb9c9f1bb60d438097a4049f7698ee22cfb0181affc17bd1264e38d6fc",
+  "dllSource": "GooseHUB/.build/d3d12-20261104/before-native-texture.dll",
+  "render": false,
+  "returnCode": 1
+}

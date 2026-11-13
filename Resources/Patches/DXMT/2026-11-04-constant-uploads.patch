@@ -1,0 +1,274 @@
+diff --git a/src/d3d9/d3d9_device.cpp b/src/d3d9/d3d9_device.cpp
+--- a/src/d3d9/d3d9_device.cpp
++++ b/src/d3d9/d3d9_device.cpp
+@@ -163,6 +163,11 @@
+     ERR("D3D9Device::Initialize: D3D11CreateDevice failed");
+     return hr;
+   }
++
++  D3D11_FEATURE_DATA_D3D11_OPTIONS options = {};
++  if (SUCCEEDED(d3d11_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &options, sizeof(options))) &&
++      options.ConstantBufferOffsetting && options.MapNoOverwriteOnDynamicConstantBuffer)
++    d3d11_ctx_->QueryInterface(IID_PPV_ARGS(&constant_context_));
+ 
+   hr = CreateSwapChain();
+   if (FAILED(hr)) {
+@@ -2179,7 +2184,9 @@
+   auto device_lock = LockDevice();
+   if (!pConstantData || !ConstantRangeValid(StartRegister, Vector4fCount, kMaxFloatConstants)) return D3DERR_INVALIDCALL;
+   if (recording_) { recording_->RecordVSConstantF(StartRegister, pConstantData, Vector4fCount); return D3D_OK; }
+-  memcpy(&vs_const_f_[StartRegister * 4], pConstantData, Vector4fCount * 4 * sizeof(float));
++  size_t bytes = Vector4fCount * 4 * sizeof(float);
++  if (!memcmp(&vs_const_f_[StartRegister * 4], pConstantData, bytes)) return D3D_OK;
++  memcpy(&vs_const_f_[StartRegister * 4], pConstantData, bytes);
+   vs_const_dirty_ = true;
+   return D3D_OK;
+ }
+@@ -2195,7 +2202,9 @@
+   auto device_lock = LockDevice();
+   if (!pConstantData || !ConstantRangeValid(StartRegister, Vector4iCount, kMaxOtherConstants)) return D3DERR_INVALIDCALL;
+   if (recording_) { recording_->RecordVSConstantI(StartRegister, pConstantData, Vector4iCount); return D3D_OK; }
+-  memcpy(&vs_const_i_[StartRegister * 4], pConstantData, Vector4iCount * 4 * sizeof(int));
++  size_t bytes = Vector4iCount * 4 * sizeof(int);
++  if (!memcmp(&vs_const_i_[StartRegister * 4], pConstantData, bytes)) return D3D_OK;
++  memcpy(&vs_const_i_[StartRegister * 4], pConstantData, bytes);
+   vs_extra_dirty_ = true;
+   return D3D_OK;
+ }
+@@ -2211,9 +2220,13 @@
+   auto device_lock = LockDevice();
+   if (!pConstantData || !ConstantRangeValid(StartRegister, BoolCount, kMaxOtherConstants)) return D3DERR_INVALIDCALL;
+   if (recording_) { recording_->RecordVSConstantB(StartRegister, pConstantData, BoolCount); return D3D_OK; }
+-  for (UINT i = 0; i < BoolCount; i++)
+-    vs_const_b_[StartRegister + i] = pConstantData[i] ? 1 : 0;
+-  vs_extra_dirty_ = true;
++  for (UINT i = 0; i < BoolCount; i++) {
++    uint32_t value = pConstantData[i] ? 1 : 0;
++    if (vs_const_b_[StartRegister + i] != value) {
++      vs_const_b_[StartRegister + i] = value;
++      vs_extra_dirty_ = true;
++    }
++  }
+   return D3D_OK;
+ }
+ HRESULT STDMETHODCALLTYPE
+@@ -2229,7 +2242,9 @@
+   auto device_lock = LockDevice();
+   if (!pConstantData || !ConstantRangeValid(StartRegister, Vector4fCount, kMaxFloatConstants)) return D3DERR_INVALIDCALL;
+   if (recording_) { recording_->RecordPSConstantF(StartRegister, pConstantData, Vector4fCount); return D3D_OK; }
+-  memcpy(&ps_const_f_[StartRegister * 4], pConstantData, Vector4fCount * 4 * sizeof(float));
++  size_t bytes = Vector4fCount * 4 * sizeof(float);
++  if (!memcmp(&ps_const_f_[StartRegister * 4], pConstantData, bytes)) return D3D_OK;
++  memcpy(&ps_const_f_[StartRegister * 4], pConstantData, bytes);
+   ps_const_dirty_ = true;
+   return D3D_OK;
+ }
+@@ -2245,7 +2260,9 @@
+   auto device_lock = LockDevice();
+   if (!pConstantData || !ConstantRangeValid(StartRegister, Vector4iCount, kMaxOtherConstants)) return D3DERR_INVALIDCALL;
+   if (recording_) { recording_->RecordPSConstantI(StartRegister, pConstantData, Vector4iCount); return D3D_OK; }
+-  memcpy(&ps_const_i_[StartRegister * 4], pConstantData, Vector4iCount * 4 * sizeof(int));
++  size_t bytes = Vector4iCount * 4 * sizeof(int);
++  if (!memcmp(&ps_const_i_[StartRegister * 4], pConstantData, bytes)) return D3D_OK;
++  memcpy(&ps_const_i_[StartRegister * 4], pConstantData, bytes);
+   ps_extra_dirty_ = true;
+   return D3D_OK;
+ }
+@@ -2261,9 +2278,13 @@
+   auto device_lock = LockDevice();
+   if (!pConstantData || !ConstantRangeValid(StartRegister, BoolCount, kMaxOtherConstants)) return D3DERR_INVALIDCALL;
+   if (recording_) { recording_->RecordPSConstantB(StartRegister, pConstantData, BoolCount); return D3D_OK; }
+-  for (UINT i = 0; i < BoolCount; i++)
+-    ps_const_b_[StartRegister + i] = pConstantData[i] ? 1 : 0;
+-  ps_extra_dirty_ = true;
++  for (UINT i = 0; i < BoolCount; i++) {
++    uint32_t value = pConstantData[i] ? 1 : 0;
++    if (ps_const_b_[StartRegister + i] != value) {
++      ps_const_b_[StartRegister + i] = value;
++      ps_extra_dirty_ = true;
++    }
++  }
+   return D3D_OK;
+ }
+ HRESULT STDMETHODCALLTYPE
+@@ -2483,8 +2504,9 @@
+ }
+ 
+ void
+-D3D9Device::UploadShaderConstants() {
+-  constexpr UINT kExtraCBBytes = sm3::kExtraCBSizeVec4 * 16;
++D3D9Device::UploadShaderConstants(bool programmable_vs, bool programmable_ps) {
++  constexpr UINT kRingBytes = 64 * 1024;
++  constexpr UINT kExtraCBBytes = (sm3::kExtraCBSizeVec4 * 16 + 255) & ~255u;
+   auto ensure = [&](Com<ID3D11Buffer> &buf, UINT bytes) {
+     if (buf) return;
+     D3D11_BUFFER_DESC bd = {};
+@@ -2494,27 +2516,53 @@
+     bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+     d3d11_device_->CreateBuffer(&bd, nullptr, &buf);
+   };
+-  ensure(vs_cbuffer_, kMaxFloatConstants * 4 * sizeof(float));
+-  ensure(ps_cbuffer_, kMaxFloatConstants * 4 * sizeof(float));
+-  ensure(vs_cbuffer_extra_, kExtraCBBytes);
+-  ensure(ps_cbuffer_extra_, kExtraCBBytes);
++  UINT float_bytes = constant_context_ ? kRingBytes : sizeof(vs_const_f_);
++  if (programmable_vs) {
++    ensure(vs_cbuffer_, float_bytes);
++    ensure(vs_cbuffer_extra_, kExtraCBBytes);
++  }
++  if (programmable_ps) {
++    ensure(ps_cbuffer_, float_bytes);
++    ensure(ps_cbuffer_extra_, kExtraCBBytes);
++  }
+ 
+   auto upload = [&](ID3D11Buffer *buf, const void *data, size_t size) {
+     D3D11_MAPPED_SUBRESOURCE m = {};
+-    if (SUCCEEDED(d3d11_ctx_->Map(buf, 0, D3D11_MAP_WRITE_DISCARD, 0, &m))) {
+-      memcpy(m.pData, data, size);
+-      d3d11_ctx_->Unmap(buf, 0);
++    if (FAILED(d3d11_ctx_->Map(buf, 0, D3D11_MAP_WRITE_DISCARD, 0, &m))) return false;
++    memcpy(m.pData, data, size);
++    d3d11_ctx_->Unmap(buf, 0);
++    return true;
++  };
++
++  auto upload_float = [&](ID3D11Buffer *buf, ConstantUpload &state, bool &dirty,
++                          const float *values, UINT used) {
++    // A later shader may read more registers without any SetConstantF call.
++    used = std::clamp(used, 1u, kMaxFloatConstants);
++    if ((!dirty && used <= state.uploaded) || !buf) return;
++    UINT bytes = (used * 16 + 255) & ~255u;
++    UINT offset = 0;
++    D3D11_MAP mode = D3D11_MAP_WRITE_DISCARD;
++    if (constant_context_ && state.cursor + bytes <= kRingBytes && state.cursor) {
++      offset = state.cursor;
++      mode = D3D11_MAP_WRITE_NO_OVERWRITE;
+     }
++    D3D11_MAPPED_SUBRESOURCE mapped = {};
++    if (FAILED(d3d11_ctx_->Map(buf, 0, mode, 0, &mapped))) return;
++    auto destination = static_cast<uint8_t *>(mapped.pData) + offset;
++    memcpy(destination, values, used * 16);
++    memset(destination + used * 16, 0, bytes - used * 16);
++    d3d11_ctx_->Unmap(buf, 0);
++    state.first = offset / 16;
++    state.count = bytes / 16;
++    state.cursor = offset + bytes;
++    state.uploaded = used;
++    dirty = false;
+   };
+-
+-  if (vs_const_dirty_ && vs_cbuffer_) {
+-    upload(vs_cbuffer_.ptr(), vs_const_f_, sizeof(vs_const_f_));
+-    vs_const_dirty_ = false;
+-  }
+-  if (ps_const_dirty_ && ps_cbuffer_) {
+-    upload(ps_cbuffer_.ptr(), ps_const_f_, sizeof(ps_const_f_));
+-    ps_const_dirty_ = false;
+-  }
++  // Separate rings prevent a VS wrap from discarding an unchanged PS snapshot.
++  if (programmable_vs)
++    upload_float(vs_cbuffer_.ptr(), vs_upload_, vs_const_dirty_, vs_const_f_, vertex_shader_->FloatConstantsUsed());
++  if (programmable_ps)
++    upload_float(ps_cbuffer_.ptr(), ps_upload_, ps_const_dirty_, ps_const_f_, pixel_shader_->FloatConstantsUsed());
+ 
+   // cb1 layout (see sm3_translate.hpp): 16 int4 registers, 16 bool registers
+   // (0/1 in .x), then one misc vec4 whose .x is the alpha-test reference.
+@@ -2577,23 +2625,31 @@
+       memcpy(out + base + 16, luminance, sizeof(luminance));
+     }
+   };
+-  if (vs_extra_dirty_ && vs_cbuffer_extra_) {
++  if (programmable_vs && vs_extra_dirty_ && vs_cbuffer_extra_) {
+     uint8_t staging[kExtraCBBytes];
+     fillExtra(staging, vs_const_i_, vs_const_b_);
+-    upload(vs_cbuffer_extra_.ptr(), staging, sizeof(staging));
+-    vs_extra_dirty_ = false;
+-  }
+-  if (ps_extra_dirty_ && ps_cbuffer_extra_) {
++    if (upload(vs_cbuffer_extra_.ptr(), staging, sizeof(staging))) vs_extra_dirty_ = false;
++  }
++  if (programmable_ps && ps_extra_dirty_ && ps_cbuffer_extra_) {
+     uint8_t staging[kExtraCBBytes];
+     fillExtra(staging, ps_const_i_, ps_const_b_);
+-    upload(ps_cbuffer_extra_.ptr(), staging, sizeof(staging));
+-    ps_extra_dirty_ = false;
+-  }
+-
+-  ID3D11Buffer *vs_cbs[2] = {vs_cbuffer_.ptr(), vs_cbuffer_extra_.ptr()};
+-  ID3D11Buffer *ps_cbs[2] = {ps_cbuffer_.ptr(), ps_cbuffer_extra_.ptr()};
+-  d3d11_ctx_->VSSetConstantBuffers(0, 2, vs_cbs);
+-  d3d11_ctx_->PSSetConstantBuffers(0, 2, ps_cbs);
++    if (upload(ps_cbuffer_extra_.ptr(), staging, sizeof(staging))) ps_extra_dirty_ = false;
++  }
++
++  auto bind = [&](bool vertex, ID3D11Buffer *floats, ID3D11Buffer *extra, const ConstantUpload &state) {
++    ID3D11Buffer *buffers[2] = {floats, extra};
++    if (constant_context_) {
++      UINT first[2] = {state.first, 0};
++      UINT count[2] = {state.count, kExtraCBBytes / 16};
++      if (vertex) constant_context_->VSSetConstantBuffers1(0, 2, buffers, first, count);
++      else constant_context_->PSSetConstantBuffers1(0, 2, buffers, first, count);
++    } else {
++      if (vertex) d3d11_ctx_->VSSetConstantBuffers(0, 2, buffers);
++      else d3d11_ctx_->PSSetConstantBuffers(0, 2, buffers);
++    }
++  };
++  if (programmable_vs) bind(true, vs_cbuffer_.ptr(), vs_cbuffer_extra_.ptr(), vs_upload_);
++  if (programmable_ps) bind(false, ps_cbuffer_.ptr(), ps_cbuffer_extra_.ptr(), ps_upload_);
+ }
+ 
+ /* The private reference that keeps a bound texture alive. Reached through
+@@ -2972,10 +3028,10 @@
+   d3d11_ctx_->PSSetShader(ps, nullptr, 0);
+   if (unlikely(fps_report_)) {
+     auto t = std::chrono::steady_clock::now();
+-    UploadShaderConstants();
++    UploadShaderConstants(!ffp_vs, !ffp_ps);
+     diag_upload_s_ += std::chrono::duration<double>(std::chrono::steady_clock::now() - t).count();
+   } else {
+-    UploadShaderConstants();
++    UploadShaderConstants(!ffp_vs, !ffp_ps);
+   }
+   if (ffp_vs || ffp_ps)
+     UploadFFPConstants(ffp_key, ffp_vs, ffp_ps);
+diff --git a/src/d3d9/d3d9_device.hpp b/src/d3d9/d3d9_device.hpp
+--- a/src/d3d9/d3d9_device.hpp
++++ b/src/d3d9/d3d9_device.hpp
+@@ -1,6 +1,7 @@
+ #pragma once
+ 
+ #include "d3d9_private.h"
++#include "d3d11_1.h"
+ #include "d3d9_surface.hpp"
+ #include "d3d9_shader.hpp"
+ #include "d3d9_vertex_declaration.hpp"
+@@ -218,6 +219,7 @@
+   Com<IDXGIAdapter>          dxgi_adapter_;
+   Com<ID3D11Device>          d3d11_device_;
+   Com<ID3D11DeviceContext>   d3d11_ctx_;
++  Com<ID3D11DeviceContext1>  constant_context_;
+   Com<IDXGISwapChain>        swap_chain_;
+   HWND                       focus_wnd_;
+   DWORD                      behavior_flags_;
+@@ -355,6 +357,12 @@
+   uint32_t                   ps_const_b_[kMaxOtherConstants] = {};
+   Com<ID3D11Buffer>          vs_cbuffer_;
+   Com<ID3D11Buffer>          ps_cbuffer_;
++  struct ConstantUpload {
++    UINT cursor = 0;
++    UINT first = 0;
++    UINT count = 0;
++    UINT uploaded = 0;
++  } vs_upload_, ps_upload_;
+   Com<ID3D11Buffer>          vs_cbuffer_extra_; // cb1: i#/b#/alpha-ref, layout in sm3_translate.hpp
+   Com<ID3D11Buffer>          ps_cbuffer_extra_;
+   bool                       vs_const_dirty_ = true;
+@@ -404,7 +412,7 @@
+   D3D9VertexDeclaration *ImplicitDeclarationForFVF(DWORD fvf);
+   HRESULT BindInputLayout();
+   uint32_t VertexInputConversions();
+-  void UploadShaderConstants();
++  void UploadShaderConstants(bool programmable_vs, bool programmable_ps);
+   void BindTexturesAndSamplers();
+   HRESULT DrawPrepare(D3DPRIMITIVETYPE type);
+   // Instance count for DrawIndexedPrimitive when stream 0 uses

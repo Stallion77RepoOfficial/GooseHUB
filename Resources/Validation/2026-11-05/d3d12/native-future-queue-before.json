@@ -1,0 +1,7 @@
+{
+  "dllSHA256": "3356cd201e42f255ebf270a99da1e8582a5bf46019324e61c4aaa0e892f28f3e",
+  "exeSHA256": "a17557cd19a09fe60d3c61c264ebdb7045b139a114bf47cc3970e06d7c1604f8",
+  "dllSource": "GooseHUB/.build/d3d12-20261104/before-queue-scheduler.dll",
+  "render": false,
+  "returnCode": 1
+}

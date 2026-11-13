@@ -1,0 +1,38 @@
+{
+  "installer": {
+    "before": "False running warning reproduced without installed/running application",
+    "after": "Unmodified NSIS installer reached Installation Complete"
+  },
+  "powershell": {
+    "unsupportedProbeBefore": 0,
+    "unsupportedProbeAfter": {
+      "ARM64": 1,
+      "x86": 1
+    }
+  },
+  "processDetection": {
+    "absent": true,
+    "exactLongSpacedNamePresent": true,
+    "stopped": true,
+    "exactNSISCmdPipeline": true
+  },
+  "hardware": {
+    "vid": "b6a4",
+    "pid": "40c1",
+    "transport": "USB 2.4 GHz receiver",
+    "vendorInputReportID": 5,
+    "featureReportID": 6,
+    "featureReportBytes": 41,
+    "readWriteOpen": true,
+    "actualFeatureRead": true,
+    "connectionFlag": 1,
+    "batteryPercent": 93,
+    "chip": 14,
+    "manufacturerUIConnected": true
+  },
+  "limits": [
+    "Validated on the attached YXT/Throne receiver; no universal peripheral or Windows kernel-driver compatibility claim.",
+    "The new configuration path forwards only wholly vendor-defined input IDs; pointer/keyboard/digitizer/built-in interfaces are excluded.",
+    "No game benchmark was run for this task."
+  ]
+}

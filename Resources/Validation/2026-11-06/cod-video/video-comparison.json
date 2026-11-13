@@ -1,0 +1,35 @@
+{
+  "baseline": {
+    "frames": 17428,
+    "greenFrames": [
+      {
+        "frame": "8",
+        "qpcMs": "444849486.2589",
+        "clearColor": "ff000000",
+        "r0": "0",
+        "g0": "135",
+        "b0": "0",
+        "r1": "0",
+        "g1": "135",
+        "b1": "0",
+        "r2": "0",
+        "g2": "135",
+        "b2": "0"
+      }
+    ],
+    "file": "probe-map-copycpu-video-probe.csv"
+  },
+  "fixed": {
+    "implementation": "direct upload to destination",
+    "frames": 7876,
+    "greenFrames": [],
+    "file": "probe-map-direct-video-probe.csv",
+    "probeSHA256": "ecf455c599b80a99db6d83f8b4a64207cf47b3fa6dcb356178a272048af7627c"
+  },
+  "startupFixed": {
+    "frames": 6897,
+    "greenFrames": [],
+    "file": "probe-startup-direct.csv",
+    "probeSHA256": "ecf455c599b80a99db6d83f8b4a64207cf47b3fa6dcb356178a272048af7627c"
+  }
+}

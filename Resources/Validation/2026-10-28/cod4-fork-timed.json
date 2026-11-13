@@ -1,0 +1,208 @@
+{
+  "version": "fork",
+  "duration": 60.62948608293664,
+  "frameGroups": [
+    {
+      "elapsed": 14.470162166981027,
+      "fps": 22.6732,
+      "drawsPerFrame": 4
+    },
+    {
+      "elapsed": 15.343554000020958,
+      "fps": 68.336,
+      "drawsPerFrame": 5
+    },
+    {
+      "elapsed": 15.557271917001344,
+      "fps": 280.802,
+      "drawsPerFrame": 5
+    },
+    {
+      "elapsed": 16.410827500047162,
+      "fps": 70.2921,
+      "drawsPerFrame": 1713
+    },
+    {
+      "elapsed": 16.71201062493492,
+      "fps": 199.191,
+      "drawsPerFrame": 416
+    },
+    {
+      "elapsed": 17.04801074997522,
+      "fps": 178.565,
+      "drawsPerFrame": 506
+    },
+    {
+      "elapsed": 17.411705125006847,
+      "fps": 165.048,
+      "drawsPerFrame": 506
+    },
+    {
+      "elapsed": 18.147057333029807,
+      "fps": 81.5751,
+      "drawsPerFrame": 2141
+    },
+    {
+      "elapsed": 18.893836457980797,
+      "fps": 80.3627,
+      "drawsPerFrame": 1577
+    },
+    {
+      "elapsed": 19.644004708039574,
+      "fps": 79.9688,
+      "drawsPerFrame": 1461
+    },
+    {
+      "elapsed": 20.516347958007827,
+      "fps": 68.7792,
+      "drawsPerFrame": 1998
+    },
+    {
+      "elapsed": 21.36029454204254,
+      "fps": 71.0932,
+      "drawsPerFrame": 2014
+    },
+    {
+      "elapsed": 22.106077249976806,
+      "fps": 80.4526,
+      "drawsPerFrame": 1922
+    },
+    {
+      "elapsed": 22.894536625011824,
+      "fps": 76.0994,
+      "drawsPerFrame": 1960
+    },
+    {
+      "elapsed": 23.75803929194808,
+      "fps": 69.4853,
+      "drawsPerFrame": 1539
+    },
+    {
+      "elapsed": 24.62128820794169,
+      "fps": 69.5084,
+      "drawsPerFrame": 1750
+    },
+    {
+      "elapsed": 25.432323375018314,
+      "fps": 73.9735,
+      "drawsPerFrame": 1869
+    },
+    {
+      "elapsed": 26.7054207919864,
+      "fps": 47.1297,
+      "drawsPerFrame": 1989
+    },
+    {
+      "elapsed": 27.906029875040986,
+      "fps": 50.1523,
+      "drawsPerFrame": 1898
+    },
+    {
+      "elapsed": 29.16537712502759,
+      "fps": 47.4848,
+      "drawsPerFrame": 1872
+    },
+    {
+      "elapsed": 30.61459479201585,
+      "fps": 41.4011,
+      "drawsPerFrame": 1959
+    },
+    {
+      "elapsed": 32.45137954200618,
+      "fps": 32.6661,
+      "drawsPerFrame": 2005
+    },
+    {
+      "elapsed": 33.7980201250175,
+      "fps": 44.5557,
+      "drawsPerFrame": 2218
+    },
+    {
+      "elapsed": 35.07920825004112,
+      "fps": 46.8303,
+      "drawsPerFrame": 2184
+    },
+    {
+      "elapsed": 36.526880624936894,
+      "fps": 41.4464,
+      "drawsPerFrame": 825
+    },
+    {
+      "elapsed": 38.507286667008884,
+      "fps": 30.2967,
+      "drawsPerFrame": 1132
+    },
+    {
+      "elapsed": 40.356788042001426,
+      "fps": 32.4418,
+      "drawsPerFrame": 1366
+    },
+    {
+      "elapsed": 42.77678479196038,
+      "fps": 24.7935,
+      "drawsPerFrame": 1855
+    },
+    {
+      "elapsed": 44.500273416982964,
+      "fps": 34.8129,
+      "drawsPerFrame": 1643
+    },
+    {
+      "elapsed": 46.14946908294223,
+      "fps": 36.3815,
+      "drawsPerFrame": 1332
+    },
+    {
+      "elapsed": 47.35096920793876,
+      "fps": 49.9383,
+      "drawsPerFrame": 1341
+    },
+    {
+      "elapsed": 48.74858762498479,
+      "fps": 42.9311,
+      "drawsPerFrame": 1286
+    },
+    {
+      "elapsed": 49.9079738749424,
+      "fps": 51.7489,
+      "drawsPerFrame": 1017
+    },
+    {
+      "elapsed": 51.154508791980334,
+      "fps": 48.1342,
+      "drawsPerFrame": 1643
+    },
+    {
+      "elapsed": 52.41049058304634,
+      "fps": 47.7741,
+      "drawsPerFrame": 1653
+    },
+    {
+      "elapsed": 53.44918350002263,
+      "fps": 57.7606,
+      "drawsPerFrame": 1084
+    },
+    {
+      "elapsed": 54.70564449997619,
+      "fps": 47.754,
+      "drawsPerFrame": 1859
+    },
+    {
+      "elapsed": 55.7348222079454,
+      "fps": 58.2998,
+      "drawsPerFrame": 2097
+    },
+    {
+      "elapsed": 56.756541416980326,
+      "fps": 58.7247,
+      "drawsPerFrame": 1998
+    },
+    {
+      "elapsed": 58.84683175000828,
+      "fps": 28.704,
+      "drawsPerFrame": 1865
+    }
+  ],
+  "criticalSectionWarnings": [],
+  "exitAfterTestStop": -9
+}

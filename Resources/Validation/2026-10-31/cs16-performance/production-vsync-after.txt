@@ -1,0 +1,6 @@
+
+HKEY_CURRENT_USER\Software\Wine\AppDefaults\hl.exe\Mac Driver
+    AllowVerticalSync    REG_SZ    N
+
+msync: bootstrapped mach port on wine-5531529-msync.
+msync: up and running.

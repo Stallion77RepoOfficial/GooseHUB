@@ -1,0 +1,36 @@
+{
+  "label": "shipping-off01",
+  "nativeTimedemo": {
+    "frames": 980,
+    "seconds": 13.524,
+    "fps": 72.464
+  },
+  "inline": "0",
+  "timebase": {
+    "numer": 125,
+    "denom": 3
+  },
+  "elapsed": 17.69097108297865,
+  "returnCode": -9,
+  "arguments": [
+    "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/fps-load-20261031/bottle/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-gl",
+    "-32bpp",
+    "-nojoy",
+    "-noipx",
+    "+condebug",
+    "+developer",
+    "1",
+    "+fps_max",
+    "999",
+    "+timedemo",
+    "load_characters"
+  ]
+}

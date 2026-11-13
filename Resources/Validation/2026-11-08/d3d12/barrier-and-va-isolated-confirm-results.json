@@ -1,0 +1,29 @@
+{
+  "dllSHA256": "ede820ecc686e65b7895e28ed8eafc3ec42dd4724dfd8198b79f3ac2d05cc302",
+  "tests": [
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-old",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-new",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-aliasing-pingpong",
+      "exit": 0
+    },
+    {
+      "mode": "compute-aliasing-pingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-dual-raw",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-structured-vertex-resource-skin-cache-typed",
+      "exit": 0
+    }
+  ]
+}

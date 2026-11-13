@@ -1,0 +1,110 @@
+{
+  "scope": "1025 actual DXBC draws, 64 SRVs and 16 sampler descriptors, last 4 of 6 iterations per run; 3 interleaved pairs. Not game FPS.",
+  "runs": [
+    {
+      "pair": 0,
+      "variant": "before",
+      "cpuSubmissionMS": [
+        1.5062,
+        1.3279,
+        1.3815,
+        1.3164
+      ],
+      "gpuCompletionMS": [
+        2.6386,
+        2.3834,
+        2.8064,
+        2.5835
+      ]
+    },
+    {
+      "pair": 0,
+      "variant": "after",
+      "cpuSubmissionMS": [
+        0.4654,
+        0.4577,
+        0.459,
+        0.4791
+      ],
+      "gpuCompletionMS": [
+        1.4992,
+        1.5076,
+        1.9483,
+        1.3962
+      ]
+    },
+    {
+      "pair": 1,
+      "variant": "before",
+      "cpuSubmissionMS": [
+        1.376,
+        2.0364,
+        1.4385,
+        1.3452
+      ],
+      "gpuCompletionMS": [
+        2.461,
+        3.0868,
+        2.3165,
+        2.4024
+      ]
+    },
+    {
+      "pair": 1,
+      "variant": "after",
+      "cpuSubmissionMS": [
+        0.4704,
+        0.4838,
+        0.4593,
+        0.566
+      ],
+      "gpuCompletionMS": [
+        1.3122,
+        1.5101,
+        1.3086,
+        1.7866
+      ]
+    },
+    {
+      "pair": 2,
+      "variant": "before",
+      "cpuSubmissionMS": [
+        1.2202,
+        1.1463,
+        1.6389,
+        2.3055
+      ],
+      "gpuCompletionMS": [
+        2.2714,
+        2.2571,
+        2.5698,
+        3.3033
+      ]
+    },
+    {
+      "pair": 2,
+      "variant": "after",
+      "cpuSubmissionMS": [
+        0.5925,
+        0.8961,
+        0.6125,
+        0.506
+      ],
+      "gpuCompletionMS": [
+        1.6315,
+        1.887,
+        1.719,
+        1.6096
+      ]
+    }
+  ],
+  "cpuSubmissionMS": {
+    "before": 1.37875,
+    "after": 0.48145000000000004
+  },
+  "gpuCompletionMS": {
+    "before": 2.5153999999999996,
+    "after": 1.55985
+  },
+  "cpuSubmissionReductionPercent": 65.08068902991839
+}

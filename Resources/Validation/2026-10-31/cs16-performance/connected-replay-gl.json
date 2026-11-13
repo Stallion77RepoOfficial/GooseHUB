@@ -1,0 +1,39 @@
+{
+  "label": "connected-replay-gl",
+  "backend": "gl",
+  "nativeTimedemo": {
+    "frames": 2110,
+    "seconds": 14.023,
+    "fps": 150.467
+  },
+  "metalHUD": false,
+  "seconds": 23.01362445903942,
+  "exitCode": -9,
+  "controlledStopAfterResult": true,
+  "arguments": [
+    "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-performance-20261031/data/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-nojoy",
+    "-noipx",
+    "-gl",
+    "-32bpp",
+    "+condebug",
+    "+developer",
+    "1",
+    "+fps_max",
+    "999",
+    "+timedemo",
+    "codex_moving"
+  ],
+  "graphicsModules": [
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\opengl32.dll\" at 64400000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\wined3d.dll\" at 64980000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\Program Files (x86)\\\\cs16v2017_oyunyoneticisi\\\\DDRAW.dll\" at 66290000: builtin"
+  ]
+}

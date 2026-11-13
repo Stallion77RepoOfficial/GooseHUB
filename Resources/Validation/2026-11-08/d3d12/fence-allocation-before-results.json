@@ -1,0 +1,9 @@
+{
+  "dllSHA256": "864aba93b1fd3e52018eb6936dfe8d73c5638bbbad5540ce7996c920eb4f5e9d",
+  "tests": [
+    {
+      "mode": "fence-allocation",
+      "exit": 1
+    }
+  ]
+}

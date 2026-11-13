@@ -1,0 +1,9 @@
+{
+  "dllSHA256": "109c073f7ea0ef24123473609dd9e458224f5cb70ce4eeacfe223050d84d863b",
+  "tests": [
+    {
+      "mode": "dxbc-compute-aliasing-pingpong",
+      "exit": 1
+    }
+  ]
+}

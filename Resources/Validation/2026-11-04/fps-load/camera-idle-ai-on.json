@@ -1,0 +1,372 @@
+{
+  "label": "camera-idle-ai-on",
+  "activePlayer": true,
+  "timebase": {
+    "numer": 125,
+    "denom": 3
+  },
+  "phases": [
+    {
+      "name": "hidden-16-frozen",
+      "beginTicks": 3467446304913,
+      "endTicks": 3467614309441,
+      "report": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=0 effects=0\n\u0000\u0000",
+      "commands": [
+        "bench_visible 0",
+        "bench_effects 0",
+        "r_drawentities 1"
+      ]
+    },
+    {
+      "name": "visible-15-frozen",
+      "beginTicks": 3467696492463,
+      "endTicks": 3467864511538,
+      "report": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000",
+      "commands": [
+        "bench_visible 15"
+      ]
+    },
+    {
+      "name": "hidden-16-repeat",
+      "beginTicks": 3467946643477,
+      "endTicks": 3468114668318,
+      "report": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=0 effects=0\n\u0000\u0000",
+      "commands": [
+        "bench_visible 0"
+      ]
+    },
+    {
+      "name": "visible-15-smoke-light",
+      "beginTicks": 3468205266490,
+      "endTicks": 3468373273586,
+      "report": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=3\n\u0000\u0000",
+      "commands": [
+        "bench_visible 15",
+        "bench_effects 3"
+      ]
+    },
+    {
+      "name": "visible-15-clean-repeat",
+      "beginTicks": 3468455517954,
+      "endTicks": 3468623526965,
+      "report": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000",
+      "commands": [
+        "bench_effects 0"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "elapsed": 7.7607683340029325,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 0 x, 0 y, 0 z\nplayers :  1 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n1 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 9.31487383399508,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 0 x, 0 y, 0 z\nplayers :  1 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:02    0   45\n1 users\n\u0000\u0000\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 0 x, 0 y, 0 z\nplayers :  1 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:02    0   45\n1 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 9.669714375020703,
+      "command": "bench_join",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_JOIN 1 alive=0 team=-1\n\u0000\u0000"
+    },
+    {
+      "elapsed": 10.023055500001647,
+      "command": "developer 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 10.377885124995373,
+      "command": "fps_max 999",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 10.730546792008681,
+      "command": "sv_cheats 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 11.08232870901702,
+      "command": "mp_limitteams 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 11.437606541992864,
+      "command": "mp_autoteambalance 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 11.791803125001024,
+      "command": "mp_freezetime 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 12.145189584000036,
+      "command": "mp_roundtime 9",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 12.499061459006043,
+      "command": "bot_join_after_player 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 12.851988459005952,
+      "command": "bot_auto_vacate 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 13.204918292001821,
+      "command": "bot_quota 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 13.559393125004135,
+      "command": "bot_stop 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 13.912217334000161,
+      "command": "bot_zombie 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 14.266349209006876,
+      "command": "bot_allow_grenades 0",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 14.621038709010463,
+      "command": "amxx plugins",
+      "response": "\u00ff\u00ff\u00ff\u00fflCurrently loaded plugins:\n       name                    version     author            file             status   \n [  1] Local load measurement  1           GooseHUB          load_scene.amxx  running  \n1 plugins, 1 running\n\u0000\u0000"
+    },
+    {
+      "elapsed": 14.977444999996806,
+      "command": "bench_join",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_JOIN 1 alive=1 team=2\n\u0000\u0000"
+    },
+    {
+      "elapsed": 15.333473209000658,
+      "command": "bot_quota 15",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 15.688293417013483,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 448 x, 2368 y, -74 z\nplayers :  3 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:08    0    0\n# 2 \"Harold\" 2 BOT   0 00:11    0    0\n# 3   \"Toby\" 3 BOT   0 00:11    0    0\n3 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 16.543942624994088,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 448 x, 2368 y, -74 z\nplayers :  6 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:09    0    0\n# 2 \"Harold\" 2 BOT   0 00:12    0    0\n# 3   \"Toby\" 3 BOT   0 00:12    0    0\n# 4  \"Ethan\" 4 BOT   0 00:12    0    0\n# 5   \"Bert\" 5 BOT   0 00:12    0    0\n# 6 \"Clarence\" 6 BOT   0 00:12    0    0\n6 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 17.40222166699823,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 448 x, 2368 y, -74 z\nplayers :  8 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:10    0    0\n# 2 \"Harold\" 2 BOT   0 00:13    0    0\n# 3   \"Toby\" 3 BOT   0 00:13    0    0\n# 4  \"Ethan\" 4 BOT   0 00:13    0    0\n# 5   \"Bert\" 5 BOT   0 00:13    0    0\n# 6 \"Clarence\" 6 BOT   0 00:13    0    0\n# 7 \"Ulysses\" 7 BOT   0 00:13    0    0\n# 8 \"Dustin\" 8 BOT   0 00:13    0    0\n8 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 18.26364916699822,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 448 x, 2368 y, -74 z\nplayers :  11 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:11    0    0\n# 2 \"Harold\" 2 BOT   0 00:14    0    0\n# 3   \"Toby\" 3 BOT   0 00:14    0    0\n# 4  \"Ethan\" 4 BOT   0 00:14    0    0\n# 5   \"Bert\" 5 BOT   0 00:14    0    0\n# 6 \"Clarence\" 6 BOT   0 00:14    0    0\n# 7 \"Ulysses\" 7 BOT   0 00:14    0    0\n# 8 \"Dustin\" 8 BOT   0 00:14    0    0\n# 9  \"Shawn\" 9 BOT   0 00:14    0    0\n#10   \"Fred\" 10 BOT   0 00:14    0    0\n#11  \"Wyatt\" 11 BOT   0 00:14    0    0\n11 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 19.122368584008655,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 448 x, 2368 y, -74 z\nplayers :  14 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:11    0    0\n# 2 \"Harold\" 2 BOT   0 00:15    0    0\n# 3   \"Toby\" 3 BOT   0 00:15    0    0\n# 4  \"Ethan\" 4 BOT   0 00:15    0    0\n# 5   \"Bert\" 5 BOT   0 00:15    0    0\n# 6 \"Clarence\" 6 BOT   0 00:15    0    0\n# 7 \"Ulysses\" 7 BOT   0 00:15    0    0\n# 8 \"Dustin\" 8 BOT   0 00:15    0    0\n# 9  \"Shawn\" 9 BOT   0 00:15    0    0\n#10   \"Fred\" 10 BOT   0 00:15    0    0\n#11  \"Wyatt\" 11 BOT   0 00:15    0    0\n#12 \"Graham\" 12 BOT   0 00:15    0    0\n#13 \"Albert\" 13 BOT   0 00:15    0    0\n#14  \"Ulric\" 14 BOT   0 00:15    0    0\n14 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 19.979623791994527,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 448 x, 2368 y, -74 z\nplayers :  16 active (20 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:12    0    0\n# 2 \"Harold\" 2 BOT   0 00:16    0    0\n# 3   \"Toby\" 3 BOT   0 00:16    0    0\n# 4  \"Ethan\" 4 BOT   0 00:16    0    0\n# 5   \"Bert\" 5 BOT   0 00:16    0    0\n# 6 \"Clarence\" 6 BOT   0 00:16    0    0\n# 7 \"Ulysses\" 7 BOT   0 00:16    0    0\n# 8 \"Dustin\" 8 BOT   0 00:16    0    0\n# 9  \"Shawn\" 9 BOT   0 00:16    0    0\n#10   \"Fred\" 10 BOT   0 00:16    0    0\n#11  \"Wyatt\" 11 BOT   0 00:16    0    0\n#12 \"Graham\" 12 BOT   0 00:16    0    0\n#13 \"Albert\" 13 BOT   0 00:16    0    0\n#14  \"Ulric\" 14 BOT   0 00:16    0    0\n#15   \"Opie\" 15 BOT   0 00:16    0    0\n#16  \"Perry\" 16 BOT   0 00:16    0    0\n16 users\n\u0000\u0000"
+    },
+    {
+      "elapsed": 20.3367785839946,
+      "command": "sv_restart 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 24.692443834006554,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=0 origin=0.00,0.00,0.00 yaw=0.00 offgrid=16\nBENCH_REPORT human=0 human_alive=0 alive=16 ct=8 t=8 peers_visible=16 effects=0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 25.046986542001832,
+      "command": "bench_form",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_FORM human=1 peers=15 origin=448.00,2368.00,-91.96\n\u0000\u0000"
+    },
+    {
+      "elapsed": 25.401068792009028,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 25.75817116702092,
+      "command": "bench_visible 0",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_VISIBLE requested=0 peers=15\n\u0000\u0000"
+    },
+    {
+      "elapsed": 26.110047875001328,
+      "command": "bench_effects 0",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_EFFECTS 0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 26.4628811670118,
+      "command": "r_drawentities 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 28.818924916995456,
+      "command": "fps_max",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"fps_max\" is \"999\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 29.17191833400284,
+      "command": "developer",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"developer\" is \"1\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 29.526114125008462,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=0 effects=0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 36.881915250007296,
+      "command": "bench_visible 15",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_VISIBLE requested=15 peers=15\n\u0000\u0000"
+    },
+    {
+      "elapsed": 39.23566649999702,
+      "command": "fps_max",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"fps_max\" is \"999\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 39.59122733399272,
+      "command": "developer",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"developer\" is \"1\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 39.95062741701258,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 47.31405445901328,
+      "command": "bench_visible 0",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_VISIBLE requested=0 peers=15\n\u0000\u0000"
+    },
+    {
+      "elapsed": 49.66910033399472,
+      "command": "fps_max",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"fps_max\" is \"999\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 50.02106087500579,
+      "command": "developer",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"developer\" is \"1\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 50.37359133400605,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=0 effects=0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 57.727278875012416,
+      "command": "bench_visible 15",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_VISIBLE requested=15 peers=15\n\u0000\u0000"
+    },
+    {
+      "elapsed": 58.0834172500181,
+      "command": "bench_effects 3",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_EFFECTS 3\n\u0000\u0000"
+    },
+    {
+      "elapsed": 60.43995579201146,
+      "command": "fps_max",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"fps_max\" is \"999\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 60.797324084007414,
+      "command": "developer",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"developer\" is \"1\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 61.14955095900223,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=3\n\u0000\u0000"
+    },
+    {
+      "elapsed": 68.50524450000376,
+      "command": "bench_effects 0",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_EFFECTS 0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 70.86537429201417,
+      "command": "fps_max",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"fps_max\" is \"999\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 71.21986504201777,
+      "command": "developer",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\"developer\" is \"1\"\n\u0000\u0000"
+    },
+    {
+      "elapsed": 71.57669712501229,
+      "command": "bench_report",
+      "response": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000"
+    },
+    {
+      "elapsed": 78.9314159170026,
+      "command": "-right",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "elapsed": 79.28743495899835,
+      "command": "stop",
+      "response": "\u00ff\u00ff\u00ff\u00fflNot recording a demo.\n\u0000\u0000"
+    },
+    {
+      "elapsed": 79.72887512500165,
+      "command": "quit",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    }
+  ],
+  "arguments": [
+    "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/fps-load-20261031/bottle/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-nojoy",
+    "-noipx",
+    "-ip",
+    "127.0.0.1",
+    "-port",
+    "27615",
+    "-gl",
+    "-32bpp",
+    "+condebug",
+    "+maxplayers",
+    "20",
+    "+sv_lan",
+    "1",
+    "+rcon_password",
+    "0e674f59c572cae8ba6a",
+    "+developer",
+    "1",
+    "+fps_max",
+    "999",
+    "+sv_cheats",
+    "1",
+    "+map",
+    "de_dust2"
+  ],
+  "elapsed": 80.01082358401618,
+  "returnCode": 0,
+  "demoRecorded": false,
+  "profiled": false
+}

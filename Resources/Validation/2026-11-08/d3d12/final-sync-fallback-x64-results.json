@@ -1,0 +1,17 @@
+{
+  "dllSHA256": "469d35acb95c2ab30e0455d1460519da7d215fd6100c41e688fce55fb16603e9",
+  "tests": [
+    {
+      "mode": "queries",
+      "exit": 0
+    },
+    {
+      "mode": "multi-list-queries",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-occlusion-reuse",
+      "exit": 0
+    }
+  ]
+}

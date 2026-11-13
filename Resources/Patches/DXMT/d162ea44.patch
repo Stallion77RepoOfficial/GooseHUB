@@ -1,0 +1,49 @@
+From d162ea44a31fbf9089ea09977337f0beb30bd082 Mon Sep 17 00:00:00 2001
+From: Feifan He <feifan@codeweavers.com>
+Date: Tue, 27 Oct 2026 14:39:14 +0800
+Subject: [PATCH] fix(airconv): set point size and primitive count for gs
+ pointlist output
+
+Metal requires `[point_size]` to be set for point primtive.
+And `primitive_count` is zero but but `next_write_vertex` contains the actual count for point primitive.
+
+Signed-off-by: Feifan He <feifan@codeweavers.com>
+---
+ src/airconv/dxbc_converter_gs.cpp | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/airconv/dxbc_converter_gs.cpp b/src/airconv/dxbc_converter_gs.cpp
+index a525da4..62cd031 100644
+--- a/src/airconv/dxbc_converter_gs.cpp
++++ b/src/airconv/dxbc_converter_gs.cpp
+@@ -152,6 +152,7 @@ convert_dxbc_geometry_shader(
+     topology = air::MeshOutputTopology::Line;
+     break;
+   case microsoft::D3D10_SB_PRIMITIVE_TOPOLOGY_POINTLIST:
++    func_signature.DefineMeshVertexOutput(air::OutputPointSize{});
+     break;
+   default:
+     return llvm::make_error<UnsupportedFeature>("unsupported geometry shader output topology");
+@@ -321,6 +322,7 @@ convert_dxbc_geometry_shader(
+         h(gs_out_ctx, io);
+       }
+       emit_clip_distances(current_write_vertex);
++      air.CreateSetMeshPointSize(current_write_vertex, air.getFloat(1.0));
+       air.CreateSetMeshIndex(current_write_vertex, current_write_vertex);
+     };
+     resource_map.call_cut = []() {
+@@ -504,7 +506,10 @@ convert_dxbc_geometry_shader(
+     return err;
+   }
+   resource_map.call_cut();
+-  air.CreateSetMeshPrimitiveCount(builder.CreateLoad(types._int, primitive_count));
++  if (topology == air::MeshOutputTopology::Point)
++    air.CreateSetMeshPrimitiveCount(builder.CreateLoad(types._int, next_write_vertex));
++  else
++    air.CreateSetMeshPrimitiveCount(builder.CreateLoad(types._int, primitive_count));
+ 
+   builder.CreateRetVoid();
+   module.getOrInsertNamedMetadata("air.mesh")->addOperand(function_metadata);
+-- 
+2.55.0
+

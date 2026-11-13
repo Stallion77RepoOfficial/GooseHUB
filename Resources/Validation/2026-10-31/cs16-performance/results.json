@@ -1,0 +1,267 @@
+{
+  "createdAt": "2026-10-31T19:38:34.272886+00:00",
+  "appVersion": "0.2.4",
+  "appBuild": "7",
+  "runtimeSettings": {
+    "reducedX87Precision": true
+  },
+  "runtimeScope": "All application launches using FEX; no shortcut-specific CPU override",
+  "sourcePolicy": "Preserve custom Wine and DXMT; selective changes only",
+  "wineOpenGLSnapshotRestored": true,
+  "diagnosticAndBatchCodeAbsentFromPackage": true,
+  "productionLaunchVerified": true,
+  "productionLaunchLog": "production-global-x87-launch.log",
+  "productionLaunchHeader": {
+    "arguments": [
+      "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+      "-game",
+      "cstrike",
+      "-gl",
+      "-32bpp",
+      "-nojoy",
+      "-noipx",
+      "+developer",
+      "1",
+      "+fps_max",
+      "999",
+      "+cl_showfps",
+      "1"
+    ],
+    "executable": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/bin/wine",
+    "prefix": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix",
+    "x87MathBits": 64
+  },
+  "userFeedback": {
+    "fluency": "User reports the game is now quite fluid",
+    "request": "Global setting and investigate 600 FPS or higher",
+    "numericLiveFPS": null,
+    "flickerExplicitlyConfirmedResolved": false
+  },
+  "target": {
+    "requestedFPS": 600,
+    "achievedInValidTimedemo": false,
+    "bestObservedAverageFPS": 406.311,
+    "lastObservedAverageFPS": 397.907,
+    "liveFrametimeLowsMeasured": false
+  },
+  "method": {
+    "demo": "connected-moving.dem",
+    "sha256": "21cd13aab8a71539bfbc573d76a9d300d150b2b8f1753f2dc8ed4e89ad2493a5",
+    "frames": 2110,
+    "scene": "de_dust2, local, no bots, active alive moving player",
+    "resolution": [
+      960,
+      600
+    ],
+    "windowed": true,
+    "synchronization": "MSync",
+    "backgroundClientsStoppedByAgent": false,
+    "backgroundLoadControlled": false
+  },
+  "measurements": [
+    {
+      "label": "connected-replay-gl",
+      "backend": "gl",
+      "x87ReducedPrecision": null,
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 14.023,
+        "fps": 150.467
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "connected-replay-gl-x87precise",
+      "backend": "gl",
+      "x87ReducedPrecision": null,
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 13.401,
+        "fps": 157.453
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "connected-replay-gl-fastx87",
+      "backend": "gl",
+      "x87ReducedPrecision": null,
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 10.369,
+        "fps": 203.488
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "connected-replay-gl-fastx87-repeat",
+      "backend": "gl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 6.548,
+        "fps": 322.24
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "connected-replay-gl-fastx87-hud",
+      "backend": "gl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": true,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 8.97,
+        "fps": 235.224
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "connected-replay-dxmt",
+      "backend": "dxmt",
+      "x87ReducedPrecision": null,
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 14.209,
+        "fps": 148.493
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "connected-replay-dxmt-fastx87",
+      "backend": "dxmt",
+      "x87ReducedPrecision": null,
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 28.256,
+        "fps": 74.675
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "global-x87-gl-baseline",
+      "backend": "gl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 5.707,
+        "fps": 369.726
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "global-x87-gl-confirm",
+      "backend": "gl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": true,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 5.193,
+        "fps": 406.311
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "global-x87-gl-final",
+      "backend": "gl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": true,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 5.303,
+        "fps": 397.907
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "global-x87-winemetalgl",
+      "backend": "wmgl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 18.858,
+        "fps": 111.889
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "global-x87-winemetalgl-warm",
+      "backend": "wmgl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": false,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 18.168,
+        "fps": 116.137
+      },
+      "controlledStopAfterResult": true
+    },
+    {
+      "label": "global-x87-gl-batch",
+      "backend": "gl",
+      "x87ReducedPrecision": "1",
+      "metalHUD": true,
+      "nativeTimedemo": {
+        "frames": 2110,
+        "seconds": 15.411,
+        "fps": 136.916
+      },
+      "controlledStopAfterResult": true
+    }
+  ],
+  "notSelected": [
+    "D3D7/DxWrapper to custom DXMT route",
+    "WineMetalGL 3.7.0 ARM64",
+    "Experimental i386 OpenGL command buffering"
+  ],
+  "excludedMeasurements": {
+    "earlyWaitBasedTests": "No active player; invalid for gameplay performance",
+    "global-x87-gl-batch-disabled": "Build ran concurrently; not a controlled performance comparison",
+    "connected-profile-gl": "Profiler overhead; CPU sample includes loading",
+    "gl-batch-hidden-window-fixture": "Fixture did not show a drawable; replaced by visible-window normal and batched GPU checks"
+  },
+  "incompleteExperiment": {
+    "label": "connected-replay-wined3d-fastx87",
+    "result": "Loader wait timeout; no FPS result; not attributed to x87 without evidence"
+  },
+  "validation": {
+    "swiftTestsPassed": 11,
+    "swiftTestLog": "swift-tests-global-x87.log",
+    "processVerticesGroupsPassedPerArchitecture": 5,
+    "processVerticesArchitectures": [
+      "x86",
+      "x64",
+      "ARM64EC"
+    ],
+    "samplerPixelChecksPerRoute": 13,
+    "samplerRoutes": [
+      "DXMT x86",
+      "DXMT ARM64EC",
+      "WineD3D default precision",
+      "WineD3D global 64-bit x87"
+    ],
+    "experimentalOpenGLStateChecksPassed": 6,
+    "engineAssets": 2217,
+    "engineHashFailures": [],
+    "signatureExitCode": 0,
+    "uniqueEngineAssets": 2217
+  },
+  "latestSourceCheck": {
+    "wine": "11.21",
+    "wineCommit": "2528aff26208257fdbf980666a4f0e66d47563ce",
+    "dxmtCommit": "3b252590cb0290e36fca6f088b5255b871d2d95a",
+    "note": "11.21 MESA buffer mapping requires an extension absent in the tested OpenGL context; no whole-fork replacement."
+  },
+  "temporaryTestRuntimesRemoved": true,
+  "onlyAppInDist": [
+    "Goose HUB latest.app"
+  ],
+  "temporaryDownloadsRemoved": true
+}

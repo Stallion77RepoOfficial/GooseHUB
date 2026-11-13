@@ -1,0 +1,32 @@
+[
+  {
+    "commit": "81e52628b25ac173d04796e8a9b9cda637d3e233",
+    "status": "applied",
+    "reason": ""
+  },
+  {
+    "commit": "48e2d50404d0b67f30cf0a149df361f4d50eac64",
+    "status": "applied",
+    "reason": ""
+  },
+  {
+    "commit": "53a91cdcbe21125913b24a48cf0f429597017d6a",
+    "status": "applied",
+    "reason": ""
+  },
+  {
+    "commit": "80e1217aa09ff493c165f0392048046ec5f97797",
+    "status": "applied",
+    "reason": ""
+  },
+  {
+    "commit": "8c284041138dec2c38146970c5de3549ea3e007a",
+    "status": "applied",
+    "reason": ""
+  },
+  {
+    "commit": "1300ec99c7ed7461df1d400257aa83165faf0069",
+    "status": "not-applied",
+    "reason": "error: patch failed: dlls/winemac.drv/cocoa_window.m:3783\nerror: dlls/winemac.drv/cocoa_window.m: patch does not apply"
+  }
+]

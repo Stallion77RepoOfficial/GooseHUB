@@ -1,0 +1,33 @@
+{
+  "method": "Only groups with >=1000 draws/frame. Bog is a scripted live scene, so its complete images and AI timing are not identical between runs. Compare CPU submission costs, not a claimed exact game FPS uplift. DXMT_FPS diagnostic overhead is enabled equally.",
+  "runs": [
+    {
+      "label": "cod-before04",
+      "groups": 85,
+      "medianFPS": 139.861,
+      "medianUploadMicrosecondsPerDraw": 0.853385214007782,
+      "medianPrepareMicrosecondsPerDraw": 2.931198060941828
+    },
+    {
+      "label": "cod-after01",
+      "groups": 160,
+      "medianFPS": 152.126,
+      "medianUploadMicrosecondsPerDraw": 0.4616007880209393,
+      "medianPrepareMicrosecondsPerDraw": 2.53393308650894
+    },
+    {
+      "label": "cod-before06",
+      "groups": 74,
+      "medianFPS": 136.6245,
+      "medianUploadMicrosecondsPerDraw": 0.8542190856896396,
+      "medianPrepareMicrosecondsPerDraw": 2.898042628754008
+    },
+    {
+      "label": "cod-after03",
+      "groups": 121,
+      "medianFPS": 151.465,
+      "medianUploadMicrosecondsPerDraw": 0.4387323232323233,
+      "medianPrepareMicrosecondsPerDraw": 2.4246415897799856
+    }
+  ]
+}

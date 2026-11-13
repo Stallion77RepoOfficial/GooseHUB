@@ -1,0 +1,42 @@
+{
+  "bottleID": "dec8c517-5ab6-4876-80c4-937f4aa9a349",
+  "prefix": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/dec8c517-5ab6-4876-80c4-937f4aa9a349/prefix",
+  "game": "/Users/berkegulacar/Library/Application Support/GooseHUB/Games/ULTRAKILL Prelude/ULTRAKILL.exe",
+  "arguments": [
+    "-force-d3d12",
+    "-screen-fullscreen",
+    "0",
+    "-screen-width",
+    "960",
+    "-screen-height",
+    "600"
+  ],
+  "dllsMatchDeliveredPackage": {
+    "d3d11": true,
+    "d3d12": true
+  },
+  "migratedSettings": "Only HKCU\\Software\\Hakita\\ULTRAKILL from the tested clone; W/F preserved",
+  "launchedFromLibrary": true,
+  "playerLogDirect3D12": true,
+  "playerLogRenderer": "Apple M4",
+  "dllSHA256": {
+    "d3d11": "d97672487ea13a755cb35b8f6252835809d5519af962c474902276ebf97dc2db",
+    "d3d12": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2"
+  },
+  "globalRuntimeOptionsRecorded": {
+    "arguments": [
+      "/Users/berkegulacar/Library/Application Support/GooseHUB/Games/ULTRAKILL Prelude/ULTRAKILL.exe",
+      "-force-d3d12",
+      "-screen-fullscreen",
+      "0",
+      "-screen-width",
+      "960",
+      "-screen-height",
+      "600"
+    ],
+    "executable": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/bin/wine",
+    "legacyOpenGLBatching": true,
+    "prefix": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/dec8c517-5ab6-4876-80c4-937f4aa9a349/prefix",
+    "x87MathBits": 64
+  }
+}

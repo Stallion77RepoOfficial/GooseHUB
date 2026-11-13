@@ -1,0 +1,45 @@
+{
+  "createdAt": "2026-10-31T19:41:40.256933+00:00",
+  "appVersion": "0.2.4",
+  "appBuild": "7",
+  "engineAssets": 2217,
+  "engineHashFailures": [],
+  "signatureExitCode": 0,
+  "signatureOutput": "",
+  "canonicalStagingUpdated": [
+    "Sources/engine-sources.json",
+    "manifest.json"
+  ],
+  "dxmt": "Adrenalin 2026.10.31",
+  "wine": "11.11 Adrenalin 2026.10.28",
+  "onlyAppInDist": [
+    "Goose HUB latest.app"
+  ],
+  "productionGlobalLaunchHeader": {
+    "arguments": [
+      "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+      "-game",
+      "cstrike",
+      "-gl",
+      "-32bpp",
+      "-nojoy",
+      "-noipx",
+      "+developer",
+      "1",
+      "+fps_max",
+      "999",
+      "+cl_showfps",
+      "1"
+    ],
+    "executable": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/bin/wine",
+    "prefix": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix",
+    "x87MathBits": 64
+  },
+  "runtimeSettings": {
+    "reducedX87Precision": true
+  },
+  "uniqueEngineAssets": 2217,
+  "duplicateAssetPaths": [],
+  "manifestDeduplicated": true,
+  "signatureValidatedBeforeFinalInstall": true
+}

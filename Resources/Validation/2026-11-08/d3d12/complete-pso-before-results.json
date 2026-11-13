@@ -1,0 +1,9 @@
+{
+  "dllSHA256": "82ca7d0c7647604b09fe84bc6e69c8e7f48795e5affed9f158217fef323ad229",
+  "tests": [
+    {
+      "mode": "dxbc-placed-cold-single",
+      "exit": 1
+    }
+  ]
+}

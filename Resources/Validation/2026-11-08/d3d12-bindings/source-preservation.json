@@ -1,0 +1,18 @@
+{
+  "priorVersion": "0.2.9",
+  "priorSourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
+  "reconstructedPriorSourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
+  "priorCustomForkPreserved": true,
+  "currentSourceTreeSHA256": "ee3ec3944fcf8b1d14c45c98e31c43d3129c9c33930e3ccef50d9ba3f78a4d5d",
+  "incrementalFiles": [
+    "src/d3d12/d3d12.cpp"
+  ],
+  "unchangedRuntimeComponents": [
+    "D3D11",
+    "D3D9",
+    "DXGI",
+    "native winemetal",
+    "Wine",
+    "FEX"
+  ]
+}

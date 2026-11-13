@@ -1,0 +1,124 @@
+--- a/GooseHUB/Sources/GooseCore/EngineInventory.swift
++++ b/GooseHUB/Sources/GooseCore/EngineInventory.swift
+@@ -178,7 +178,10 @@
+             : [executable.path] + arguments
+         var environment = RuntimeEnvironment.build(bottle: bottle, prefix: prefix, engines: engines, inherited: inherited)
+         if bottle.architecture == .arm64ec {
+-            environment["FEX_X87REDUCEDPRECISION"] = settings.reducedX87Precision ? "1" : "0"
++            // Installer bootstraps can use extended arithmetic to reconstruct
++            // file paths; reducing it to double precision changes characters.
++            let fastX87 = settings.reducedX87Precision && !InstallerCompatibility.requiresFullX87Precision(executable)
++            environment["FEX_X87REDUCEDPRECISION"] = fastX87 ? "1" : "0"
+             if settings.legacyOpenGLBatching && engines.hasLegacyOpenGL {
+                 environment["WINE_GL_BATCHING_PATH"] = engines.legacyOpenGL.path
+                 environment["WINE_GL_BATCHING"] = "1"
+--- /dev/null
++++ b/GooseHUB/Sources/GooseCore/InstallerCompatibility.swift
+@@ -0,0 +1,25 @@
++import Foundation
++
++enum InstallerCompatibility {
++    static func requiresFullX87Precision(_ executable: URL) -> Bool {
++        if executable.pathExtension.lowercased() == "msi" { return true }
++        guard executable.pathExtension.lowercased() == "exe" else { return false }
++        let name = executable.lastPathComponent.lowercased()
++        if ["setup.exe", "install.exe", "installer.exe", "uninstall.exe", "uninstaller.exe", "unwise.exe"].contains(name) {
++            return true
++        }
++        if name.range(of: #"^unins[0-9]{3}\.exe$"#, options: .regularExpression) != nil { return true }
++
++        // Renamed installers keep their engine signature. Read a bounded PE
++        // header rather than mapping a potentially multi-gigabyte installer.
++        guard let file = try? FileHandle(forReadingFrom: executable) else { return false }
++        defer { try? file.close() }
++        guard let header = try? file.read(upToCount: 1_048_576), header.count >= 64,
++              header[0] == 0x4d, header[1] == 0x5a else { return false }
++        let pe = (0..<4).reduce(0) { $0 | Int(header[60 + $1]) << (8 * $1) }
++        guard pe <= header.count - 4, header[pe..<(pe + 4)].elementsEqual([0x50, 0x45, 0, 0]) else { return false }
++        return ["Inno Setup Setup Data", "Inno Setup Uninstall Log", "NullsoftInst"].contains {
++            header.range(of: Data($0.utf8)) != nil
++        }
++    }
++}
+--- a/GooseHUB/Sources/GooseCore/ProcessRunner.swift
++++ b/GooseHUB/Sources/GooseCore/ProcessRunner.swift
+@@ -29,8 +29,11 @@
+         process.standardOutput = output
+         process.standardError = output
+         var header: [String: Any] = ["executable": invocation.executable.path, "arguments": invocation.arguments,
+-                                     "prefix": invocation.environment["WINEPREFIX"] ?? ""]
+-        if invocation.environment["FEX_X87REDUCEDPRECISION"] == "1" { header["x87MathBits"] = 64 }
++                                     "prefix": invocation.environment["WINEPREFIX"] ?? "",
++                                     "workingDirectory": invocation.workingDirectory.path]
++        if let reduced = invocation.environment["FEX_X87REDUCEDPRECISION"] {
++            header["x87MathBits"] = reduced == "1" ? 64 : 80
++        }
+         if invocation.environment["WINE_GL_BATCHING"] == "1" { header["legacyOpenGLBatching"] = true }
+         let data = try JSONSerialization.data(withJSONObject: header, options: [.sortedKeys, .withoutEscapingSlashes])
+         try output.write(contentsOf: data + Data("\n".utf8))
+--- a/GooseHUB/Sources/GooseHubApp/SystemViews.swift
++++ b/GooseHUB/Sources/GooseHubApp/SystemViews.swift
+@@ -26,7 +26,7 @@
+                     get: { model.runtimeSettings.reducedX87Precision },
+                     set: { model.setReducedX87Precision($0) }))
+                     .font(.system(size: 12)).disabled(model.busy)
+-                    .help("Faster x87 emulation with reduced precision. Turn off if a game has calculation issues.")
++                    .help("Faster x87 emulation with reduced precision. Installers use full precision automatically. Turn off if a game has calculation issues.")
+                 Toggle("Legacy OpenGL batching", isOn: Binding(
+                     get: { model.runtimeSettings.legacyOpenGLBatching },
+                     set: { model.setLegacyOpenGLBatching($0) }))
+--- /dev/null
++++ b/GooseHUB/Tests/GooseCoreTests/InstallerCompatibilityTests.swift
+@@ -0,0 +1,52 @@
++import Foundation
++import XCTest
++@testable import GooseCore
++
++final class InstallerCompatibilityTests: XCTestCase {
++    private func invocation(_ executable: URL, fast: Bool = true) -> ProcessInvocation {
++        ProcessInvocation.application(bottle: Bottle(name: "Applications"),
++            prefix: URL(fileURLWithPath: "/owned-prefix"), executable: executable, arguments: [],
++            engines: EngineLayout(root: URL(fileURLWithPath: "/engines"), environment: [:]),
++            inherited: ["FEX_X87REDUCEDPRECISION": "1"], settings: RuntimeSettings(reducedX87Precision: fast))
++    }
++
++    func testInstallerPrecisionDoesNotDisableGlobalGameAcceleration() {
++        for name in ["setup.exe", "SETUP.EXE", "install.exe", "installer.exe", "uninstall.exe", "unins000.exe", "package.msi"] {
++            let result = invocation(URL(fileURLWithPath: "/downloads/" + name))
++            XCTAssertEqual(result.environment["FEX_X87REDUCEDPRECISION"], "0", name)
++        }
++        for name in ["hl.exe", "iw3sp.exe", "GameSetupSimulator.exe", "uninstalled-game.exe"] {
++            XCTAssertEqual(invocation(URL(fileURLWithPath: "/games/" + name)).environment["FEX_X87REDUCEDPRECISION"], "1", name)
++        }
++        XCTAssertEqual(invocation(URL(fileURLWithPath: "/games/hl.exe"), fast: false)
++            .environment["FEX_X87REDUCEDPRECISION"], "0")
++        let msi = invocation(URL(fileURLWithPath: "/downloads/with spaces/package.msi"))
++        XCTAssertEqual(msi.arguments, ["msiexec", "/i", "/downloads/with spaces/package.msi"])
++        XCTAssertEqual(msi.workingDirectory.path, "/downloads/with spaces")
++    }
++
++    func testRenamedInstallerSignaturesAndUnrelatedExecutableContents() throws {
++        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
++        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
++        defer { try? FileManager.default.removeItem(at: folder) }
++        let executable = folder.appendingPathComponent("AcmeRelease.exe")
++        func header(_ marker: String) -> Data {
++            var data = Data(repeating: 0, count: 256)
++            data[0] = 0x4d; data[1] = 0x5a; data[60] = 128
++            data.replaceSubrange(128..<132, with: [0x50, 0x45, 0, 0])
++            data.append(Data(marker.utf8))
++            return data
++        }
++        for marker in ["Inno Setup Setup Data (5.5.0) (u)", "Inno Setup Uninstall Log", "NullsoftInst"] {
++            try header(marker).write(to: executable)
++            XCTAssertEqual(invocation(executable).environment["FEX_X87REDUCEDPRECISION"], "0", marker)
++        }
++        try header("This game mentions setup.exe in its help.").write(to: executable)
++        XCTAssertEqual(invocation(executable).environment["FEX_X87REDUCEDPRECISION"], "1")
++        // A truncated or invalid PE header must not crash the launch planner.
++        for data in [Data(), Data([0x4d, 0x5a]), Data(repeating: 255, count: 64), Data("Inno Setup Setup Data".utf8)] {
++            try data.write(to: executable)
++            XCTAssertEqual(invocation(executable).environment["FEX_X87REDUCEDPRECISION"], "1")
++        }
++    }
++}

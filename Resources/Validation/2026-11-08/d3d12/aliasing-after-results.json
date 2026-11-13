@@ -1,0 +1,25 @@
+{
+  "dllSHA256": "49e3990d49a7543976013a3b2b558ae7659082428abcb9d0728008bf20babb05",
+  "tests": [
+    {
+      "mode": "dxbc-compute-aliasing-pingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-aliasing-pingpong-same-resource",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-aliasing-pingpong-separated",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-texpingpong",
+      "exit": 0
+    },
+    {
+      "mode": "queries",
+      "exit": 0
+    }
+  ]
+}

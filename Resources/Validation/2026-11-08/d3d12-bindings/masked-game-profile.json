@@ -1,0 +1,18 @@
+{
+  "scope": "Automatic Hunt_Office URL, uncontrolled foreground and moving scene; diagnostic counters only, not matched FPS",
+  "frames": 4856,
+  "medianPresentIntervalMs": 15.811699986457825,
+  "median": {
+    "record_draw_ms": 0.7354,
+    "legacy_draw_ms": 2.1524,
+    "legacy_bind_ms": 1.1138,
+    "gpu_va_ms": 2.4791499999999997,
+    "gpu_va_lookups": 13376.0,
+    "query_wait_ms": 2.5701,
+    "gpu_barriers": 51.0,
+    "render_passes": 63.0,
+    "compute_passes": 10.0,
+    "command_buffers": 16.0
+  },
+  "fatalErrors": []
+}

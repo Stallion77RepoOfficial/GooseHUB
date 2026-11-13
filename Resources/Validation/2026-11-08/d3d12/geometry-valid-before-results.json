@@ -1,0 +1,9 @@
+{
+  "dllSHA256": "9e98078282517019be0f8912b50d0dfcd5df309cd87d736fcb6a3c02adf88da8",
+  "tests": [
+    {
+      "mode": "dxbc-placed-geometry",
+      "exit": 1
+    }
+  ]
+}

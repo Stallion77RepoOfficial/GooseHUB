@@ -1,0 +1,14 @@
+{
+  "scope": "Automatic Hunt_Office URL, uncontrolled foreground and scene, diagnostic timing only",
+  "frames": 7458,
+  "medianPresentIntervalMs": 17.71909999847412,
+  "median": {
+    "record_draw_ms": 0.97315,
+    "legacy_draw_ms": 2.0768,
+    "legacy_bind_ms": 1.59425,
+    "gpu_va_ms": 0.9218,
+    "gpu_va_lookups": 6931.5,
+    "query_wait_ms": 2.80145,
+    "gpu_barriers": 44.0
+  }
+}

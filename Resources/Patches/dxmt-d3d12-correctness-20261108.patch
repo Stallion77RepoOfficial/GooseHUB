@@ -1,0 +1,1937 @@
+--- a/src/airconv/airconv_context.cpp
++++ b/src/airconv/airconv_context.cpp
+@@ -4,6 +4,8 @@
+ #include "llvm/IR/LLVMContext.h"
+ #include "llvm/IR/Metadata.h"
+ #include "llvm/IR/Module.h"
++#include "llvm/IR/ReplaceConstant.h"
++#include "llvm/ADT/SmallPtrSet.h"
+ #include "llvm/IR/Verifier.h"
+ #include "llvm/Passes/PassBuilder.h"
+ #include "llvm/Support/VersionTuple.h"
+@@ -157,6 +159,20 @@
+ 
+   // Optimize the IR!
+   MPM.run(M, MAM);
++
++  // InstCombine folds accesses at constant threadgroup offsets into constant
++  // GEP expressions. The AIR pointer downgrade reconstructs types on
++  // instructions, so expose these operands as instructions too. LLVM handles
++  // nested expressions and PHI predecessors without changing their meaning.
++  SmallPtrSet<Constant *, 16> expressions;
++  for (auto &function : M)
++    for (auto &block : function)
++      for (auto &instruction : block)
++        for (auto &operand : instruction.operands())
++          if (auto *expression = dyn_cast<ConstantExpr>(operand.get()))
++            expressions.insert(expression);
++  SmallVector<Constant *, 16> constants(expressions.begin(), expressions.end());
++  convertUsersOfConstantsToInstructions(constants, nullptr, true, true);
+ }
+ 
+ void
+--- a/src/d3d11/d3d11.def
++++ b/src/d3d11/d3d11.def
+@@ -5,5 +5,8 @@
+     D3D11CreateDeviceAndSwapChain @23
+     D3D11On12CreateDevice @24
+     DXMTCreateBufferAlias
++    DXMTCreateBufferFromAllocation
++    DXMTCreateTextureFromAllocation
+ 
+   DXMTCreateSharedBuffer
++  DXMTWaitForSubmission
+--- a/src/d3d11/d3d11_buffer.cpp
++++ b/src/d3d11/d3d11_buffer.cpp
+@@ -458,6 +458,28 @@
+ /* D3D12 CPU-visible allocations cannot inherit a private DEFAULT buffer's
+  * storage. In WoW64 the backing must also lie in the 32-bit address space. */
+ extern "C" HRESULT WINAPI
++DXMTCreateBufferFromAllocation(ID3D11Device *device, const D3D11_BUFFER_DESC *desc, Buffer *backing,
++                               ID3D11Buffer **out) {
++  if (!out) return E_POINTER;
++  *out = nullptr;
++  if (!device || !desc || !backing || !backing->current() || !desc->ByteWidth ||
++      desc->ByteWidth > backing->length() || desc->Usage != D3D11_USAGE_DEFAULT) return E_INVALIDARG;
++  *out = reinterpret_cast<ID3D11Buffer *>(ref(new D3D11Buffer(desc, Rc<Buffer>(backing),
++                                                            static_cast<MTLD3D11Device *>(device))));
++  return S_OK;
++}
++
++extern "C" HRESULT WINAPI
++DXMTWaitForSubmission(ID3D11Device *device, UINT64 sequence) {
++  if (!device) return E_POINTER;
++  auto &queue = static_cast<MTLD3D11Device *>(device)->GetDXMTDevice().queue();
++  // Keep the atomic wait and notification in this module: static C++ runtime
++  // copies in another DLL have separate atomic-wait notification tables.
++  queue.WaitCPUFence(sequence);
++  return queue.IsDeviceWedged() ? DXGI_ERROR_DEVICE_REMOVED : S_OK;
++}
++
++extern "C" HRESULT WINAPI
+ DXMTCreateSharedBuffer(ID3D11Device *device, const D3D11_BUFFER_DESC *desc, ID3D11Buffer **out) {
+   if (!out) return E_POINTER;
+   *out = nullptr;
+--- a/src/d3d11/d3d11_context_impl.cpp
++++ b/src/d3d11/d3d11_context_impl.cpp
+@@ -45,6 +45,7 @@
+ #include <atomic>
+ #include <chrono>
+ #include <thread>
++#include <d3d11on12.h>
+ 
+ namespace dxmt {
+ 
+@@ -61,10 +62,18 @@
+  * d3d11.asyncPipelineCompilation=false restores the blocking behaviour, which
+  * is how this was measured in the first place. */
+ static bool
+-AsyncPipelineCompilation() {
++AsyncPipelineCompilation(MTLD3D11Device *device) {
+   static const bool value =
+       Config::getInstance().getOption<bool>("d3d11.asyncPipelineCompilation", true);
+-  return value;
++  if (!value) return false;
++  // The D3D12 bridge promises to execute a valid PSO's first draw. Its DXBC
++  // path cannot inherit D3D11's optional draw-skipping compilation policy.
++  ID3D11On12Device *on12 = nullptr;
++  if (SUCCEEDED(device->QueryInterface(__uuidof(ID3D11On12Device), reinterpret_cast<void **>(&on12)))) {
++    on12->Release();
++    return false;
++  }
++  return true;
+ }
+ 
+ /* Skipping is the last resort, though. Most pipelines are ready within a few
+@@ -5180,11 +5189,11 @@
+       return DrawCallStatus::Invalid;
+     }
+ 
+-    EmitST([pso = std::move(pipeline)](ArgumentEncodingContext &enc) {
++    EmitST([pso = std::move(pipeline), allow_async = AsyncPipelineCompilation(m_parent)](ArgumentEncodingContext &enc) {
+       auto render_encoder = enc.currentRenderEncoder();
+       render_encoder->use_tessellation = 1;
+       MTL_COMPILED_TESSELLATION_MESH_PIPELINE GraphicsPipeline{};
+-      if (AsyncPipelineCompilation() && !PipelineReadyWithinBudget(enc, pso)) {
++      if (allow_async && !PipelineReadyWithinBudget(enc, pso)) {
+         render_encoder->last_pso = {};
+         return;
+       }
+@@ -5234,11 +5243,11 @@
+     MTL_GRAPHICS_PIPELINE_DESC pipelineDesc;
+     InitializeGraphicsPipelineDesc<IndexedDraw>(pipelineDesc);
+     device->CreateGeometryPipeline(&pipelineDesc, &pipeline);
+-    EmitST([pso = std::move(pipeline)](ArgumentEncodingContext& enc) {
++    EmitST([pso = std::move(pipeline), allow_async = AsyncPipelineCompilation(m_parent)](ArgumentEncodingContext& enc) {
+       auto render_encoder = enc.currentRenderEncoder();
+       render_encoder->use_geometry = 1;
+       MTL_COMPILED_GRAPHICS_PIPELINE GraphicsPipeline{};
+-      if (AsyncPipelineCompilation() && !PipelineReadyWithinBudget(enc, pso)) {
++      if (allow_async && !PipelineReadyWithinBudget(enc, pso)) {
+         render_encoder->last_pso = {};
+         return;
+       }
+@@ -5298,9 +5307,9 @@
+     InitializeGraphicsPipelineDesc<IndexedDraw>(pipelineDesc);
+ 
+     device->CreateGraphicsPipeline(&pipelineDesc, &pipeline);
+-    EmitST([pso = std::move(pipeline)](ArgumentEncodingContext& enc) {
++    EmitST([pso = std::move(pipeline), allow_async = AsyncPipelineCompilation(m_parent)](ArgumentEncodingContext& enc) {
+       MTL_COMPILED_GRAPHICS_PIPELINE GraphicsPipeline{};
+-      if (AsyncPipelineCompilation() && !PipelineReadyWithinBudget(enc, pso)) {
++      if (allow_async && !PipelineReadyWithinBudget(enc, pso)) {
+         enc.currentRenderEncoder()->last_pso = {};
+         return;
+       }
+@@ -6024,4 +6033,4 @@
+ 
+ };
+ 
+-} // namespace dxmt+} // namespace dxmt
+--- a/src/d3d11/d3d11_resource_view_helper.cpp
++++ b/src/d3d11/d3d11_resource_view_helper.cpp
+@@ -262,7 +262,8 @@
+   case D3D_SRV_DIMENSION_TEXTURECUBE: {
+     if (~ViewDesc.TextureCube.MipLevels == 0)
+       ViewDesc.TextureCube.MipLevels = MiplevelCount - ViewDesc.TextureCube.MostDetailedMip;
+-    if (TextureType == WMTTextureTypeCube || TextureType == WMTTextureTypeCubeArray) {
++    if (TextureType == WMTTextureTypeCube || TextureType == WMTTextureTypeCubeArray ||
++        (TextureType == WMTTextureType2DArray && pTexture->width() == pTexture->height() && ArraySize >= 6)) {
+       Descriptor.type = WMTTextureTypeCube;
+       Descriptor.format = metal_format.PixelFormat;
+       Descriptor.firstMiplevel = ViewDesc.TextureCube.MostDetailedMip;
+@@ -281,7 +282,8 @@
+       ViewDesc.TextureCubeArray.MipLevels = MiplevelCount - ViewDesc.TextureCubeArray.MostDetailedMip;
+     if (~ViewDesc.TextureCubeArray.NumCubes == 0)
+       ViewDesc.TextureCubeArray.NumCubes = (ArraySize - ViewDesc.TextureCubeArray.First2DArrayFace) / 6;
+-    if (TextureType == WMTTextureTypeCube || TextureType == WMTTextureTypeCubeArray) {
++    if (TextureType == WMTTextureTypeCube || TextureType == WMTTextureTypeCubeArray ||
++        (TextureType == WMTTextureType2DArray && pTexture->width() == pTexture->height() && ArraySize % 6 == 0)) {
+       Descriptor.type = WMTTextureTypeCubeArray;
+       Descriptor.format = metal_format.PixelFormat;
+       Descriptor.firstMiplevel = ViewDesc.TextureCubeArray.MostDetailedMip;
+@@ -1134,4 +1136,4 @@
+   }
+ };
+ 
+-} // namespace dxmt+} // namespace dxmt
+--- a/src/d3d11/d3d11_texture_device.cpp
++++ b/src/d3d11/d3d11_texture_device.cpp
+@@ -332,6 +332,11 @@
+     if (!ViewDimensionNamesResource<typename tag_texture::DESC1>(finalDesc.ViewDimension) ||
+         IsTypelessViewFormat(finalDesc.Format))
+       return E_INVALIDARG;
++    if constexpr (std::is_same_v<typename tag_texture::DESC1, D3D11_TEXTURE2D_DESC1>) {
++      if ((finalDesc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBE ||
++           finalDesc.ViewDimension == D3D11_SRV_DIMENSION_TEXTURECUBEARRAY) &&
++          !(this->desc.MiscFlags & D3D11_RESOURCE_MISC_TEXTURECUBE)) return E_INVALIDARG;
++    }
+     if (FAILED(InitializeAndNormalizeViewDescriptor(
+             this->m_parent, this->desc.MipLevels, arraySize, this->texture_.ptr(), finalDesc, descriptor
+         ))) {
+@@ -573,6 +578,34 @@
+                                                      pInitialData, ppTexture);
+ }
+ 
++// Private interop for D3D12 placed resources. Keep the original Metal heap
++// allocation; creating an ordinary D3D11 texture here would allocate unrelated
++// storage and lose uploads, aliasing, and render-target contents.
++extern "C" HRESULT WINAPI
++DXMTCreateTextureFromAllocation(ID3D11Device *device, D3D11_RESOURCE_DIMENSION dimension, const void *desc,
++                                Texture *backing, ID3D11Resource **out) {
++  if (!out) return E_POINTER;
++  *out = nullptr;
++  if (!device || !desc || !backing || !backing->current()) return E_INVALIDARG;
++  auto *owner = static_cast<MTLD3D11Device *>(device);
++  switch (dimension) {
++  case D3D11_RESOURCE_DIMENSION_TEXTURE1D:
++    *out = reinterpret_cast<ID3D11Texture1D *>(ref(new DeviceTexture<tag_texture_1d>(
++        static_cast<const D3D11_TEXTURE1D_DESC *>(desc), Rc<Texture>(backing), owner)));
++    break;
++  case D3D11_RESOURCE_DIMENSION_TEXTURE2D:
++    *out = reinterpret_cast<ID3D11Texture2D1 *>(ref(new DeviceTexture<tag_texture_2d>(
++        static_cast<const D3D11_TEXTURE2D_DESC1 *>(desc), Rc<Texture>(backing), owner)));
++    break;
++  case D3D11_RESOURCE_DIMENSION_TEXTURE3D:
++    *out = reinterpret_cast<ID3D11Texture3D1 *>(ref(new DeviceTexture<tag_texture_3d>(
++        static_cast<const D3D11_TEXTURE3D_DESC1 *>(desc), Rc<Texture>(backing), owner)));
++    break;
++  default: return E_INVALIDARG;
++  }
++  return S_OK;
++}
++
+ HRESULT
+ CreateDeviceTexture2D(MTLD3D11Device *pDevice,
+                       const D3D11_TEXTURE2D_DESC1 *pDesc,
+@@ -816,4 +849,4 @@
+ 
+ #pragma endregion
+ 
+-} // namespace dxmt+} // namespace dxmt
+--- a/src/d3d12/d3d12.cpp
++++ b/src/d3d12/d3d12.cpp
+@@ -10,6 +10,7 @@
+ #include "../d3d11/d3d11_device.hpp"
+ #include "../d3d11/d3d11_on12.hpp"
+ #include "../d3d11/d3d11_resource.hpp"
++#include "../d3d11/d3d11_shader.hpp"
+ #include "dxmt_buffer.hpp"
+ #include "dxmt_texture.hpp"
+ #include "Metal.hpp"
+@@ -23,10 +24,13 @@
+ #include "dxmt_timeline_fence.hpp"
+ #include "log/log.hpp"
+ #include "dxmt_format.hpp"
++#include "dxmt_statistics.hpp"
++#include "sha1/sha1_util.hpp"
+ 
+ #include <algorithm>
+ #include <array>
+ #include <atomic>
++#include <condition_variable>
+ #include <cstring>
+ #include <cstdio>
+ #include <functional>
+@@ -54,6 +58,36 @@
+   return enabled;
+ }
+ 
++static void dump_pipeline_shader(const char *stage, const D3D12_SHADER_BYTECODE &bytecode) {
++  static const std::wstring directory = [] {
++    WCHAR path[32768];
++    DWORD count = GetEnvironmentVariableW(L"DXMT_D3D12_SHADER_DUMP_DIRECTORY", path, std::size(path));
++    return count && count < std::size(path) ? std::wstring(path, count) : std::wstring();
++  }();
++  if (directory.empty() || !bytecode.pShaderBytecode || !bytecode.BytecodeLength ||
++      bytecode.BytecodeLength > UINT_MAX)
++    return;
++  const auto hash = dxmt::Sha1HashState::compute(bytecode.pShaderBytecode, bytecode.BytecodeLength).string();
++  const std::string name = std::string(stage) + "_" + hash + ".cso";
++  const std::wstring path = directory + L"\\" + std::wstring(name.begin(), name.end());
++  HANDLE file = CreateFileW(path.c_str(), GENERIC_WRITE, FILE_SHARE_READ, nullptr,
++                            CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
++  if (file == INVALID_HANDLE_VALUE)
++    return;
++  DWORD written = 0;
++  WriteFile(file, bytecode.pShaderBytecode, DWORD(bytecode.BytecodeLength), &written, nullptr);
++  CloseHandle(file);
++}
++
++struct BridgeCpuStatistics {
++  std::atomic<uint64_t> query_jobs = 0, query_queue_ticks = 0, query_wait_ticks = 0,
++                        query_cpu_ticks = 0, query_prepare_ticks = 0, gpu_barriers = 0,
++                        execute_calls = 0, command_lists = 0, record_draw_ticks = 0,
++                        legacy_draw_ticks = 0, legacy_bind_ticks = 0, gpu_va_ticks = 0,
++                        gpu_va_lookups = 0, gpu_va_steps = 0;
++};
++BridgeCpuStatistics &bridge_cpu_statistics() { static BridgeCpuStatistics stats; return stats; }
++
+ class PresentTrace {
+ public:
+   PresentTrace() {
+@@ -62,22 +96,35 @@
+     if (count && count < std::size(path)) file_ = _wfopen(path, L"w");
+     if (file_) {
+       QueryPerformanceFrequency(&frequency_);
+-      std::fprintf(file_, "swapchain,frame,start_ms,end_ms,present_ms,hresult\n");
++      std::fprintf(file_, "swapchain,frame,start_ms,end_ms,present_ms,hresult,encode_ms,sync_ms,commit_ms,present_latency_ms,async_skips,render_passes,blit_passes,compute_passes,command_buffers,slow_commands,query_jobs,query_queue_ms,query_wait_ms,query_cpu_ms,query_prepare_ms,gpu_barriers,execute_calls,command_lists,record_draw_ms,legacy_draw_ms,legacy_bind_ms,gpu_va_ms,gpu_va_lookups,gpu_va_steps\n");
+     }
+   }
+   ~PresentTrace() { if (file_) std::fclose(file_); }
++  bool enabled() const { return file_ != nullptr; }
+   LONGLONG begin() const {
+     if (!file_) return 0;
+     LARGE_INTEGER tick; QueryPerformanceCounter(&tick); return tick.QuadPart;
+   }
+-  void end(const void *chain, LONGLONG start, HRESULT hr) {
++  void end(const void *chain, LONGLONG start, HRESULT hr, const dxmt::FrameStatistics &stats) {
+     if (!start) return;
+     LARGE_INTEGER tick; QueryPerformanceCounter(&tick);
+     const double scale = 1000.0 / frequency_.QuadPart;
+     std::lock_guard<std::mutex> lock(mutex_);
+-    std::fprintf(file_, "%p,%llu,%.6f,%.6f,%.6f,%08x\n", chain,
++    auto &bridge = bridge_cpu_statistics();
++    std::fprintf(file_, "%p,%llu,%.6f,%.6f,%.6f,%08x,%.6f,%.6f,%.6f,%.6f,%u,%u,%u,%u,%u,%llu,%llu,%.6f,%.6f,%.6f,%.6f,%llu,%llu,%llu,%.6f,%.6f,%.6f,%.6f,%llu,%llu\n", chain,
+                  (unsigned long long)frame_++, start * scale, tick.QuadPart * scale,
+-                 (tick.QuadPart - start) * scale, unsigned(hr));
++                 (tick.QuadPart - start) * scale, unsigned(hr),
++                 stats.encode_prepare_interval.count() / 1000000.0, stats.sync_interval.count() / 1000000.0,
++                 stats.commit_interval.count() / 1000000.0, stats.present_latency_interval.count() / 1000000.0,
++                 stats.async_pipeline_skips, stats.render_pass_count, stats.blit_pass_count, stats.compute_pass_count,
++                 stats.command_buffer_count, (unsigned long long)stats.slow_command_count,
++                 (unsigned long long)bridge.query_jobs.exchange(0), bridge.query_queue_ticks.exchange(0) * scale,
++                 bridge.query_wait_ticks.exchange(0) * scale, bridge.query_cpu_ticks.exchange(0) * scale,
++                 bridge.query_prepare_ticks.exchange(0) * scale, (unsigned long long)bridge.gpu_barriers.exchange(0),
++                 (unsigned long long)bridge.execute_calls.exchange(0), (unsigned long long)bridge.command_lists.exchange(0),
++                 bridge.record_draw_ticks.exchange(0) * scale, bridge.legacy_draw_ticks.exchange(0) * scale,
++                 bridge.legacy_bind_ticks.exchange(0) * scale, bridge.gpu_va_ticks.exchange(0) * scale,
++                 (unsigned long long)bridge.gpu_va_lookups.exchange(0), (unsigned long long)bridge.gpu_va_steps.exchange(0));
+     if (frame_ % 60 == 0) std::fflush(file_);
+   }
+ private:
+@@ -87,6 +134,15 @@
+   std::mutex mutex_;
+ };
+ PresentTrace &present_trace() { static PresentTrace trace; return trace; }
++
++class CpuTimingScope {
++public:
++  explicit CpuTimingScope(std::atomic<uint64_t> &counter) : counter_(counter), start_(present_trace().begin()) {}
++  ~CpuTimingScope() { if (start_) counter_.fetch_add(present_trace().begin() - start_); }
++private:
++  std::atomic<uint64_t> &counter_;
++  LONGLONG start_;
++};
+ 
+ template <typename T> void add_ref(T *ptr) {
+   if (ptr)
+@@ -383,6 +439,69 @@
+   HRESULT STDMETHODCALLTYPE GetDevice(REFIID riid, void **device) final {        \
+     return D3D12ChildMethods::GetDevice(riid, device);                           \
+   }
++
++class DxmtD3D12CommandSignature final : public ID3D12CommandSignature,
++                                      public D3D12ChildMethods, public UnknownRef {
++public:
++  DxmtD3D12CommandSignature(DxmtD3D12Device *device, D3D12_INDIRECT_ARGUMENT_TYPE type,
++                           UINT stride, UINT argument_size)
++      : D3D12ChildMethods(device), type_(type), stride_(stride), argument_size_(argument_size) {}
++  HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **out) final {
++    if (!out) return E_POINTER;
++    *out = nullptr;
++    if (iid != __uuidof(IUnknown) && iid != __uuidof(ID3D12Object) &&
++        iid != __uuidof(ID3D12DeviceChild) && iid != __uuidof(ID3D12Pageable) &&
++        iid != __uuidof(ID3D12CommandSignature)) return E_NOINTERFACE;
++    *out = static_cast<ID3D12CommandSignature *>(this); AddRef(); return S_OK;
++  }
++  ULONG STDMETHODCALLTYPE AddRef() final { return add_ref(); }
++  ULONG STDMETHODCALLTYPE Release() final { return release_ref(); }
++  DXMT_D3D12_OBJECT_OVERRIDES
++  D3D12_INDIRECT_ARGUMENT_TYPE type() const { return type_; }
++  UINT stride() const { return stride_; }
++  UINT argument_size() const { return argument_size_; }
++private:
++  D3D12_INDIRECT_ARGUMENT_TYPE type_;
++  UINT stride_, argument_size_;
++};
++
++class DxmtD3D12QueryHeap final : public ID3D12QueryHeap,
++                               public D3D12ChildMethods, public UnknownRef {
++public:
++  DxmtD3D12QueryHeap(DxmtD3D12Device *device, ID3D11Device *native, const D3D12_QUERY_HEAP_DESC &desc)
++      : D3D12ChildMethods(device), native_(native), desc_(desc), queries_(desc.Count) {}
++  HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **out) final {
++    if (!out) return E_POINTER;
++    *out = nullptr;
++    if (iid != __uuidof(IUnknown) && iid != __uuidof(ID3D12Object) &&
++        iid != __uuidof(ID3D12DeviceChild) && iid != __uuidof(ID3D12Pageable) &&
++        iid != __uuidof(ID3D12QueryHeap)) return E_NOINTERFACE;
++    *out = static_cast<ID3D12QueryHeap *>(this); AddRef(); return S_OK;
++  }
++  ULONG STDMETHODCALLTYPE AddRef() final { return add_ref(); }
++  ULONG STDMETHODCALLTYPE Release() final { return release_ref(); }
++  DXMT_D3D12_OBJECT_OVERRIDES
++  bool accepts(D3D12_QUERY_TYPE type, UINT index) const {
++    return index < desc_.Count && ((type == D3D12_QUERY_TYPE_TIMESTAMP &&
++        (desc_.Type == D3D12_QUERY_HEAP_TYPE_TIMESTAMP || desc_.Type == D3D12_QUERY_HEAP_TYPE_COPY_QUEUE_TIMESTAMP)) ||
++        ((type == D3D12_QUERY_TYPE_OCCLUSION || type == D3D12_QUERY_TYPE_BINARY_OCCLUSION) &&
++         desc_.Type == D3D12_QUERY_HEAP_TYPE_OCCLUSION));
++  }
++  ID3D11Query *query(UINT index, bool fresh = false) {
++    if (index >= queries_.size()) return nullptr;
++    if (fresh) queries_[index] = nullptr;
++    if (!queries_[index]) {
++      D3D11_QUERY_DESC q = {};
++      q.Query = desc_.Type == D3D12_QUERY_HEAP_TYPE_OCCLUSION ? D3D11_QUERY_OCCLUSION : D3D11_QUERY_TIMESTAMP;
++      if (FAILED(native_->CreateQuery(&q, queries_[index].put()))) return nullptr;
++    }
++    return queries_[index].get();
++  }
++private:
++  ComPtr<ID3D11Device> native_;
++  D3D12_QUERY_HEAP_DESC desc_;
++  std::vector<ComPtr<ID3D11Query>> queries_;
++};
+ 
+ class DxmtD3D12RootSignature final : public ID3D12RootSignature,
+                                      public D3D12ChildMethods,
+@@ -696,9 +815,8 @@
+                                 public D3D12ChildMethods,
+                                 public UnknownRef {
+ public:
+-  /* Placed resource: real Metal memory inside a heap. The command list still
+-   * renders through d3d11, so a placed resource has no d3d11_resource_ and the
+-   * draw path skips it until that path is replaced. */
++  /* Placed resources retain their Metal heap storage. Their D3D11 views wrap
++   * that same allocation so DXBC and native Metal commands see the same data. */
+   DxmtD3D12Resource(
+       DxmtD3D12Device *device, const D3D12_RESOURCE_DESC &desc, DxmtD3D12Heap *heap, UINT64 heap_offset,
+       WMT::Reference<WMT::Buffer> &&buffer, uint64_t gpu_address, void *mapped, uint64_t buffer_offset = 0
+@@ -883,11 +1001,11 @@
+   ID3D11Resource *d3d11_resource();
+   bool initialize_backing();
+   template <PipelineStage stage>
+-  void track_access(ArgumentEncodingContext &enc, int flags) {
++  void track_access(ArgumentEncodingContext &enc, int flags, UINT level = 0, UINT slice = 0) {
+     if (dxmt_buffer_)
+       enc.access<stage>(dxmt_buffer_, 0, UINT(desc_.Width), flags);
+     else if (dxmt_texture_)
+-      enc.access<stage>(dxmt_texture_, 0, 0, flags);
++      enc.access<stage>(dxmt_texture_, level, slice, flags);
+     else
+       enc.trackExternalResource<stage>(access_tracker_, flags);
+   }
+@@ -898,6 +1016,7 @@
+   void update_buffer(ID3D11Buffer *buffer, UINT byte_width);
+   const uint8_t *cpu_data() const { return cpu_data_.data(); }
+   size_t cpu_size() const { return cpu_data_.size(); }
++  const D3D12_RESOURCE_DESC &desc() const { return desc_; }
+ 
+   /* Grows the shadow on demand so a copy into a resource that has not been
+    * mapped yet still lands somewhere. */
+@@ -1108,6 +1227,7 @@
+   HRESULT init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *desc);
+   HRESULT init_compute(const D3D12_COMPUTE_PIPELINE_STATE_DESC *desc);
+   ID3D11ComputeShader *legacy_compute_shader() const { return cs_.get(); }
++  uint64_t legacy_compute_uav_mask() const { return cs_uav_mask_; }
+   void apply(ID3D11DeviceContext *context, const FLOAT *blend_factor, UINT stencil_ref);
+ 
+   WMT::ComputePipelineState
+@@ -1167,7 +1287,9 @@
+   ComPtr<ID3D11InputLayout> input_layout_;
+   ComPtr<ID3D11VertexShader> vs_;
+   ComPtr<ID3D11PixelShader> ps_;
++  ComPtr<ID3D11GeometryShader> gs_;
+   ComPtr<ID3D11ComputeShader> cs_;
++  uint64_t cs_uav_mask_ = UINT64_MAX;
+   /* Metal side: the libraries have to outlive the functions taken from them. */
+   WMT::Reference<WMT::Library> vertex_library_;
+   WMT::Reference<WMT::Library> fragment_library_;
+@@ -1557,6 +1679,51 @@
+   D3D12_COMMAND_QUEUE_DESC desc_ = {};
+ };
+ 
++/* Query readback can wait for an already submitted chunk independently of
++ * the application's submission thread. One worker per device preserves the
++ * order of result writes and their shared-event values. */
++class QueryResolveWorker {
++public:
++  QueryResolveWorker() : thread_(std::function<void()>([this] {
++    SetThreadDescription(GetCurrentThread(), L"dxmt-d12-query");
++    if (GetEnvironmentVariableA("DXMT_D3D12_QUERY_PRIORITY_HIGH", nullptr, 0))
++      SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
++    for (;;) {
++      std::function<void()> task;
++      {
++        std::unique_lock<std::mutex> lock(mutex_);
++        condition_.wait(lock, [&] { return stopped_ || !pending_.empty(); });
++        if (pending_.empty()) return;
++        task = std::move(pending_.front());
++        pending_.pop_front();
++      }
++      auto pool = WMT::MakeAutoreleasePool();
++      task();
++    }
++  })) {}
++  ~QueryResolveWorker() {
++    {
++      std::lock_guard<std::mutex> lock(mutex_);
++      stopped_ = true;
++    }
++    condition_.notify_one();
++    thread_.join();
++  }
++  void submit(std::function<void()> task) {
++    {
++      std::lock_guard<std::mutex> lock(mutex_);
++      pending_.push_back(std::move(task));
++    }
++    condition_.notify_one();
++  }
++private:
++  std::mutex mutex_;
++  std::condition_variable condition_;
++  std::deque<std::function<void()>> pending_;
++  bool stopped_ = false;
++  dxmt::thread thread_;
++};
++
+ class DxmtD3D12Device final : public ID3D12Device, public IMTLD3D12DeviceInterop, public UnknownRef {
+ public:
+   DxmtD3D12Device(ID3D11Device *device, ID3D11DeviceContext *context)
+@@ -1573,6 +1740,8 @@
+       /* The same core d3d11 encodes through; sharing it is what lets a d3d12
+        * fence be the same timeline the GPU signals. */
+       dxmt_device_ = &dxmt_capable->GetDXMTDevice();
++      aliasing_event_ = metal_device_.newEvent();
++      dxmt_capable->SetD3D12Device(static_cast<ID3D12Device *>(this));
+     }
+     if (context) context->QueryInterface(IID_PPV_ARGS(context1_.put()));
+   }
+@@ -1590,7 +1759,23 @@
+   /* Flushes whatever has been recorded into the shared command chunk. Goes
+    * through the d3d11 immediate context because the chunk is its own and its
+    * commit path carries the state checks. */
+-  void submit_recorded_work();
++  void submit_recorded_work(bool commit = true);
++  void encode_gpu_barrier();
++  void synchronize_compute_for_diagnostics();
++  static bool asynchronous_query_resolve_enabled() {
++    static const bool enabled = [] {
++      char value[8] = {};
++      DWORD length = GetEnvironmentVariableA("DXMT_D3D12_ASYNC_QUERY_RESOLVE", value, sizeof(value));
++      return !(length == 1 && value[0] == '0');
++    }();
++    return enabled;
++  }
++  bool defer_query_resolve(std::vector<ComPtr<ID3D11Query>> queries, D3D12_QUERY_TYPE type,
++                           DxmtD3D12Resource *destination, UINT64 offset);
++  HRESULT initialization_status() const {
++    if (!metal_device_ || !dxmt_device_) return DXGI_ERROR_UNSUPPORTED;
++    return aliasing_event_ ? S_OK : E_OUTOFMEMORY;
++  }
+   ID3D11DeviceContext1 *context1() const { return context1_.get(); }
+   ID3D11Buffer *upload_root_constants(const void *bytes, UINT size, UINT &first, UINT &count) {
+     if (!size || size > 256 || !bytes) return nullptr;
+@@ -1647,6 +1832,7 @@
+ 
+   /* An 11on12 device the application still holds outlives this one. */
+   ~DxmtD3D12Device() {
++    query_worker_.reset();
+     if (dxmt_device_)
+       static_cast<MTLD3D11Device *>(d3d11_device_.get())->SetD3D12Device(nullptr);
+   }
+@@ -1900,16 +2086,20 @@
+     if (!fence)
+       return E_POINTER;
+     *fence = nullptr;
++    if (!metal_device_)
++      return E_FAIL;
++    auto timeline = dxmt::TimelineFence::create(metal_device_, initial_value);
++    if (!timeline) {
++      ERR("D3D12: failed to allocate the shared event for a fence");
++      return E_OUTOFMEMORY;
++    }
+     auto object = new DxmtD3D12Fence(this, initial_value);
+-    if (metal_device_) {
+-      if (auto timeline = dxmt::TimelineFence::create(metal_device_, initial_value))
+-        object->adopt(std::move(timeline));
+-    }
++    object->adopt(std::move(timeline));
+     HRESULT hr = object->QueryInterface(riid, fence);
+     object->Release();
+     return hr;
+   }
+-  HRESULT STDMETHODCALLTYPE GetDeviceRemovedReason() final { return S_OK; }
++  HRESULT STDMETHODCALLTYPE GetDeviceRemovedReason() final { return query_resolve_status_.load(); }
+   /* One footprint per subresource, laid out back to back in a buffer the
+    * application then uploads from. Each mip has its own extent and its own
+    * aligned pitch, so a single layout for the whole texture -- which is what
+@@ -1972,14 +2162,37 @@
+     if (total_bytes)
+       *total_bytes = total;
+   }
+-  HRESULT STDMETHODCALLTYPE CreateQueryHeap(const D3D12_QUERY_HEAP_DESC *, REFIID, void **) final {
+-    return E_NOTIMPL;
++  HRESULT STDMETHODCALLTYPE CreateQueryHeap(const D3D12_QUERY_HEAP_DESC *desc, REFIID iid, void **out) final {
++    if (out) *out = nullptr;
++    if (!desc || !desc->Count || desc->NodeMask > 1) return E_INVALIDARG;
++    if (desc->Type != D3D12_QUERY_HEAP_TYPE_OCCLUSION && desc->Type != D3D12_QUERY_HEAP_TYPE_TIMESTAMP &&
++        desc->Type != D3D12_QUERY_HEAP_TYPE_COPY_QUEUE_TIMESTAMP) return E_NOTIMPL;
++    if (!out) return S_FALSE;
++    try {
++      auto heap = new DxmtD3D12QueryHeap(this, d3d11_device(), *desc);
++      HRESULT hr = heap->QueryInterface(iid, out); heap->Release(); return hr;
++    } catch (const std::bad_alloc &) { return E_OUTOFMEMORY; }
+   }
+   HRESULT STDMETHODCALLTYPE SetStablePowerState(BOOL) final { return S_OK; }
+-  HRESULT STDMETHODCALLTYPE CreateCommandSignature(const D3D12_COMMAND_SIGNATURE_DESC *,
+-                                                   ID3D12RootSignature *, REFIID,
+-                                                   void **) final {
+-    return E_NOTIMPL;
++  HRESULT STDMETHODCALLTYPE CreateCommandSignature(const D3D12_COMMAND_SIGNATURE_DESC *desc,
++                                                   ID3D12RootSignature *root, REFIID iid,
++                                                   void **out) final {
++    if (out) *out = nullptr;
++    if (!desc || !desc->pArgumentDescs || !desc->NumArgumentDescs || desc->NodeMask > 1)
++      return E_INVALIDARG;
++    if (desc->NumArgumentDescs != 1) return E_NOTIMPL;
++    UINT size = 0;
++    auto type = desc->pArgumentDescs[0].Type;
++    switch (type) {
++    case D3D12_INDIRECT_ARGUMENT_TYPE_DRAW: size = sizeof(D3D12_DRAW_ARGUMENTS); break;
++    case D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED: size = sizeof(D3D12_DRAW_INDEXED_ARGUMENTS); break;
++    case D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH: size = sizeof(D3D12_DISPATCH_ARGUMENTS); break;
++    default: return E_NOTIMPL;
++    }
++    if (root || desc->ByteStride < size || (desc->ByteStride & 3)) return E_INVALIDARG;
++    if (!out) return S_FALSE;
++    auto signature = new DxmtD3D12CommandSignature(this, type, desc->ByteStride, size);
++    HRESULT hr = signature->QueryInterface(iid, out); signature->Release(); return hr;
+   }
+   void STDMETHODCALLTYPE GetResourceTiling(ID3D12Resource *, UINT *, D3D12_PACKED_MIP_INFO *,
+                                            D3D12_TILE_SHAPE *, UINT *, UINT,
+@@ -2004,25 +2217,46 @@
+     if (!base || !size)
+       return;
+     std::lock_guard<std::mutex> lock(gpu_address_mutex_);
+-    gpu_addresses_[base] = {size, resource};
+-  }
+-  void unregister_gpu_address(uint64_t base) {
++    auto aliases = gpu_addresses_.equal_range(base);
++    for (auto it = aliases.first; it != aliases.second; ++it) {
++      if (it->second.resource == resource) {
++        it->second.size = size;
++        return;
++      }
++    }
++    gpu_addresses_.emplace(base, GpuAddressRange{size, resource});
++  }
++  void unregister_gpu_address(uint64_t base, DxmtD3D12Resource *resource) {
+     if (!base)
+       return;
+     std::lock_guard<std::mutex> lock(gpu_address_mutex_);
+-    gpu_addresses_.erase(base);
++    auto aliases = gpu_addresses_.equal_range(base);
++    for (auto it = aliases.first; it != aliases.second;) {
++      if (it->second.resource == resource) it = gpu_addresses_.erase(it);
++      else ++it;
++    }
+   }
+   DxmtD3D12Resource *resource_from_gpu_va(D3D12_GPU_VIRTUAL_ADDRESS va) const {
+     if (!va)
+       return nullptr;
++    CpuTimingScope lookup_time(bridge_cpu_statistics().gpu_va_ticks);
++    const bool profiling = present_trace().enabled();
++    if (profiling) bridge_cpu_statistics().gpu_va_lookups.fetch_add(1);
+     std::lock_guard<std::mutex> lock(gpu_address_mutex_);
+-    /* The last range starting at or before va is the only one that can hold
+-     * it: ranges do not overlap. */
++    /* Placed buffers can overlap, including identical base addresses. Prefer
++     * the newest matching alias, retaining older live ranges when one dies. */
+     auto it = gpu_addresses_.upper_bound(va);
+-    if (it == gpu_addresses_.begin())
+-      return nullptr;
+-    --it;
+-    return va < it->first + it->second.size ? it->second.resource : nullptr;
++    uint64_t steps = 0;
++    while (it != gpu_addresses_.begin()) {
++      --it;
++      ++steps;
++      if (va - it->first < it->second.size) {
++        if (profiling) bridge_cpu_statistics().gpu_va_steps.fetch_add(steps);
++        return it->second.resource;
++      }
++    }
++    if (profiling) bridge_cpu_statistics().gpu_va_steps.fetch_add(steps);
++    return nullptr;
+   }
+ 
+   void register_queue(DxmtD3D12CommandQueue *queue);
+@@ -2034,19 +2268,25 @@
+   std::vector<DxmtD3D12CommandQueue *> queues_;
+   std::recursive_mutex submission_mutex_;
+   WMT::Device metal_device_;
++  WMT::Reference<WMT::Event> aliasing_event_;
++  uint64_t aliasing_event_value_ = 0;
+   dxmt::Device *dxmt_device_ = nullptr;
+   ComPtr<ID3D11Device> d3d11_device_;
+   ComPtr<ID3D11DeviceContext> context_;
+   ComPtr<ID3D11DeviceContext1> context1_;
+   ComPtr<ID3D11Buffer> root_constants_;
+   UINT root_constants_offset_ = 0;
++  std::unique_ptr<QueryResolveWorker> query_worker_;
++  WMT::Reference<WMT::SharedEvent> query_result_event_;
++  uint64_t query_result_event_value_ = 0;
++  std::atomic<HRESULT> query_resolve_status_ = S_OK;
+ 
+   struct GpuAddressRange {
+     uint64_t size;
+     DxmtD3D12Resource *resource;
+   };
+   mutable std::mutex gpu_address_mutex_;
+-  std::map<uint64_t, GpuAddressRange> gpu_addresses_;
++  std::multimap<uint64_t, GpuAddressRange> gpu_addresses_;
+ };
+ 
+ void DxmtD3D12Resource::register_gpu_address() {
+@@ -2056,7 +2296,7 @@
+ 
+ void DxmtD3D12Resource::unregister_gpu_address() {
+   if (device_)
+-    device_->unregister_gpu_address(gpu_va_);
++    device_->unregister_gpu_address(gpu_va_, this);
+ }
+ 
+ HRESULT DxmtD3D12Fence::SetEventOnCompletion(UINT64 value, HANDLE event) {
+@@ -2065,11 +2305,8 @@
+     Logger::warn(str::format("D3D12 event fence=", this, " value=", value, " completed=", GetCompletedValue(), " event=", event));
+   dxmt::TimelineFence *timeline = timeline_.ptr();
+   dxmt::Device *dxmt_device = device_ ? device_->dxmt_device() : nullptr;
+-  if (!timeline || !dxmt_device) {
+-    if (value_.load() < value) return E_FAIL;
+-    if (event) SetEvent(event);
+-    return S_OK;
+-  }
++  if (!timeline || !dxmt_device)
++    return E_FAIL;
+   /* D3D12 specifies a blocking CPU wait when the event handle is null. */
+   if (!event) return timeline->waitUntil(value, INFINITE) ? S_OK : E_FAIL;
+ 
+@@ -2083,15 +2320,139 @@
+   return S_OK;
+ }
+ 
+-void DxmtD3D12Device::submit_recorded_work() {
++void DxmtD3D12Device::submit_recorded_work(bool commit) {
+   if (!d3d11_device_)
+     return;
+   IMTLD3D11DeviceContext *immediate = nullptr;
+   if (SUCCEEDED(context_->QueryInterface(__uuidof(IMTLD3D11DeviceContext), (void **)&immediate))) {
+     immediate->PrepareFlush();
+-    immediate->Commit();
++    if (commit) immediate->Commit();
+     immediate->Release();
+   }
++}
++
++void DxmtD3D12Device::encode_gpu_barrier() {
++  if (present_trace().enabled()) bridge_cpu_statistics().gpu_barriers.fetch_add(1);
++  IMTLD3D11DeviceContext *immediate = nullptr;
++  if (FAILED(context_->QueryInterface(__uuidof(IMTLD3D11DeviceContext), (void **)&immediate)))
++    return;
++  immediate->PrepareFlush();
++  immediate->Release();
++
++  // End the preceding pass and order its GPU accesses before later work.
++  // This also covers aliases, whose D3D11 trackers are unrelated.
++  // A private event keeps these markers off the queue's completion timeline.
++  const uint64_t value = ++aliasing_event_value_;
++  dxmt_device_->queue().CurrentChunk()->emitcc(
++      [event = aliasing_event_, value](ArgumentEncodingContext &enc) mutable {
++        enc.signalEvent(WMT::Reference<WMT::Event>(event), value);
++        enc.waitEvent(std::move(event), value);
++      });
++}
++
++bool DxmtD3D12Device::defer_query_resolve(std::vector<ComPtr<ID3D11Query>> queries,
++                                        D3D12_QUERY_TYPE type, DxmtD3D12Resource *destination,
++                                        UINT64 offset) {
++  if (!asynchronous_query_resolve_enabled() || queries.empty() || !destination ||
++      !destination->metal_buffer()) return false;
++  const LONGLONG prepare_start = present_trace().begin();
++  using SharedBuffer = HRESULT (WINAPI *)(ID3D11Device *, const D3D11_BUFFER_DESC *, ID3D11Buffer **);
++  using WaitForSubmission = HRESULT (WINAPI *)(ID3D11Device *, UINT64);
++  auto wait_for_submission = reinterpret_cast<WaitForSubmission>(
++      GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTWaitForSubmission"));
++  auto create_shared = reinterpret_cast<SharedBuffer>(
++      GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateSharedBuffer"));
++  if (!create_shared || !wait_for_submission) return false;
++  const UINT bytes = UINT(queries.size() * sizeof(UINT64));
++  D3D11_BUFFER_DESC desc = {};
++  desc.ByteWidth = bytes;
++  desc.Usage = D3D11_USAGE_DEFAULT;
++  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
++  ComPtr<ID3D11Buffer> upload;
++  if (FAILED(create_shared(d3d11_device_.get(), &desc, upload.put()))) return false;
++  auto source = GetResourceCommon(upload.get())->buffer();
++  auto *allocation = source ? source->current() : nullptr;
++  if (!allocation || allocation->flags().test(BufferAllocationFlag::CpuInvisible) ||
++      allocation->flags().test(BufferAllocationFlag::GpuManaged)) return false;
++  auto *mapped = static_cast<UINT64 *>(allocation->mappedMemory(allocation->currentSuballocation()));
++  if (!mapped) return false;
++  if (!query_result_event_) query_result_event_ = metal_device_.newSharedEvent();
++  if (!query_result_event_) return false;
++  if (!query_worker_) {
++    query_worker_ = std::make_unique<QueryResolveWorker>();
++    if (d3d12_diagnostics()) WARN("D3D12 asynchronous query readback enabled");
++  }
++
++  // Finish the producer chunk first. Its CPU fence advances only after the
++  // query readback objects have published their actual GPU results.
++  auto *queue = &dxmt_device_->queue();
++  const uint64_t producer = queue->CurrentSeqId();
++  submit_recorded_work();
++  const uint64_t value = ++query_result_event_value_;
++  const LONGLONG queued_at = present_trace().begin();
++  query_worker_->submit([this, wait_for_submission, producer, queries = std::move(queries), source, mapped,
++                         type, event = query_result_event_, value, queued_at]() mutable {
++    const LONGLONG started_at = present_trace().begin();
++    HRESULT status = wait_for_submission(d3d11_device_.get(), producer);
++    const LONGLONG ready_at = present_trace().begin();
++    for (size_t i = 0; i < queries.size() && SUCCEEDED(status); ++i) {
++      status = context_->GetData(queries[i].get(), mapped + i, sizeof(UINT64), D3D11_ASYNC_GETDATA_DONOTFLUSH);
++      if (status == S_FALSE) status = E_FAIL;
++      if (SUCCEEDED(status) && type == D3D12_QUERY_TYPE_BINARY_OCCLUSION) mapped[i] = mapped[i] != 0;
++    }
++    if (FAILED(status)) {
++      ERR("D3D12: asynchronous query result failed: ", status);
++      query_resolve_status_.store(DXGI_ERROR_DEVICE_REMOVED);
++    }
++    std::atomic_thread_fence(std::memory_order_release);
++    // Release later GPU work even on device loss so teardown cannot deadlock.
++    event.signalValue(value);
++    if (queued_at) {
++      auto &stats = bridge_cpu_statistics();
++      stats.query_jobs.fetch_add(1);
++      stats.query_queue_ticks.fetch_add(started_at - queued_at);
++      stats.query_wait_ticks.fetch_add(ready_at - started_at);
++      stats.query_cpu_ticks.fetch_add(present_trace().begin() - ready_at);
++    }
++  });
++
++  queue->CurrentChunk()->emitcc(
++      [source, target = ComPtr<DxmtD3D12Resource>(destination), offset, bytes,
++       event = query_result_event_, value](ArgumentEncodingContext &enc) mutable {
++        enc.waitEvent(WMT::Reference<WMT::Event>(event), value);
++        enc.startBlitPass();
++        auto [buffer, source_offset] = enc.access<PipelineStage::Compute>(source, 0, bytes, ResourceAccess::Read);
++        target->track_access<PipelineStage::Compute>(enc, ResourceAccess::Write);
++        auto &copy = enc.encodeBlitCommand<wmtcmd_blit_copy_from_buffer_to_buffer>();
++        copy.type = WMTBlitCommandCopyFromBufferToBuffer;
++        copy.src = buffer->buffer();
++        copy.src_offset = source_offset;
++        copy.dst = target->metal_buffer();
++        copy.dst_offset = target->metal_buffer_offset() + offset;
++        copy.copy_length = bytes;
++        enc.endPass();
++      });
++  if (prepare_start) bridge_cpu_statistics().query_prepare_ticks.fetch_add(present_trace().begin() - prepare_start);
++  return true;
++}
++
++void DxmtD3D12Device::synchronize_compute_for_diagnostics() {
++  static const bool gpu_order = [] {
++    bool value = GetEnvironmentVariableA("DXMT_D3D12_GPU_ORDER_COMPUTE", nullptr, 0) != 0;
++    if (value) WARN("D3D12 GPU compute ordering enabled for diagnostics");
++    return value;
++  }();
++  if (gpu_order) encode_gpu_barrier();
++  static const bool enabled = [] {
++    bool value = GetEnvironmentVariableA("DXMT_D3D12_SYNC_COMPUTE", nullptr, 0) != 0;
++    if (value) WARN("D3D12 compute completion waits enabled for diagnostics");
++    return value;
++  }();
++  if (!enabled) return;
++  ComPtr<IMTLD3D11DeviceContext> immediate;
++  if (SUCCEEDED(context_->QueryInterface(__uuidof(IMTLD3D11DeviceContext),
++                                         reinterpret_cast<void **>(immediate.put()))))
++    immediate->WaitUntilGPUIdle();
+ }
+ 
+ HRESULT D3D12ChildMethods::GetDevice(REFIID riid, void **device) {
+@@ -2099,6 +2460,27 @@
+ }
+ 
+ bool DxmtD3D12RootSignature::initialize_samplers() {
++  if (d3d12_diagnostics()) {
++    static std::atomic<unsigned> traced_roots = 0;
++    for (const auto &p : description_.parameters)
++      if ((p.kind == dxmt::RootParameterKind::ShaderResourceView ||
++           p.kind == dxmt::RootParameterKind::UnorderedAccessView) && traced_roots.fetch_add(1) < 32)
++        Logger::warn(str::format("D3D12 legacy root descriptor kind=", UINT(p.kind),
++                                 " visibility=", p.shader_visibility, " register=", p.shader_register));
++  }
++  static std::atomic<unsigned> traced_signatures = 0;
++  if (d3d12_diagnostics() && traced_signatures.fetch_add(1) < 12) {
++    Logger::warn(str::format("D3D12 signature=", this, " parameters=", description_.parameters.size()));
++    for (const auto &parameter : description_.parameters) {
++      Logger::warn(str::format("D3D12 root kind=", UINT(parameter.kind), " visibility=", parameter.shader_visibility,
++                               " register=", parameter.shader_register, " space=", parameter.register_space));
++      for (UINT i = 0; i < parameter.range_count; ++i) {
++        const auto &range = description_.ranges[parameter.first_range + i];
++        Logger::warn(str::format("D3D12 range kind=", UINT(range.range_type), " register=", range.base_shader_register,
++                                 " space=", range.register_space, " count=", range.descriptor_count));
++      }
++    }
++  }
+   samplers_.clear();
+   for (const auto &s : description_.static_samplers) {
+     D3D11_SAMPLER_DESC desc = {};
+@@ -2146,7 +2528,21 @@
+     tex.BindFlags &= ~D3D11_BIND_SHADER_RESOURCE;
+   if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
+     tex.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
++  using ImportTexture = HRESULT (WINAPI *)(ID3D11Device *, D3D11_RESOURCE_DIMENSION, const void *,
++                                           dxmt::Texture *, ID3D11Resource **);
++  auto import_texture = reinterpret_cast<ImportTexture>(
++      GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateTextureFromAllocation"));
++  auto alias = [&](D3D11_RESOURCE_DIMENSION dimension, const void *description) {
++    return import_texture && dxmt_texture_ &&
++           SUCCEEDED(import_texture(device_->d3d11_device(), dimension, description, dxmt_texture_.ptr(),
++                                    d3d11_resource_.put()));
++  };
+   if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D) {
++    if (is_placed()) {
++      D3D11_TEXTURE3D_DESC1 volume = {tex.Width, tex.Height, desc_.DepthOrArraySize, tex.MipLevels, tex.Format,
++                                     tex.Usage, tex.BindFlags, 0, 0, D3D11_TEXTURE_LAYOUT_UNDEFINED};
++      return alias(D3D11_RESOURCE_DIMENSION_TEXTURE3D, &volume) ? d3d11_resource_.get() : nullptr;
++    }
+     D3D11_TEXTURE3D_DESC volume = {tex.Width, tex.Height, desc_.DepthOrArraySize, tex.MipLevels, tex.Format,
+                                   tex.Usage, tex.BindFlags, 0, 0};
+     ID3D11Texture3D *texture = nullptr;
+@@ -2158,6 +2554,8 @@
+   if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE1D) {
+     D3D11_TEXTURE1D_DESC line = {tex.Width, tex.MipLevels, tex.ArraySize, tex.Format, tex.Usage,
+                                 tex.BindFlags, 0, 0};
++    if (is_placed())
++      return alias(D3D11_RESOURCE_DIMENSION_TEXTURE1D, &line) ? d3d11_resource_.get() : nullptr;
+     ID3D11Texture1D *texture = nullptr;
+     if (FAILED(device_->d3d11_device()->CreateTexture1D(&line, nullptr, &texture))) return nullptr;
+     d3d11_resource_ = texture;
+@@ -2166,6 +2564,11 @@
+   }
+   if (tex.Width == tex.Height && tex.ArraySize >= 6 && tex.ArraySize % 6 == 0)
+     tex.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
++  if (is_placed()) {
++    D3D11_TEXTURE2D_DESC1 image = {tex.Width, tex.Height, tex.MipLevels, tex.ArraySize, tex.Format, tex.SampleDesc,
++                                  tex.Usage, tex.BindFlags, 0, tex.MiscFlags, D3D11_TEXTURE_LAYOUT_UNDEFINED};
++    return alias(D3D11_RESOURCE_DIMENSION_TEXTURE2D, &image) ? d3d11_resource_.get() : nullptr;
++  }
+   ID3D11Texture2D *texture = nullptr;
+   if (FAILED(device_->d3d11_device()->CreateTexture2D(&tex, nullptr, &texture)))
+     return nullptr;
+@@ -2175,14 +2578,46 @@
+ }
+ 
+ bool DxmtD3D12Resource::initialize_backing() {
+-  if (is_placed()) return true;
++  if (is_placed()) {
++    if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
++      if (!desc_.Width || desc_.Width > UINT_MAX) return false;
++      WMTBufferInfo info = {};
++      info.length = desc_.Width;
++      info.gpu_address = gpu_va_;
++      info.memory.set(mapped_);
++      info.options = heap_resource_options(heap_properties_);
++      dxmt_buffer_ = new dxmt::Buffer(desc_.Width, device_->metal_device());
++      auto allocation = dxmt_buffer_->importBuffer(metal_buffer_, info, metal_buffer_base_offset_);
++      if (!allocation) return false;
++      dxmt_buffer_->rename(std::move(allocation));
++      D3D11_BUFFER_DESC desc = {};
++      desc.ByteWidth = UINT(desc_.Width); desc.Usage = D3D11_USAGE_DEFAULT;
++      desc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_INDEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
++      if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) desc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
++      desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS | D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
++      using ImportBuffer = HRESULT (WINAPI *)(ID3D11Device *, const D3D11_BUFFER_DESC *, dxmt::Buffer *, ID3D11Buffer **);
++      auto import_buffer = reinterpret_cast<ImportBuffer>(
++          GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateBufferFromAllocation"));
++      if (!import_buffer || FAILED(import_buffer(device_->d3d11_device(), &desc, dxmt_buffer_.ptr(), &generic_buffer_)))
++        return false;
++      d3d11_resource_ = generic_buffer_;
++    } else {
++      WMTTextureInfo info = {};
++      if (!texture_info_from_desc(device_->metal_device(), desc_, heap_resource_options(heap_properties_), info))
++        return false;
++      dxmt_texture_ = new dxmt::Texture(info, device_->metal_device());
++      auto allocation = dxmt_texture_->importTexture(metal_texture_, metal_texture_id_);
++      if (!allocation) return false;
++      dxmt_texture_->rename(std::move(allocation));
++    }
++  }
+   if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && !d3d11_resource_) {
+     if (!desc_.Width || desc_.Width > UINT_MAX) return false;
+     D3D11_BUFFER_DESC desc = {};
+     desc.ByteWidth = UINT(desc_.Width);
+     desc.Usage = D3D11_USAGE_DEFAULT;
+     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_INDEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
+-    desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
++    desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS | D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS;
+     if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
+       desc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+     HRESULT result;
+@@ -2205,7 +2640,8 @@
+     if (!dxmt_buffer_) return false;
+     auto *allocation = dxmt_buffer_->current();
+     if (!allocation) return false;
+-    gpu_va_ = allocation->gpuAddress() + allocation->currentSuballocationOffset();
++    if (!is_placed())
++      gpu_va_ = allocation->gpuAddress() + allocation->currentSuballocationOffset();
+     mapped_ = allocation->mappedMemory(allocation->currentSuballocation());
+     register_gpu_address();
+   } else {
+@@ -2489,6 +2925,8 @@
+   if (!desc)
+     return E_INVALIDARG;
+ 
++  dump_pipeline_shader("cs", desc->CS);
++
+   WMT::Device metal_device = device_->metal_device();
+   if (!metal_device)
+     return E_FAIL;
+@@ -2499,9 +2937,24 @@
+ 
+   if (!convert_dxil_stage(
+           metal_device, desc->CS, root_signature, compute_library_, compute_function_, &compute_threadgroup_size_
+-      ))
+-    return device_->d3d11_device()->CreateComputeShader(desc->CS.pShaderBytecode,
+-                                                       desc->CS.BytecodeLength, nullptr, cs_.put());
++      )) {
++    HRESULT hr = device_->d3d11_device()->CreateComputeShader(desc->CS.pShaderBytecode,
++                                                            desc->CS.BytecodeLength, nullptr, cs_.put());
++    ComPtr<IMTLD3D11Shader> shader;
++    if (SUCCEEDED(hr) && cs_ && SUCCEEDED(cs_->QueryInterface(__uuidof(IMTLD3D11Shader),
++                                                       reinterpret_cast<void **>(shader.put())))) {
++      if (auto *managed = shader->GetManagedShader()) cs_uav_mask_ = managed->reflection().UAVSlotMask;
++    }
++    if (d3d12_diagnostics()) {
++      static std::atomic<unsigned> traced_compute_masks = 0;
++      if (traced_compute_masks.fetch_add(1) < 128)
++        Logger::warn(str::format("D3D12 compute shader=",
++                                 dxmt::Sha1HashState::compute(desc->CS.pShaderBytecode,
++                                                            desc->CS.BytecodeLength).string().substr(0, 8),
++                                 " UAV mask=", cs_uav_mask_));
++    }
++    return hr;
++  }
+   if (!compute_function_)
+     return E_INVALIDARG;
+   /* A dispatch with a zero-sized threadgroup is a Metal validation failure, and
+@@ -2519,6 +2972,10 @@
+   if (!desc)
+     return E_INVALIDARG;
+ 
++  dump_pipeline_shader("vs", desc->VS);
++  dump_pipeline_shader("ps", desc->PS);
++  dump_pipeline_shader("gs", desc->GS);
++
+   /* Translate first: a real D3D12 application supplies DXIL, which the d3d11
+    * path below cannot compile at all, so the Metal result is what decides
+    * whether the pipeline exists. */
+@@ -2527,8 +2984,18 @@
+     root_signature = signature->converter_descriptor();
+ 
+   WMT::Device metal_device = device_->metal_device();
+-  bool metal_ok = convert_dxil_stage(metal_device, desc->VS, root_signature, vertex_library_, vertex_function_) &&
++  // The native vertex/fragment encoder cannot execute a geometry stage.
++  bool metal_ok = !desc->GS.BytecodeLength &&
++                  convert_dxil_stage(metal_device, desc->VS, root_signature, vertex_library_, vertex_function_) &&
+                   convert_dxil_stage(metal_device, desc->PS, root_signature, fragment_library_, fragment_function_);
++  static const bool trace_pipelines = GetEnvironmentVariableA("DXMT_D3D12_PIPELINE_TRACE", nullptr, 0) != 0;
++  static std::atomic<unsigned> traced_pipelines = 0;
++  if (trace_pipelines && traced_pipelines.fetch_add(1) < 256)
++    Logger::warn(str::format("D3D12 pipeline path=", metal_ok && vertex_function_ ? "metal" : "dxbc",
++                             " targets=", desc->NumRenderTargets, " depth=", desc->DepthStencilState.DepthEnable,
++                             " depthFormat=", UINT(desc->DSVFormat), " vsBytes=", desc->VS.BytecodeLength,
++                             " psBytes=", desc->PS.BytecodeLength, " gsBytes=", desc->GS.BytecodeLength,
++                             " hsBytes=", desc->HS.BytecodeLength, " dsBytes=", desc->DS.BytecodeLength));
+ 
+   if (metal_ok && vertex_function_) {
+     /* The converter numbers attributes by declaration order including system
+@@ -2597,6 +3064,21 @@
+   if (SUCCEEDED(hr) && ps) {
+     ps_ = ps;
+     ps->Release();
++  }
++  if (desc->GS.BytecodeLength) {
++    hr = device->CreateGeometryShader(desc->GS.pShaderBytecode, desc->GS.BytecodeLength, nullptr, gs_.put());
++    if (FAILED(hr)) return hr;
++  }
++  if (d3d12_diagnostics() && ps_) {
++    ComPtr<IMTLD3D11Shader> shader;
++    if (SUCCEEDED(ps_->QueryInterface(__uuidof(IMTLD3D11Shader), reinterpret_cast<void **>(shader.put())))) {
++      if (auto *managed = shader->GetManagedShader(); managed && managed->reflection().UAVSlotMask) {
++        static std::atomic<unsigned> traced_uavs = 0;
++        if (traced_uavs.fetch_add(1) < 32)
++          Logger::warn(str::format("D3D12 pixel shader UAV mask=", managed->reflection().UAVSlotMask,
++                                   " targets=", desc->NumRenderTargets, " bytes=", desc->PS.BytecodeLength));
++      }
++    }
+   }
+ 
+   D3D11_RASTERIZER_DESC rs = {};
+@@ -2668,6 +3150,7 @@
+   context->IASetInputLayout(input_layout_.get());
+   context->VSSetShader(vs_.get(), nullptr, 0);
+   context->PSSetShader(ps_.get(), nullptr, 0);
++  context->GSSetShader(gs_.get(), nullptr, 0);
+   context->RSSetState(rasterizer_.get());
+   context->OMSetBlendState(blend_.get(), blend_factor, sample_mask_);
+   context->OMSetDepthStencilState(depth_stencil_.get(), stencil_ref);
+@@ -2727,6 +3210,7 @@
+   }
+   void STDMETHODCALLTYPE DrawInstanced(UINT vertex_count_per_instance, UINT instance_count,
+                                        UINT start_vertex_location, UINT start_instance_location) final {
++    CpuTimingScope recording_time(bridge_cpu_statistics().record_draw_ticks);
+     /* A pipeline with Metal shaders behind it and a placed render target is
+      * one this can encode itself; anything else still goes through d3d11. */
+     if (record_metal_draw(vertex_count_per_instance, instance_count, start_vertex_location,
+@@ -2739,6 +3223,7 @@
+     auto blend_factor = blend_factor_;
+     auto stencil_ref = stencil_ref_;
+     record([=, this]() {
++      CpuTimingScope drawing_time(bridge_cpu_statistics().legacy_draw_ticks);
+       auto context = device_->context();
+       if (pipeline)
+         pipeline->apply(context, blend_factor.data(), stencil_ref);
+@@ -2862,6 +3347,7 @@
+   void STDMETHODCALLTYPE DrawIndexedInstanced(UINT index_count_per_instance, UINT instance_count,
+                                               UINT start_index_location, INT base_vertex_location,
+                                               UINT start_instance_location) final {
++    CpuTimingScope recording_time(bridge_cpu_statistics().record_draw_ticks);
+     if (record_metal_draw(index_count_per_instance, instance_count, start_index_location,
+                           start_instance_location, true, base_vertex_location))
+       return;
+@@ -2873,6 +3359,7 @@
+     auto blend_factor = blend_factor_;
+     auto stencil_ref = stencil_ref_;
+     record([=, this]() {
++      CpuTimingScope drawing_time(bridge_cpu_statistics().legacy_draw_ticks);
+       auto context = device_->context();
+       if (pipeline)
+         pipeline->apply(context, blend_factor.data(), stencil_ref);
+@@ -2900,11 +3387,12 @@
+     if (!pipeline || !device_ || !device_->dxmt_device()) return;
+     if (pipeline->legacy_compute_shader()) {
+       auto owner = pipeline_;
+-      LegacyRootBindings bindings = {compute_root_signature_, compute_root_arguments_, compute_root_descriptors_};
++      LegacyRootBindings bindings = {compute_root_signature_, compute_root_arguments_, compute_root_descriptors_, resource_heap_, sampler_heap_};
+       record([=, this]() {
+         device_->context()->CSSetShader(owner->legacy_compute_shader(), nullptr, 0);
+-        bind_legacy_graphics(bindings, true);
++        bind_legacy_graphics(bindings, true, owner->legacy_compute_uav_mask());
+         device_->context()->Dispatch(x, y, z);
++        device_->synchronize_compute_for_diagnostics();
+       });
+       return;
+     }
+@@ -3177,6 +3665,10 @@
+       copy->kind = CopyWork::Kind::BufferToBuffer;
+       copy->src_buffer = src_res->metal_buffer();
+       copy->dst_buffer = dst_res->metal_buffer();
++      copy->src_resource = src_res;
++      copy->dst_resource = dst_res;
++      copy->src_offset = src_res->metal_buffer_offset();
++      copy->dst_offset = dst_res->metal_buffer_offset();
+       copy->length = src_desc.Width;
+       record_copy(copy);
+       return;
+@@ -3193,6 +3685,8 @@
+         copy->kind = CopyWork::Kind::TextureToTexture;
+         copy->src_texture = src_res->metal_texture();
+         copy->dst_texture = dst_res->metal_texture();
++        copy->src_resource = src_res;
++        copy->dst_resource = dst_res;
+         copy->src_level = location.mip;
+         copy->src_slice = location.slice;
+         copy->dst_level = location.mip;
+@@ -3267,10 +3761,8 @@
+   void STDMETHODCALLTYPE SetPipelineState(ID3D12PipelineState *pipeline_state) final {
+     pipeline_ = static_cast<DxmtD3D12PipelineState *>(pipeline_state);
+   }
+-  /* Translated by dxmt::translateTransitionBarrier and friends, which decide
+-   * between nothing, a memory barrier inside the current encoder, and a pass
+-   * boundary. Only the compute path acts on the result so far; the d3d11 draw
+-   * path does its own tracking. */
++  /* Keep application barriers for both native and DXBC commands. D3D11
++   * resource tracking alone does not preserve D3D12's explicit UAV handoff. */
+   void STDMETHODCALLTYPE ResourceBarrier(UINT count, const D3D12_RESOURCE_BARRIER *barriers) final {
+     for (UINT i = 0; i < count && barriers; i++) {
+       const D3D12_RESOURCE_BARRIER &barrier = barriers[i];
+@@ -3283,6 +3775,13 @@
+         resource = barrier_resource(target);
+         action = dxmt::translateTransitionBarrier(resource, barrier.Transition.StateBefore,
+                                                   barrier.Transition.StateAfter);
++        // UAV results must be visible before a later pass consumes them,
++        // including committed resources whose Metal hazards are tracked.
++        if ((barrier.Transition.StateBefore & D3D12_RESOURCE_STATE_UNORDERED_ACCESS) &&
++            barrier.Transition.StateBefore != barrier.Transition.StateAfter) {
++          action.kind = dxmt::BarrierKind::EncoderSplit;
++          action.needs_fence = true;
++        }
+         break;
+       }
+       case D3D12_RESOURCE_BARRIER_TYPE_UAV:
+@@ -3290,6 +3789,12 @@
+         action = dxmt::translateUnorderedAccessBarrier(resource);
+         break;
+       case D3D12_RESOURCE_BARRIER_TYPE_ALIASING:
++        if (d3d12_diagnostics()) {
++          static std::atomic<unsigned> traced_aliases = 0;
++          if (traced_aliases.fetch_add(1) < 24)
++            Logger::warn(str::format("D3D12 aliasing barrier before=", barrier.Aliasing.pResourceBefore,
++                                     " after=", barrier.Aliasing.pResourceAfter));
++        }
+         action = dxmt::translateAliasingBarrier();
+         break;
+       default:
+@@ -3298,11 +3803,10 @@
+ 
+       if (action.kind == dxmt::BarrierKind::None)
+         continue;
+-      /* An encoder split inside a compute batch is at least as strong as a
+-       * memory barrier, and the batch has no way to split mid-pass yet, so it
+-       * degrades to one rather than being dropped. */
+       commands_.push_back(RecordedCommand{{}, false, nullptr, nullptr, nullptr, nullptr, true,
+-                                          action.scope ? action.scope : WMTBarrierScopeBuffers});
++                                          action.scope ? action.scope : WMTBarrierScopeBuffers,
++                                          barrier.Type == D3D12_RESOURCE_BARRIER_TYPE_ALIASING,
++                                          action.kind == dxmt::BarrierKind::EncoderSplit});
+     }
+   }
+ 
+@@ -3315,7 +3819,11 @@
+     resource->GetDesc(&desc);
+     return {desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER, !resource->is_placed()};
+   }
+-  void STDMETHODCALLTYPE ExecuteBundle(ID3D12GraphicsCommandList *) final {}
++  void STDMETHODCALLTYPE ExecuteBundle(ID3D12GraphicsCommandList *) final {
++    static std::atomic<unsigned> calls = 0;
++    if (d3d12_diagnostics() && calls.fetch_add(1) < 8)
++      ERR("D3D12: bundle execution is not implemented");
++  }
+   void STDMETHODCALLTYPE SetDescriptorHeaps(UINT count, ID3D12DescriptorHeap *const *heaps) final {
+     /* D3D12 allows one heap of each type to be bound at a time, and the
+      * converted shaders read them from two fixed buffer slots. */
+@@ -3467,7 +3975,7 @@
+                                                UINT8 stencil, UINT, const D3D12_RECT *) final {
+     Descriptor *desc = DxmtD3D12DescriptorHeap::from_cpu(dsv);
+ 
+-    if (desc && desc->resource && !desc->resource->is_placed() && desc->dsv) {
++    if (desc && desc->resource && desc->dsv) {
+       ComPtr<ID3D11DepthStencilView> view(desc->dsv);
+       record([=]() { device_->context()->ClearDepthStencilView(view.get(), flags, depth, stencil); });
+       return;
+@@ -3505,7 +4013,7 @@
+     Descriptor *desc = DxmtD3D12DescriptorHeap::from_cpu(rtv);
+     FLOAT clear[4] = {color[0], color[1], color[2], color[3]};
+ 
+-    if (desc && desc->resource && !desc->resource->is_placed() && desc->rtv) {
++    if (desc && desc->resource && desc->rtv) {
+       ComPtr<ID3D11RenderTargetView> view(desc->rtv);
+       record([=]() { device_->context()->ClearRenderTargetView(view.get(), clear); });
+       return;
+@@ -3555,30 +4063,156 @@
+     });
+   }
+   void STDMETHODCALLTYPE ClearUnorderedAccessViewUint(D3D12_GPU_DESCRIPTOR_HANDLE,
+-                                                      D3D12_CPU_DESCRIPTOR_HANDLE,
+-                                                      ID3D12Resource *, const UINT[4],
+-                                                      UINT, const D3D12_RECT *) final {}
++                                                      D3D12_CPU_DESCRIPTOR_HANDLE handle,
++                                                      ID3D12Resource *, const UINT values[4],
++                                                      UINT rectangles, const D3D12_RECT *) final {
++    auto *descriptor = DxmtD3D12DescriptorHeap::from_cpu(handle);
++    if (!descriptor || !descriptor->uav || !values) return;
++    if (rectangles) { ERR("D3D12: partial UINT UAV clears are not implemented"); return; }
++    ComPtr<ID3D11UnorderedAccessView> view(descriptor->uav);
++    std::array<UINT, 4> clear; std::copy_n(values, 4, clear.begin());
++    record([=, this]() { device_->context()->ClearUnorderedAccessViewUint(view.get(), clear.data()); });
++  }
+   void STDMETHODCALLTYPE ClearUnorderedAccessViewFloat(D3D12_GPU_DESCRIPTOR_HANDLE,
+-                                                       D3D12_CPU_DESCRIPTOR_HANDLE,
+-                                                       ID3D12Resource *, const float[4],
+-                                                       UINT, const D3D12_RECT *) final {}
++                                                       D3D12_CPU_DESCRIPTOR_HANDLE handle,
++                                                       ID3D12Resource *, const float values[4],
++                                                       UINT rectangles, const D3D12_RECT *) final {
++    auto *descriptor = DxmtD3D12DescriptorHeap::from_cpu(handle);
++    if (!descriptor || !descriptor->uav || !values) return;
++    if (rectangles) { ERR("D3D12: partial FLOAT UAV clears are not implemented"); return; }
++    ComPtr<ID3D11UnorderedAccessView> view(descriptor->uav);
++    std::array<float, 4> clear; std::copy_n(values, 4, clear.begin());
++    record([=, this]() { device_->context()->ClearUnorderedAccessViewFloat(view.get(), clear.data()); });
++  }
+   void STDMETHODCALLTYPE DiscardResource(ID3D12Resource *, const D3D12_DISCARD_REGION *) final {}
+-  void STDMETHODCALLTYPE BeginQuery(ID3D12QueryHeap *, D3D12_QUERY_TYPE, UINT) final {}
+-  void STDMETHODCALLTYPE EndQuery(ID3D12QueryHeap *, D3D12_QUERY_TYPE, UINT) final {}
+-  void STDMETHODCALLTYPE ResolveQueryData(ID3D12QueryHeap *, D3D12_QUERY_TYPE, UINT, UINT,
+-                                          ID3D12Resource *, UINT64) final {}
++  void STDMETHODCALLTYPE BeginQuery(ID3D12QueryHeap *heap, D3D12_QUERY_TYPE type, UINT index) final {
++    auto *h = static_cast<DxmtD3D12QueryHeap *>(heap);
++    if (!h || type == D3D12_QUERY_TYPE_TIMESTAMP || !h->accepts(type, index)) return;
++    ComPtr<DxmtD3D12QueryHeap> owner(h);
++    record([=, this]() {
++      if (auto *query = owner->query(index, DxmtD3D12Device::asynchronous_query_resolve_enabled()))
++        device_->context()->Begin(query);
++    });
++  }
++  void STDMETHODCALLTYPE EndQuery(ID3D12QueryHeap *heap, D3D12_QUERY_TYPE type, UINT index) final {
++    auto *h = static_cast<DxmtD3D12QueryHeap *>(heap);
++    if (!h || !h->accepts(type, index)) return;
++    ComPtr<DxmtD3D12QueryHeap> owner(h);
++    record([=, this]() {
++      if (auto *query = owner->query(index, type == D3D12_QUERY_TYPE_TIMESTAMP &&
++                                          DxmtD3D12Device::asynchronous_query_resolve_enabled()))
++        device_->context()->End(query);
++    });
++  }
++  void STDMETHODCALLTYPE ResolveQueryData(ID3D12QueryHeap *heap, D3D12_QUERY_TYPE type, UINT start, UINT count,
++                                          ID3D12Resource *destination, UINT64 offset) final {
++    auto *h = static_cast<DxmtD3D12QueryHeap *>(heap);
++    auto *dst = static_cast<DxmtD3D12Resource *>(destination);
++    if (!h || !dst || !count || !h->accepts(type, start) || count - 1 > UINT_MAX - start ||
++        !h->accepts(type, start + count - 1) || dst->desc().Dimension != D3D12_RESOURCE_DIMENSION_BUFFER ||
++        (offset & 7) || offset > UINT_MAX || offset > dst->desc().Width ||
++        UINT64(count) * 8 > dst->desc().Width - offset || UINT64(count) * 8 > UINT_MAX - offset) return;
++    ComPtr<DxmtD3D12QueryHeap> owner(h); ComPtr<DxmtD3D12Resource> target(dst);
++    record([=, this]() {
++      auto context = device_->context(); std::vector<UINT64> values(count);
++      std::vector<ComPtr<ID3D11Query>> queries;
++      queries.reserve(count);
++      for (UINT i = 0; i < count; ++i) {
++        auto *query = owner->query(start + i);
++        if (!query) return;
++        queries.emplace_back(query);
++      }
++      if (device_->defer_query_resolve(queries, type, target.get(), offset)) return;
++      // Submit once before waiting. Repeated GetData calls with implicit
++      // flushing otherwise flood the queue with empty command buffers.
++      device_->submit_recorded_work();
++      for (UINT i = 0; i < count; ++i) {
++        HRESULT hr;
++        while ((hr = context->GetData(queries[i].get(), &values[i], sizeof(UINT64), D3D11_ASYNC_GETDATA_DONOTFLUSH)) == S_FALSE) Sleep(1);
++        if (FAILED(hr)) { ERR("D3D12: resolving query failed: ", hr); return; }
++        if (type == D3D12_QUERY_TYPE_BINARY_OCCLUSION) values[i] = values[i] != 0;
++      }
++      if (auto *resource = target->d3d11_resource()) {
++        // A full UpdateSubresource can rename a D3D11 buffer. D3D12 GPU
++        // addresses and persistent mappings must keep their original backing.
++        D3D11_BUFFER_DESC desc = {}; desc.ByteWidth = UINT(count * 8ull); desc.Usage = D3D11_USAGE_IMMUTABLE;
++        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
++        D3D11_SUBRESOURCE_DATA initial = {values.data(), 0, 0}; ComPtr<ID3D11Buffer> upload;
++        HRESULT hr = device_->d3d11_device()->CreateBuffer(&desc, &initial, upload.put());
++        if (FAILED(hr)) { ERR("D3D12: query result upload failed: ", hr); return; }
++        context->CopySubresourceRegion(resource, 0, UINT(offset), 0, 0, upload.get(), 0, nullptr);
++      }
++    });
++  }
+   void STDMETHODCALLTYPE SetPredication(ID3D12Resource *, UINT64, D3D12_PREDICATION_OP) final {}
+   void STDMETHODCALLTYPE SetMarker(UINT, const void *, UINT) final {}
+   void STDMETHODCALLTYPE BeginEvent(UINT, const void *, UINT) final {}
+   void STDMETHODCALLTYPE EndEvent() final {}
+-  void STDMETHODCALLTYPE ExecuteIndirect(ID3D12CommandSignature *, UINT, ID3D12Resource *,
+-                                         UINT64, ID3D12Resource *, UINT64) final {}
+-
+-  /* Consecutive dispatches go into one Metal compute pass, so a UAV barrier
+-   * between them is a memory barrier inside that encoder rather than a pass
+-   * boundary -- which is both cheaper and the only place a barrier can be
+-   * expressed at all. Anything that is not compute ends the batch first, so
+-   * the order the application recorded stays the order things run in. */
++  void STDMETHODCALLTYPE ExecuteIndirect(ID3D12CommandSignature *signature, UINT maximum,
++                                         ID3D12Resource *arguments, UINT64 offset,
++                                         ID3D12Resource *count_buffer, UINT64 count_offset) final {
++    if (!signature || !arguments || !maximum) return;
++    auto *sig = static_cast<DxmtD3D12CommandSignature *>(signature);
++    auto type = sig->type(); UINT stride = sig->stride(), size = sig->argument_size();
++    ComPtr<DxmtD3D12Resource> args(static_cast<DxmtD3D12Resource *>(arguments));
++    ComPtr<DxmtD3D12Resource> counts(static_cast<DxmtD3D12Resource *>(count_buffer));
++    if (args->desc().Dimension != D3D12_RESOURCE_DIMENSION_BUFFER || offset > UINT_MAX || (offset & 3) ||
++        offset > args->desc().Width || UINT64(maximum - 1) * stride + size > args->desc().Width - offset) return;
++    if (counts && (counts->desc().Dimension != D3D12_RESOURCE_DIMENSION_BUFFER ||
++                   count_offset > UINT_MAX || (count_offset & 3) || count_offset > counts->desc().Width ||
++                   counts->desc().Width - count_offset < 4)) return;
++    auto pipeline = pipeline_; auto vbvs = vbvs_; auto ibv = ibv_;
++    auto graphics = legacy_root_bindings();
++    LegacyRootBindings compute = {compute_root_signature_, compute_root_arguments_, compute_root_descriptors_, resource_heap_, sampler_heap_};
++    auto blend = blend_factor_; auto stencil = stencil_ref_;
++    record([=, this]() {
++      auto context = device_->context(); UINT count = maximum;
++      ComPtr<ID3D11Buffer> buffer;
++      if (!args->d3d11_resource() || FAILED(args->d3d11_resource()->QueryInterface(IID_PPV_ARGS(buffer.put())))) return;
++      if (counts) {
++        D3D11_BUFFER_DESC desc = {}; desc.ByteWidth = 4; desc.Usage = D3D11_USAGE_STAGING;
++        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
++        ComPtr<ID3D11Buffer> staging;
++        if (!counts->d3d11_resource() || FAILED(device_->d3d11_device()->CreateBuffer(&desc, nullptr, staging.put()))) return;
++        D3D11_BOX box = {UINT(count_offset), 0, 0, UINT(count_offset + 4), 1, 1};
++        context->CopySubresourceRegion(staging.get(), 0, 0, 0, 0, counts->d3d11_resource(), 0, &box);
++        D3D11_MAPPED_SUBRESOURCE mapped = {};
++        if (FAILED(context->Map(staging.get(), 0, D3D11_MAP_READ, 0, &mapped))) return;
++        count = std::min(maximum, *static_cast<const UINT *>(mapped.pData)); context->Unmap(staging.get(), 0);
++      }
++      if (!count || !pipeline) return;
++      if (type != D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH && pipeline->has_metal_functions()) {
++        ERR("D3D12: SM6 indirect drawing is not implemented"); return;
++      }
++      if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH) {
++        if (!pipeline->legacy_compute_shader()) { ERR("D3D12: SM6 indirect dispatch is not implemented"); return; }
++        context->CSSetShader(pipeline->legacy_compute_shader(), nullptr, 0);
++        bind_legacy_graphics(compute, true, pipeline->legacy_compute_uav_mask());
++      } else {
++        pipeline->apply(context, blend.data(), stencil);
++        bind_legacy_graphics(graphics); bind_legacy_vertex_buffers(vbvs);
++        if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED) {
++          auto *resource = device_->resource_from_gpu_va(ibv.BufferLocation);
++          if (!resource) return;
++          auto index = resource->index_buffer(); resource->update_buffer(index, ibv.SizeInBytes);
++          context->IASetIndexBuffer(index, ibv.Format, UINT(ibv.BufferLocation - resource->GetGPUVirtualAddress()));
++        }
++      }
++      for (UINT i = 0; i < count; ++i) {
++        UINT at = UINT(offset + UINT64(i) * stride);
++        if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW) context->DrawInstancedIndirect(buffer.get(), at);
++        else if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED) context->DrawIndexedInstancedIndirect(buffer.get(), at);
++        else {
++          context->DispatchIndirect(buffer.get(), at);
++          device_->synchronize_compute_for_diagnostics();
++        }
++      }
++    });
++  }
++
++  /* Native UAV barriers can stay inside a compute pass. Pass transitions and
++   * DXBC barriers close pending work and order it on the GPU, without a CPU
++   * completion wait. */
+   void replay_immediate() { replay(commands_); }
+   std::function<void()> capture_replay() {
+     ComPtr<DxmtD3D12GraphicsCommandList> owner(this);
+@@ -3589,6 +4223,7 @@
+     std::vector<GraphicsDrawWork *> draw_batch;
+     std::vector<CopyWork *> copy_batch;
+     RenderTargetState target;
++    bool gpu_barrier_emitted = false;
+ 
+     auto flush_compute = [&]() {
+       if (!compute_batch.empty())
+@@ -3613,6 +4248,7 @@
+     };
+ 
+     for (auto &command : commands) {
++      if (!command.barrier && !command.state_only) gpu_barrier_emitted = false;
+       if (command.dispatch) {
+         flush_draws();
+         flush_copies();
+@@ -3634,9 +4270,15 @@
+           flush_draws();
+         target = *command.target;
+       } else if (command.barrier) {
+-        /* A barrier with nothing before it in this pass orders against work
+-         * that has already been encoded, which a pass boundary already does. */
+-        if (!compute_batch.empty())
++        if (command.aliasing_barrier || command.encoder_split || compute_batch.empty()) {
++          flush_compute();
++          flush_draws();
++          flush_copies();
++          // A whole ResourceBarrier array often becomes consecutive records.
++          // One marker orders all of them when no work occurs in between.
++          if (!gpu_barrier_emitted) device_->encode_gpu_barrier();
++          gpu_barrier_emitted = true;
++        } else
+           compute_batch.push_back(&command);
+       } else if (command.d3d11) {
+         if (!command.state_only) {
+@@ -3650,7 +4292,9 @@
+     flush_compute();
+     flush_draws();
+     flush_copies();
+-    device_->context()->Flush();
++    // A D3D12 command list ends its encoders, not the submitted GPU batch.
++    // ExecuteCommandLists commits the whole group after replaying every list.
++    device_->submit_recorded_work(false);
+   }
+ 
+ private:
+@@ -3827,6 +4471,8 @@
+     std::shared_ptr<RenderTargetState> target;
+     bool barrier = false;
+     WMTBarrierScope barrier_scope = WMTBarrierScopeBuffers;
++    bool aliasing_barrier = false;
++    bool encoder_split = false;
+   };
+   std::vector<RecordedCommand> commands_;
+ 
+@@ -3881,21 +4527,36 @@
+     ComPtr<DxmtD3D12RootSignature> signature;
+     dxmt::RootArgumentBuffer arguments;
+     std::array<D3D12_GPU_DESCRIPTOR_HANDLE, 64> tables;
++    ComPtr<DxmtD3D12DescriptorHeap> resource_heap;
++    ComPtr<DxmtD3D12DescriptorHeap> sampler_heap;
+   };
+ 
+   LegacyRootBindings legacy_root_bindings() const {
+-    return {graphics_root_signature_, graphics_root_arguments_, root_descriptors_};
++    return {graphics_root_signature_, graphics_root_arguments_, root_descriptors_, resource_heap_, sampler_heap_};
+   }
+ 
+   /* DXBC stages run through the shared D3D11 core, with the D3D12 signature
+    * deciding registers and stage visibility. Root arguments are captured per
+    * draw; volatile table descriptors are resolved when the list executes. */
+-  void bind_legacy_graphics(const LegacyRootBindings &bindings, bool compute = false) {
++  void bind_legacy_graphics(const LegacyRootBindings &bindings, bool compute = false,
++                            uint64_t used_uavs = UINT64_MAX) {
++    CpuTimingScope binding_time(bridge_cpu_statistics().legacy_bind_ticks);
+     if (!bindings.signature || !device_->context1()) return;
+     auto *context = device_->context1();
++    if (compute) {
++      // D3D12 permits the next dispatch to read the previous UAV through an
++      // SRV after a barrier. D3D11 rejects that SRV while the old output view
++      // is still bound, so release outputs before installing the new tables.
++      std::array<ID3D11UnorderedAccessView *, D3D11_PS_CS_UAV_REGISTER_COUNT> empty = {};
++      context->CSSetUnorderedAccessViews(0, UINT(empty.size()), empty.data(), nullptr);
++    }
+     auto visible = [compute](UINT visibility, bool vertex) {
+       return !compute && (visibility == D3D12_SHADER_VISIBILITY_ALL ||
+              visibility == (vertex ? D3D12_SHADER_VISIBILITY_VERTEX : D3D12_SHADER_VISIBILITY_PIXEL));
++    };
++    auto geometry_visible = [compute](UINT visibility) {
++      return !compute && (visibility == D3D12_SHADER_VISIBILITY_ALL ||
++                          visibility == D3D12_SHADER_VISIBILITY_GEOMETRY);
+     };
+     auto cbv = [&](UINT slot, UINT visibility, UINT64 address, UINT bytes) {
+       if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT) return;
+@@ -3911,9 +4572,13 @@
+         first = UINT(offset / 16);
+         count = std::min(4096u, align_uint(size, 256) / 16);
+       }
++      static std::atomic<unsigned> missing_cbvs = 0;
++      if (d3d12_diagnostics() && address && !buffer && missing_cbvs.fetch_add(1) < 24)
++        Logger::warn(str::format("D3D12 unresolved CBV slot=", slot, " address=", address, " compute=", compute));
+       if (compute) context->CSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+       if (visible(visibility, true)) context->VSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+       if (visible(visibility, false)) context->PSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      if (geometry_visible(visibility)) context->GSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+     };
+     const auto &description = bindings.signature->description();
+     for (UINT index = 0; index < description.parameters.size(); ++index) {
+@@ -3934,6 +4599,8 @@
+           context->VSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
+         if (visible(parameter.shader_visibility, false))
+           context->PSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
++        if (geometry_visible(parameter.shader_visibility))
++          context->GSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
+       } else if (parameter.kind == dxmt::RootParameterKind::DescriptorTable) {
+         Descriptor *table = index < bindings.tables.size() ? DxmtD3D12DescriptorHeap::from_gpu(bindings.tables[index]) : nullptr;
+         UINT available = 0;
+@@ -3952,26 +4619,50 @@
+                        range.range_type == dxmt::DescriptorRangeType::UnorderedAccessView ? D3D11_PS_CS_UAV_REGISTER_COUNT : 128;
+           UINT length = range.base_shader_register < limit ?
+               std::min(range.descriptor_count, limit - range.base_shader_register) : 0;
+-          for (UINT i = 0; i < length; ++i) {
+-            Descriptor *entry = table && offset < available && i < available - offset ? table + offset + i : nullptr;
++          auto entry_at = [&](UINT i) {
++            return table && offset < available && i < available - offset ? table + offset + i : nullptr;
++          };
++          // A D3D12 table is one binding operation. Let the shared core check
++          // the range under one context lock instead of one lock per slot.
++          if (length && range.range_type == dxmt::DescriptorRangeType::ShaderResourceView) {
++            std::array<ComPtr<ID3D11ShaderResourceView>, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> retained;
++            std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> views = {};
++            for (UINT i = 0; i < length; ++i) if (auto *entry = entry_at(i); entry && entry->type == DescriptorType::Srv) {
++              retained[i] = entry->srv;
++              views[i] = retained[i].get();
++            }
++            if (compute) context->CSSetShaderResources(range.base_shader_register, length, views.data());
++            if (visible(parameter.shader_visibility, true)) context->VSSetShaderResources(range.base_shader_register, length, views.data());
++            if (visible(parameter.shader_visibility, false)) context->PSSetShaderResources(range.base_shader_register, length, views.data());
++            if (geometry_visible(parameter.shader_visibility)) context->GSSetShaderResources(range.base_shader_register, length, views.data());
++          } else if (length && range.range_type == dxmt::DescriptorRangeType::Sampler) {
++            std::array<ComPtr<ID3D11SamplerState>, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> retained;
++            std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> samplers = {};
++            for (UINT i = 0; i < length; ++i) if (auto *entry = entry_at(i); entry && entry->type == DescriptorType::Sampler) {
++              retained[i] = entry->sampler11;
++              samplers[i] = retained[i].get();
++            }
++            if (compute) context->CSSetSamplers(range.base_shader_register, length, samplers.data());
++            if (visible(parameter.shader_visibility, true)) context->VSSetSamplers(range.base_shader_register, length, samplers.data());
++            if (visible(parameter.shader_visibility, false)) context->PSSetSamplers(range.base_shader_register, length, samplers.data());
++            if (geometry_visible(parameter.shader_visibility)) context->GSSetSamplers(range.base_shader_register, length, samplers.data());
++          } else for (UINT i = 0; i < length; ++i) {
+             UINT slot = range.base_shader_register + i;
++            // Unreferenced D3D12 descriptors may contain aliases or change
++            // independently. Binding one as a D3D11 output can evict a UAV
++            // the shader does use, so never resolve those unused entries.
++            if (compute && range.range_type == dxmt::DescriptorRangeType::UnorderedAccessView &&
++                !(used_uavs & (uint64_t(1) << slot))) continue;
++            Descriptor *entry = entry_at(i);
+             if (range.range_type == dxmt::DescriptorRangeType::ConstantBufferView) {
+               cbv(slot, parameter.shader_visibility, entry ? entry->cbv.BufferLocation : 0,
+                   entry ? entry->cbv.SizeInBytes : 0);
+-            } else if (range.range_type == dxmt::DescriptorRangeType::ShaderResourceView) {
+-              ID3D11ShaderResourceView *view = entry ? entry->srv.get() : nullptr;
+-              if (compute) context->CSSetShaderResources(slot, 1, &view);
+-              if (visible(parameter.shader_visibility, true)) context->VSSetShaderResources(slot, 1, &view);
+-              if (visible(parameter.shader_visibility, false)) context->PSSetShaderResources(slot, 1, &view);
+             } else if (range.range_type == dxmt::DescriptorRangeType::UnorderedAccessView && compute) {
+-              ID3D11UnorderedAccessView *view = entry ? entry->uav.get() : nullptr;
++              ComPtr<ID3D11UnorderedAccessView> retained;
++              if (entry && entry->type == DescriptorType::Uav) retained = entry->uav;
++              ID3D11UnorderedAccessView *view = retained.get();
+               UINT keep = UINT_MAX;
+               context->CSSetUnorderedAccessViews(slot, 1, &view, &keep);
+-            } else if (range.range_type == dxmt::DescriptorRangeType::Sampler) {
+-              ID3D11SamplerState *sampler = entry ? entry->sampler11.get() : nullptr;
+-              if (compute) context->CSSetSamplers(slot, 1, &sampler);
+-              if (visible(parameter.shader_visibility, true)) context->VSSetSamplers(slot, 1, &sampler);
+-              if (visible(parameter.shader_visibility, false)) context->PSSetSamplers(slot, 1, &sampler);
+             }
+           }
+           append = range.descriptor_count > UINT_MAX - offset ? UINT_MAX : offset + range.descriptor_count;
+@@ -3986,6 +4677,7 @@
+       if (compute) context->CSSetSamplers(desc.shader_register, 1, &sampler);
+       if (visible(desc.shader_visibility, true)) context->VSSetSamplers(desc.shader_register, 1, &sampler);
+       if (visible(desc.shader_visibility, false)) context->PSSetSamplers(desc.shader_register, 1, &sampler);
++      if (geometry_visible(desc.shader_visibility)) context->GSSetSamplers(desc.shader_register, 1, &sampler);
+     }
+   }
+ 
+@@ -4186,6 +4878,7 @@
+ 
+     enc.endPass();
+   });
++  device_->synchronize_compute_for_diagnostics();
+ }
+ 
+ void DxmtD3D12GraphicsCommandList::collect_graphics_residency(GraphicsDrawWork &work) {
+@@ -4395,9 +5088,9 @@
+ 
+     for (auto &copy : steps) {
+       if (copy.src_resource)
+-        copy.src_resource->track_access<PipelineStage::Compute>(enc, ResourceAccess::Read);
++        copy.src_resource->track_access<PipelineStage::Compute>(enc, ResourceAccess::Read, copy.src_level, copy.src_slice);
+       if (copy.dst_resource)
+-        copy.dst_resource->track_access<PipelineStage::Compute>(enc, ResourceAccess::Write);
++        copy.dst_resource->track_access<PipelineStage::Compute>(enc, ResourceAccess::Write, copy.dst_level, copy.dst_slice);
+       switch (copy.kind) {
+       case CopyWork::Kind::BufferToBuffer: {
+         auto &cmd = enc.encodeBlitCommand<wmtcmd_blit_copy_from_buffer_to_buffer>();
+@@ -4862,6 +5555,10 @@
+                                    info.gpu_resource_id);
+   }
+ 
++  if (!object->initialize_backing()) {
++    object->Release();
++    return E_FAIL;
++  }
+   HRESULT hr = object->QueryInterface(riid, resource);
+   object->Release();
+   return hr;
+@@ -5411,10 +6108,8 @@
+ 
+   dxmt::TimelineFence *timeline = timeline_fence->timeline();
+   dxmt::Device *dxmt_device = device_ ? device_->dxmt_device() : nullptr;
+-  if (!timeline || !dxmt_device) {
+-    /* No GPU timeline to order against; the CPU-side value is all there is. */
+-    return timeline_fence->Signal(value);
+-  }
++  if (!timeline || !dxmt_device)
++    return E_FAIL;
+ 
+   auto &queue = dxmt_device->queue();
+   queue.CurrentChunk()->emitcc(
+@@ -5442,7 +6137,7 @@
+   dxmt::TimelineFence *timeline = timeline_fence->timeline();
+   dxmt::Device *dxmt_device = device_ ? device_->dxmt_device() : nullptr;
+   if (!timeline || !dxmt_device)
+-    return S_OK;
++    return E_FAIL;
+ 
+   auto &queue = dxmt_device->queue();
+   queue.CurrentChunk()->emitcc(
+@@ -5495,8 +6190,9 @@
+ }
+ 
+ HRESULT DxmtD3D12Fence::Signal(UINT64 value) {
++  if (!timeline_.ptr()) return E_FAIL;
+   value_ = value;
+-  if (timeline_.ptr()) timeline_->signal(value);
++  timeline_->signal(value);
+   if (device_) device_->pump_queues();
+   return S_OK;
+ }
+@@ -5532,11 +6228,28 @@
+ }
+ void DxmtD3D12CommandQueue::ExecuteCommandLists(UINT count, ID3D12CommandList *const *lists) {
+   std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
+-  for (UINT i = 0; i < count; ++i) {
+-    auto *list = static_cast<DxmtD3D12GraphicsCommandList *>(lists[i]);
+-    if (!list) continue;
+-    if (pending_.empty()) list->replay_immediate();
+-    else pending_.push_back({OperationKind::Work, list->capture_replay(), {}, 0});
++  if (present_trace().enabled()) {
++    bridge_cpu_statistics().execute_calls.fetch_add(1);
++    bridge_cpu_statistics().command_lists.fetch_add(count);
++  }
++  if (!count || !lists) return;
++  if (pending_.empty()) {
++    for (UINT i = 0; i < count; ++i)
++      if (auto *list = static_cast<DxmtD3D12GraphicsCommandList *>(lists[i])) list->replay_immediate();
++    device_->submit_recorded_work();
++  } else {
++    // Retain immutable recordings for the entire API batch: the application
++    // can Reset each list while its queue still waits for another producer.
++    std::vector<std::function<void()>> recordings;
++    recordings.reserve(count);
++    for (UINT i = 0; i < count; ++i)
++      if (auto *list = static_cast<DxmtD3D12GraphicsCommandList *>(lists[i]))
++        recordings.push_back(list->capture_replay());
++    pending_.push_back({OperationKind::Work,
++        [recordings = std::move(recordings), device = ComPtr<DxmtD3D12Device>(device_)]() mutable {
++          for (auto &replay : recordings) replay();
++          device->submit_recorded_work();
++        }, {}, 0});
+   }
+   device_->pump_queues();
+ }
+@@ -5670,7 +6383,17 @@
+       hr = request->inner->Present1(sync_interval, flags, &parameters);
+     }
+     request->result = hr;
+-    trace.end(identity, start, hr);
++    if (start) {
++      dxmt::FrameStatistics stats;
++      if (auto *device = request->device->dxmt_device()) {
++        auto &queue = device->queue();
++        auto frame = queue.CurrentFrameSeq();
++        // CurrentFrameSeq is one-based and PresentBoundary has already
++        // advanced/reset the current slot. Read the completed frame.
++        if (frame >= 2) stats = queue.statistics.at(frame - 2);
++      }
++      trace.end(identity, start, hr, stats);
++    }
+   };
+   if (queue_) queue_->submit(std::move(present));
+   else present();
+@@ -5949,7 +6672,9 @@
+     context->Release();
+   if (d3d11_device)
+     d3d11_device->Release();
+-  hr = wrapper->QueryInterface(iid, device);
++  hr = wrapper->initialization_status();
++  if (SUCCEEDED(hr))
++    hr = wrapper->QueryInterface(iid, device);
+   wrapper->Release();
+   return hr;
+ }
+--- a/src/d3d12/d3d12.def
++++ b/src/d3d12/d3d12.def
+@@ -1,9 +1,9 @@
+ LIBRARY D3D12_DXMT.DLL
+ EXPORTS
+-    D3D12CreateDevice
++    D3D12CreateDevice @101
+     D3D12SerializeRootSignature
+     D3D12SerializeVersionedRootSignature
+-    D3D12GetDebugInterface
++    D3D12GetDebugInterface @102
+     D3D12GetInterface
+     D3D12EnableExperimentalFeatures
+     D3D12CreateRootSignatureDeserializer
+--- a/src/d3d12/d3d12_state_map.hpp
++++ b/src/d3d12/d3d12_state_map.hpp
+@@ -76,7 +76,7 @@
+   if (flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)
+     usage |= WMTTextureUsageRenderTarget;
+   if (flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
+-    usage |= WMTTextureUsageShaderWrite | WMTTextureUsageShaderAtomic;
++    usage |= WMTTextureUsageShaderWrite;
+   if (flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE)
+     usage &= ~uint32_t(WMTTextureUsageShaderRead);
+ 
+@@ -110,6 +110,12 @@
+   if (MTLQueryDXGIFormat(metal_device, desc.Format, format_desc) ||
+       format_desc.PixelFormat == WMTPixelFormatInvalid)
+     return false;
++  if (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) {
++    if (desc.Format == DXGI_FORMAT_R32_TYPELESS)
++      format_desc.PixelFormat = WMTPixelFormatDepth32Float;
++    else if (desc.Format == DXGI_FORMAT_R16_TYPELESS)
++      format_desc.PixelFormat = WMTPixelFormatDepth16Unorm;
++  }
+ 
+   info = {};
+   info.pixel_format = format_desc.PixelFormat;
+@@ -122,6 +128,12 @@
+   info.mipmap_level_count = std::max<uint32_t>(desc.MipLevels, 1);
+   info.sample_count = std::max<uint32_t>(desc.SampleDesc.Count, 1);
+   info.usage = texture_usage_from_flags(desc.Flags);
++  // Shader writes do not imply atomics. Match the format restrictions used
++  // by the D3D11 path; Metal rejects RGBA8 textures carrying ShaderAtomic.
++  if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) &&
++      (info.pixel_format == WMTPixelFormatR32Uint || info.pixel_format == WMTPixelFormatR32Sint ||
++       (info.pixel_format == WMTPixelFormatRG32Uint && metal_device.supportsFamily(WMTGPUFamilyApple8))))
++    info.usage = WMTTextureUsage(info.usage | WMTTextureUsageShaderAtomic);
+   info.options = options;
+   return true;
+ }
+--- a/src/dxmt/dxmt_buffer.cpp
++++ b/src/dxmt/dxmt_buffer.cpp
+@@ -57,6 +57,20 @@
+     placed_buffer = nullptr;
+   }
+   delete this;
++}
++
++BufferAllocation::BufferAllocation(WMT::Buffer buffer, const WMTBufferInfo &info, uint64_t base_offset) :
++    obj_(buffer), info_(info), mappedMemory_(info_.memory.get_accessible_or_null()),
++    gpuAddress_(info.gpu_address), suballocation_size_(info.length), base_offset_(base_offset) {
++  if (info.options & WMTResourceStorageModePrivate)
++    flags_.set(BufferAllocationFlag::GpuPrivate);
++  fenceTrackers.resize(1);
++}
++
++Rc<BufferAllocation>
++Buffer::importBuffer(WMT::Buffer buffer, const WMTBufferInfo &info, uint64_t offset) {
++  if (!buffer || !info.length || info.length != length_) return nullptr;
++  return new BufferAllocation(buffer, info, offset);
+ }
+ 
+ WMT::Texture
+@@ -125,7 +139,7 @@
+     }
+     info.usage = usage;
+ 
+-    auto view = allocation->obj_.newTexture(info, 0, total_length);
++    auto view = allocation->obj_.newTexture(info, allocation->base_offset_, total_length);
+ 
+     allocation->cached_view_.push_back(std::make_unique<BufferView>(
+         std::move(view), info.gpu_resource_id, allocation->suballocation_size_ / texel_size
+@@ -185,4 +199,4 @@
+     delete this;
+ };
+ 
+-} // namespace dxmt+} // namespace dxmt
+--- a/src/dxmt/dxmt_buffer.hpp
++++ b/src/dxmt/dxmt_buffer.hpp
+@@ -121,12 +121,12 @@
+ 
+   uint64_t
+   currentSuballocationOffset() const noexcept {
+-    return current_suballocation_ * suballocation_size_;
++    return base_offset_ + current_suballocation_ * suballocation_size_;
+   }
+ 
+   uint64_t
+   currentSuballocationOffset(uint64_t stride) const noexcept {
+-    return current_suballocation_ * stride;
++    return base_offset_ + current_suballocation_ * stride;
+   }
+ 
+   uint32_t currentSuballocation() {
+@@ -139,7 +139,7 @@
+       memcpy(reinterpret_cast<char *>(mappedMemory_) + suballocation * suballocation_size_ + offset, data, length);
+       return;
+     }
+-    obj_.updateContents(suballocation * suballocation_size_ + offset, data, length);
++    obj_.updateContents(base_offset_ + suballocation * suballocation_size_ + offset, data, length);
+   }
+ 
+   DXMT_RESOURCE_RESIDENCY_STATE residencyState;
+@@ -147,6 +147,7 @@
+ 
+ private:
+   BufferAllocation(WMT::Device device, const WMTBufferInfo &info, Flags<BufferAllocationFlag> flags);
++  BufferAllocation(WMT::Buffer buffer, const WMTBufferInfo &info, uint64_t base_offset);
+   void free();
+ 
+   BufferAllocation(const BufferAllocation &) = delete;
+@@ -164,6 +165,7 @@
+   uint32_t suballocation_count_ = 1;
+ 
+   void * placed_buffer = nullptr;
++  uint64_t base_offset_ = 0;
+ };
+ 
+ class Buffer {
+@@ -179,6 +181,7 @@
+   }
+ 
+   Rc<BufferAllocation> allocate(Flags<BufferAllocationFlag> flags);
++  Rc<BufferAllocation> importBuffer(WMT::Buffer buffer, const WMTBufferInfo &info, uint64_t offset = 0);
+ 
+   Rc<BufferAllocation> rename(Rc<BufferAllocation> &&newAllocation);
+ 
+@@ -223,4 +226,4 @@
+   uint32_t elementCount = 0;
+ };
+ 
+-} // namespace dxmt+} // namespace dxmt
+--- a/src/dxmt/dxmt_texture.cpp
++++ b/src/dxmt/dxmt_texture.cpp
+@@ -219,6 +219,20 @@
+   }
+   auto texture = flags.test(TextureAllocationFlag::Shared) ? device_.newSharedTexture(info) : device_.newTexture(info);
+   return new TextureAllocation(this, std::move(texture), info, flags);
++}
++
++Rc<TextureAllocation>
++Texture::importTexture(WMT::Texture texture, uint64_t gpu_resource_id) {
++  if (!texture) return nullptr;
++  WMTTextureInfo info = info_;
++  info.gpu_resource_id = gpu_resource_id;
++  info.mach_port = 0;
++  Flags<TextureAllocationFlag> flags;
++  if (info.options & WMTResourceStorageModePrivate)
++    flags.set(TextureAllocationFlag::GpuPrivate);
++  if (!(info.usage & (WMTTextureUsageShaderWrite | WMTTextureUsageRenderTarget)))
++    flags.set(TextureAllocationFlag::ShaderReadonly);
++  return new TextureAllocation(this, WMT::Reference<WMT::Texture>(texture), info, flags);
+ }
+ 
+ Rc<TextureAllocation>
+--- a/src/dxmt/dxmt_texture.hpp
++++ b/src/dxmt/dxmt_texture.hpp
+@@ -292,6 +292,7 @@
+   Rc<TextureAllocation>
+   allocateOver(WMT::Buffer buffer, void *mapped, uint64_t offset, Flags<TextureAllocationFlag> flags);
+   Rc<TextureAllocation> import(mach_port_t mach_port);
++  Rc<TextureAllocation> importTexture(WMT::Texture texture, uint64_t gpu_resource_id);
+ 
+   TextureView &view(TextureViewKey key);
+   TextureView &view(TextureViewKey key, TextureAllocation *allocation);
+@@ -339,4 +340,4 @@
+   std::atomic<uint32_t> refcount_ = {0u};
+ };
+ 
+-} // namespace dxmt+} // namespace dxmt

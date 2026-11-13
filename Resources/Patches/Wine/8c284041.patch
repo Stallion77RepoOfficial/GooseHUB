@@ -1,0 +1,41 @@
+From 8c284041138dec2c38146970c5de3549ea3e007a Mon Sep 17 00:00:00 2001
+From: Jacek Caban <jacek@codeweavers.com>
+Date: Thu, 20 Aug 2026 13:46:47 +0200
+Subject: [PATCH] ntdll: Preserve exception flags when converting between x64
+ and arm64 context flags.
+
+Fixes test_context_exception_request tests on arm64ec.
+---
+ dlls/ntdll/unwind.h | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/dlls/ntdll/unwind.h b/dlls/ntdll/unwind.h
+index faca8a25..18527088 100644
+--- a/dlls/ntdll/unwind.h
++++ b/dlls/ntdll/unwind.h
+@@ -28,9 +28,12 @@
+ 
+ #if defined(__aarch64__) || defined(__arm64ec__)
+ 
++static const ULONG exception_flags_mask = CONTEXT_EXCEPTION_ACTIVE |
++    CONTEXT_SERVICE_ACTIVE | CONTEXT_EXCEPTION_REQUEST | CONTEXT_EXCEPTION_REPORTING;
++
+ static inline ULONG ctx_flags_x64_to_arm( ULONG flags )
+ {
+-    ULONG ret = CONTEXT_ARM64;
++    ULONG ret = CONTEXT_ARM64 | (flags & exception_flags_mask);
+ 
+     flags &= ~CONTEXT_AMD64;
+     if (flags & CONTEXT_AMD64_CONTROL) ret |= CONTEXT_ARM64_CONTROL;
+@@ -41,7 +44,7 @@ static inline ULONG ctx_flags_x64_to_arm( ULONG flags )
+ 
+ static inline ULONG ctx_flags_arm_to_x64( ULONG flags )
+ {
+-    ULONG ret = CONTEXT_AMD64;
++    ULONG ret = CONTEXT_AMD64 | (flags & exception_flags_mask);
+ 
+     flags &= ~CONTEXT_ARM64;
+     if (flags & CONTEXT_ARM64_CONTROL) ret |= CONTEXT_AMD64_CONTROL;
+-- 
+2.55.0
+

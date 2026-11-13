@@ -1,0 +1,33 @@
+{
+  "framesPerReplay": 980,
+  "runs": [
+    {
+      "run": "shipping-on01",
+      "frames": 980,
+      "seconds": 5.546,
+      "fps": 176.698
+    },
+    {
+      "run": "shipping-off01",
+      "frames": 980,
+      "seconds": 13.524,
+      "fps": 72.464
+    },
+    {
+      "run": "shipping-on02",
+      "frames": 980,
+      "seconds": 5.565,
+      "fps": 176.095
+    },
+    {
+      "run": "shipping-off02",
+      "frames": 980,
+      "seconds": 11.227,
+      "fps": 87.287
+    }
+  ],
+  "medianOnFPS": 176.3965,
+  "medianOffFPS": 79.8755,
+  "ratio": 2.208393061702274,
+  "method": "Identical recorded 15-character scene; native timedemo, no frame-probe DLL. Counterbalanced launch order on/off/on/off; background applications left running."
+}

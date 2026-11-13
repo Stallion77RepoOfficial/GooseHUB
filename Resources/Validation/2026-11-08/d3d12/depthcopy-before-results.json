@@ -1,0 +1,13 @@
+{
+  "dllSHA256": "8d21579987d4a708dcb1dd32eae2a98e1d70c404dcd60490c8b5f4e23f00a2e9",
+  "tests": [
+    {
+      "mode": "dxbc-prepass-depthcopy",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-prepass-depthcopy",
+      "exit": 1
+    }
+  ]
+}

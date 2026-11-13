@@ -1,0 +1,25 @@
+{
+  "applications" : [
+
+  ],
+  "architecture" : "arm64ec",
+  "createdAt" : "2026-10-23T15:33:02Z",
+  "debugLogging" : false,
+  "dxmt" : {
+    "asyncPipelineCompilation" : false,
+    "maximumFrameRate" : 120,
+    "metalHUD" : false,
+    "shaderCache" : false
+  },
+  "highResolution" : false,
+  "id" : "77D0FB5A-9D0D-44C5-B53F-20A3BD53B226",
+  "metalGoose" : {
+    "enabled" : false
+  },
+  "name" : "games",
+  "renderer" : "wined3d",
+  "state" : "ready",
+  "synchronization" : "msync",
+  "updatedAt" : "2026-10-28T19:45:16Z",
+  "windowsVersion" : "win10"
+}

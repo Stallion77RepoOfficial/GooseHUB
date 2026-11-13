@@ -1,0 +1,18 @@
+{
+  "removedOwnedTemporaryArtifacts": [
+    "Goose HUB rollback.app",
+    "prefix-validation",
+    "prefix",
+    "DX12-FPS",
+    "ULTRAKILL-Prelude",
+    "steamcmd",
+    "severedsteeldemo",
+    "fps-build",
+    "ULTRAKILL-Prelude.zip"
+  ],
+  "durableOfficialDemoFilesVerified": 183,
+  "durableDemo": "/Users/berkegulacar/Library/Application Support/GooseHUB/Games/ULTRAKILL Prelude",
+  "retainedRelease": "GooseHUB/dist/Goose HUB latest.app",
+  "retainedReportsAndSourceBaselines": true,
+  "unrelatedAppsUntouched": true
+}

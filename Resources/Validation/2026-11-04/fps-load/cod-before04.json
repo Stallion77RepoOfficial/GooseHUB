@@ -1,0 +1,2198 @@
+{
+  "label": "cod-before04",
+  "elapsed": 90.78061720798723,
+  "groups": [
+    {
+      "elapsed": 5.015264624991687,
+      "fps": 23.7964,
+      "draws": 4,
+      "prepareMs": 0.164983,
+      "uploadMs": 0.0227833,
+      "bindMs": 0.0535
+    },
+    {
+      "elapsed": 5.608404375001555,
+      "fps": 100.255,
+      "draws": 5,
+      "prepareMs": 0.0306667,
+      "uploadMs": 0.0103333,
+      "bindMs": 0.00578333
+    },
+    {
+      "elapsed": 5.8610083750099875,
+      "fps": 237.564,
+      "draws": 5,
+      "prepareMs": 0.0340667,
+      "uploadMs": 0.0120833,
+      "bindMs": 0.0066
+    },
+    {
+      "elapsed": 6.10919004198513,
+      "fps": 241.597,
+      "draws": 5,
+      "prepareMs": 0.03405,
+      "uploadMs": 0.0125333,
+      "bindMs": 0.00698333
+    },
+    {
+      "elapsed": 6.358643124985974,
+      "fps": 240.592,
+      "draws": 5,
+      "prepareMs": 0.0380833,
+      "uploadMs": 0.0156,
+      "bindMs": 0.00698333
+    },
+    {
+      "elapsed": 6.617036042007385,
+      "fps": 232.182,
+      "draws": 5,
+      "prepareMs": 0.0393833,
+      "uploadMs": 0.0147333,
+      "bindMs": 0.00806667
+    },
+    {
+      "elapsed": 6.86811716700322,
+      "fps": 238.912,
+      "draws": 5,
+      "prepareMs": 0.0370167,
+      "uploadMs": 0.01275,
+      "bindMs": 0.00771667
+    },
+    {
+      "elapsed": 7.1168487499817275,
+      "fps": 241.284,
+      "draws": 5,
+      "prepareMs": 0.0364167,
+      "uploadMs": 0.0132,
+      "bindMs": 0.00743333
+    },
+    {
+      "elapsed": 7.366543292009737,
+      "fps": 240.298,
+      "draws": 5,
+      "prepareMs": 0.0344667,
+      "uploadMs": 0.0126167,
+      "bindMs": 0.00706667
+    },
+    {
+      "elapsed": 7.61685683298856,
+      "fps": 239.643,
+      "draws": 5,
+      "prepareMs": 0.0435667,
+      "uploadMs": 0.0139833,
+      "bindMs": 0.01005
+    },
+    {
+      "elapsed": 7.866580625006463,
+      "fps": 240.267,
+      "draws": 5,
+      "prepareMs": 0.04945,
+      "uploadMs": 0.0158667,
+      "bindMs": 0.01025
+    },
+    {
+      "elapsed": 8.11666741699446,
+      "fps": 239.895,
+      "draws": 5,
+      "prepareMs": 0.04465,
+      "uploadMs": 0.0146333,
+      "bindMs": 0.00943333
+    },
+    {
+      "elapsed": 8.366699582984438,
+      "fps": 239.984,
+      "draws": 5,
+      "prepareMs": 0.0347333,
+      "uploadMs": 0.01275,
+      "bindMs": 0.007
+    },
+    {
+      "elapsed": 8.616691458009882,
+      "fps": 240.007,
+      "draws": 5,
+      "prepareMs": 0.0376667,
+      "uploadMs": 0.0135833,
+      "bindMs": 0.00748333
+    },
+    {
+      "elapsed": 8.865821166982641,
+      "fps": 240.827,
+      "draws": 5,
+      "prepareMs": 0.0378167,
+      "uploadMs": 0.01395,
+      "bindMs": 0.00785
+    },
+    {
+      "elapsed": 9.115620541997487,
+      "fps": 240.184,
+      "draws": 5,
+      "prepareMs": 0.0371333,
+      "uploadMs": 0.0137833,
+      "bindMs": 0.0079
+    },
+    {
+      "elapsed": 9.366521291987738,
+      "fps": 239.145,
+      "draws": 5,
+      "prepareMs": 0.03295,
+      "uploadMs": 0.01235,
+      "bindMs": 0.00608333
+    },
+    {
+      "elapsed": 9.615982957999222,
+      "fps": 240.522,
+      "draws": 5,
+      "prepareMs": 0.0356167,
+      "uploadMs": 0.01285,
+      "bindMs": 0.00716667
+    },
+    {
+      "elapsed": 9.865612416993827,
+      "fps": 240.398,
+      "draws": 5,
+      "prepareMs": 0.0345,
+      "uploadMs": 0.0125,
+      "bindMs": 0.00758333
+    },
+    {
+      "elapsed": 10.116834041982656,
+      "fps": 238.786,
+      "draws": 5,
+      "prepareMs": 0.0325667,
+      "uploadMs": 0.01215,
+      "bindMs": 0.00631667
+    },
+    {
+      "elapsed": 10.36646112499875,
+      "fps": 240.374,
+      "draws": 5,
+      "prepareMs": 0.0355333,
+      "uploadMs": 0.0136667,
+      "bindMs": 0.00691667
+    },
+    {
+      "elapsed": 10.620220541983144,
+      "fps": 236.566,
+      "draws": 5,
+      "prepareMs": 0.0349,
+      "uploadMs": 0.0122,
+      "bindMs": 0.0071
+    },
+    {
+      "elapsed": 10.867335082992213,
+      "fps": 242.744,
+      "draws": 5,
+      "prepareMs": 0.0382167,
+      "uploadMs": 0.0132167,
+      "bindMs": 0.00785
+    },
+    {
+      "elapsed": 11.116868582990719,
+      "fps": 240.377,
+      "draws": 5,
+      "prepareMs": 0.0363167,
+      "uploadMs": 0.0130333,
+      "bindMs": 0.00688333
+    },
+    {
+      "elapsed": 11.368354000005638,
+      "fps": 238.589,
+      "draws": 5,
+      "prepareMs": 0.0348667,
+      "uploadMs": 0.0120667,
+      "bindMs": 0.00746667
+    },
+    {
+      "elapsed": 11.618809292005608,
+      "fps": 239.553,
+      "draws": 5,
+      "prepareMs": 0.03795,
+      "uploadMs": 0.0137167,
+      "bindMs": 0.00741667
+    },
+    {
+      "elapsed": 11.867672916996526,
+      "fps": 241.161,
+      "draws": 7,
+      "prepareMs": 0.0630667,
+      "uploadMs": 0.01495,
+      "bindMs": 0.0163167
+    },
+    {
+      "elapsed": 12.117726666998351,
+      "fps": 239.891,
+      "draws": 8,
+      "prepareMs": 0.0511667,
+      "uploadMs": 0.0130833,
+      "bindMs": 0.0115167
+    },
+    {
+      "elapsed": 12.36886937500094,
+      "fps": 238.912,
+      "draws": 8,
+      "prepareMs": 0.0517667,
+      "uploadMs": 0.01405,
+      "bindMs": 0.0114167
+    },
+    {
+      "elapsed": 12.617779874999542,
+      "fps": 241.055,
+      "draws": 8,
+      "prepareMs": 0.0598833,
+      "uploadMs": 0.01615,
+      "bindMs": 0.0132667
+    },
+    {
+      "elapsed": 12.87138316698838,
+      "fps": 236.565,
+      "draws": 8,
+      "prepareMs": 0.0560667,
+      "uploadMs": 0.0153167,
+      "bindMs": 0.0124833
+    },
+    {
+      "elapsed": 13.116708082990954,
+      "fps": 244.637,
+      "draws": 8,
+      "prepareMs": 0.0494833,
+      "uploadMs": 0.015,
+      "bindMs": 0.0108833
+    },
+    {
+      "elapsed": 13.370278416987276,
+      "fps": 236.569,
+      "draws": 8,
+      "prepareMs": 0.0440833,
+      "uploadMs": 0.0124333,
+      "bindMs": 0.0102167
+    },
+    {
+      "elapsed": 13.617522874992574,
+      "fps": 242.682,
+      "draws": 8,
+      "prepareMs": 0.0476,
+      "uploadMs": 0.0135,
+      "bindMs": 0.0105
+    },
+    {
+      "elapsed": 13.868942291999701,
+      "fps": 238.636,
+      "draws": 8,
+      "prepareMs": 0.0455833,
+      "uploadMs": 0.0126167,
+      "bindMs": 0.0104167
+    },
+    {
+      "elapsed": 14.11734479200095,
+      "fps": 241.572,
+      "draws": 8,
+      "prepareMs": 0.0448333,
+      "uploadMs": 0.01265,
+      "bindMs": 0.0102167
+    },
+    {
+      "elapsed": 14.368802624987438,
+      "fps": 238.575,
+      "draws": 8,
+      "prepareMs": 0.0426667,
+      "uploadMs": 0.0122833,
+      "bindMs": 0.00973333
+    },
+    {
+      "elapsed": 14.618759667006088,
+      "fps": 240.08,
+      "draws": 8,
+      "prepareMs": 0.0498333,
+      "uploadMs": 0.0137,
+      "bindMs": 0.0109
+    },
+    {
+      "elapsed": 14.869299457990564,
+      "fps": 239.502,
+      "draws": 8,
+      "prepareMs": 0.05005,
+      "uploadMs": 0.0131167,
+      "bindMs": 0.0118167
+    },
+    {
+      "elapsed": 15.119176042004256,
+      "fps": 240.077,
+      "draws": 8,
+      "prepareMs": 0.0484333,
+      "uploadMs": 0.0125667,
+      "bindMs": 0.0115167
+    },
+    {
+      "elapsed": 15.366859375004424,
+      "fps": 242.263,
+      "draws": 8,
+      "prepareMs": 0.0504167,
+      "uploadMs": 0.0139,
+      "bindMs": 0.0114333
+    },
+    {
+      "elapsed": 15.617201666987967,
+      "fps": 239.707,
+      "draws": 8,
+      "prepareMs": 0.0613833,
+      "uploadMs": 0.0152833,
+      "bindMs": 0.0129167
+    },
+    {
+      "elapsed": 15.866611874982482,
+      "fps": 240.518,
+      "draws": 8,
+      "prepareMs": 0.0544833,
+      "uploadMs": 0.0147,
+      "bindMs": 0.0125833
+    },
+    {
+      "elapsed": 16.117979250004282,
+      "fps": 238.699,
+      "draws": 8,
+      "prepareMs": 0.0499333,
+      "uploadMs": 0.0132833,
+      "bindMs": 0.0111667
+    },
+    {
+      "elapsed": 16.36710145798861,
+      "fps": 240.909,
+      "draws": 8,
+      "prepareMs": 0.049,
+      "uploadMs": 0.0133333,
+      "bindMs": 0.0107833
+    },
+    {
+      "elapsed": 16.617245625006035,
+      "fps": 239.806,
+      "draws": 8,
+      "prepareMs": 0.05255,
+      "uploadMs": 0.0138,
+      "bindMs": 0.01125
+    },
+    {
+      "elapsed": 16.866565250005806,
+      "fps": 240.645,
+      "draws": 5,
+      "prepareMs": 0.0398833,
+      "uploadMs": 0.0127333,
+      "bindMs": 0.00878333
+    },
+    {
+      "elapsed": 17.11801370800822,
+      "fps": 238.615,
+      "draws": 5,
+      "prepareMs": 0.0331833,
+      "uploadMs": 0.0121833,
+      "bindMs": 0.00656667
+    },
+    {
+      "elapsed": 17.36822520798887,
+      "fps": 239.81,
+      "draws": 5,
+      "prepareMs": 0.0362667,
+      "uploadMs": 0.0121667,
+      "bindMs": 0.00701667
+    },
+    {
+      "elapsed": 17.616358541999944,
+      "fps": 241.793,
+      "draws": 5,
+      "prepareMs": 0.04355,
+      "uploadMs": 0.0138833,
+      "bindMs": 0.00935
+    },
+    {
+      "elapsed": 17.866496417002054,
+      "fps": 239.867,
+      "draws": 7,
+      "prepareMs": 0.0473333,
+      "uploadMs": 0.0129667,
+      "bindMs": 0.0107
+    },
+    {
+      "elapsed": 18.11963558298885,
+      "fps": 237.079,
+      "draws": 8,
+      "prepareMs": 0.0439833,
+      "uploadMs": 0.0117167,
+      "bindMs": 0.0096
+    },
+    {
+      "elapsed": 18.36677383299684,
+      "fps": 242.719,
+      "draws": 8,
+      "prepareMs": 0.0488333,
+      "uploadMs": 0.0127167,
+      "bindMs": 0.0109833
+    },
+    {
+      "elapsed": 18.619074707996333,
+      "fps": 237.81,
+      "draws": 8,
+      "prepareMs": 0.0531667,
+      "uploadMs": 0.0149833,
+      "bindMs": 0.0123
+    },
+    {
+      "elapsed": 18.868613667000318,
+      "fps": 240.443,
+      "draws": 8,
+      "prepareMs": 0.0462667,
+      "uploadMs": 0.0125167,
+      "bindMs": 0.01085
+    },
+    {
+      "elapsed": 19.118544124998152,
+      "fps": 240.085,
+      "draws": 8,
+      "prepareMs": 0.0483333,
+      "uploadMs": 0.0128,
+      "bindMs": 0.0114
+    },
+    {
+      "elapsed": 19.3693762079929,
+      "fps": 239.19,
+      "draws": 8,
+      "prepareMs": 0.0518,
+      "uploadMs": 0.0140833,
+      "bindMs": 0.0125167
+    },
+    {
+      "elapsed": 19.61926537498948,
+      "fps": 240.127,
+      "draws": 8,
+      "prepareMs": 0.0582167,
+      "uploadMs": 0.0144,
+      "bindMs": 0.0126
+    },
+    {
+      "elapsed": 19.867201707995264,
+      "fps": 241.975,
+      "draws": 8,
+      "prepareMs": 0.0599833,
+      "uploadMs": 0.0172,
+      "bindMs": 0.0136333
+    },
+    {
+      "elapsed": 20.11918183299713,
+      "fps": 238.158,
+      "draws": 8,
+      "prepareMs": 0.0548333,
+      "uploadMs": 0.0145333,
+      "bindMs": 0.0126167
+    },
+    {
+      "elapsed": 20.367179624998244,
+      "fps": 241.955,
+      "draws": 8,
+      "prepareMs": 0.05715,
+      "uploadMs": 0.0153,
+      "bindMs": 0.01325
+    },
+    {
+      "elapsed": 20.618328249984188,
+      "fps": 238.865,
+      "draws": 8,
+      "prepareMs": 0.05895,
+      "uploadMs": 0.0152833,
+      "bindMs": 0.0133333
+    },
+    {
+      "elapsed": 20.867602541984525,
+      "fps": 240.682,
+      "draws": 8,
+      "prepareMs": 0.0557833,
+      "uploadMs": 0.0142,
+      "bindMs": 0.0122833
+    },
+    {
+      "elapsed": 21.117523166991305,
+      "fps": 240.101,
+      "draws": 8,
+      "prepareMs": 0.0465,
+      "uploadMs": 0.013,
+      "bindMs": 0.0100167
+    },
+    {
+      "elapsed": 21.36703020799905,
+      "fps": 240.474,
+      "draws": 8,
+      "prepareMs": 0.04565,
+      "uploadMs": 0.0134333,
+      "bindMs": 0.00976667
+    },
+    {
+      "elapsed": 21.619514457997866,
+      "fps": 237.606,
+      "draws": 8,
+      "prepareMs": 0.0469667,
+      "uploadMs": 0.0129167,
+      "bindMs": 0.0103833
+    },
+    {
+      "elapsed": 21.866572291997727,
+      "fps": 242.846,
+      "draws": 8,
+      "prepareMs": 0.04955,
+      "uploadMs": 0.0138167,
+      "bindMs": 0.01085
+    },
+    {
+      "elapsed": 22.11682862500311,
+      "fps": 239.776,
+      "draws": 8,
+      "prepareMs": 0.0405333,
+      "uploadMs": 0.0118333,
+      "bindMs": 0.00848333
+    },
+    {
+      "elapsed": 22.368605124996975,
+      "fps": 238.325,
+      "draws": 8,
+      "prepareMs": 0.0415333,
+      "uploadMs": 0.0114167,
+      "bindMs": 0.0092
+    },
+    {
+      "elapsed": 22.618667500006268,
+      "fps": 239.916,
+      "draws": 8,
+      "prepareMs": 0.05445,
+      "uploadMs": 0.0145833,
+      "bindMs": 0.0121167
+    },
+    {
+      "elapsed": 22.8672522919951,
+      "fps": 241.373,
+      "draws": 8,
+      "prepareMs": 0.0529,
+      "uploadMs": 0.0149833,
+      "bindMs": 0.0123833
+    },
+    {
+      "elapsed": 23.119505582988495,
+      "fps": 237.958,
+      "draws": 8,
+      "prepareMs": 0.0488167,
+      "uploadMs": 0.0131333,
+      "bindMs": 0.01075
+    },
+    {
+      "elapsed": 23.367456167005002,
+      "fps": 241.883,
+      "draws": 8,
+      "prepareMs": 0.05095,
+      "uploadMs": 0.0137667,
+      "bindMs": 0.01235
+    },
+    {
+      "elapsed": 23.61965804200736,
+      "fps": 237.985,
+      "draws": 8,
+      "prepareMs": 0.0510833,
+      "uploadMs": 0.0139667,
+      "bindMs": 0.011
+    },
+    {
+      "elapsed": 23.866638707986567,
+      "fps": 242.859,
+      "draws": 7,
+      "prepareMs": 0.0526167,
+      "uploadMs": 0.0145833,
+      "bindMs": 0.0126167
+    },
+    {
+      "elapsed": 24.11941016698256,
+      "fps": 237.392,
+      "draws": 7,
+      "prepareMs": 0.04695,
+      "uploadMs": 0.0127667,
+      "bindMs": 0.0105
+    },
+    {
+      "elapsed": 24.367147541983286,
+      "fps": 242.153,
+      "draws": 7,
+      "prepareMs": 0.0439333,
+      "uploadMs": 0.01265,
+      "bindMs": 0.0103
+    },
+    {
+      "elapsed": 24.61905758298235,
+      "fps": 238.171,
+      "draws": 7,
+      "prepareMs": 0.0477167,
+      "uploadMs": 0.0137167,
+      "bindMs": 0.0108167
+    },
+    {
+      "elapsed": 24.86943724998855,
+      "fps": 239.67,
+      "draws": 7,
+      "prepareMs": 0.0523167,
+      "uploadMs": 0.0146,
+      "bindMs": 0.01105
+    },
+    {
+      "elapsed": 25.118279416987207,
+      "fps": 241.131,
+      "draws": 7,
+      "prepareMs": 0.0424333,
+      "uploadMs": 0.0115667,
+      "bindMs": 0.0092
+    },
+    {
+      "elapsed": 25.366547957994044,
+      "fps": 241.63,
+      "draws": 7,
+      "prepareMs": 0.0435167,
+      "uploadMs": 0.0120833,
+      "bindMs": 0.00891667
+    },
+    {
+      "elapsed": 25.617396832996747,
+      "fps": 239.174,
+      "draws": 7,
+      "prepareMs": 0.0435333,
+      "uploadMs": 0.0132,
+      "bindMs": 0.00918333
+    },
+    {
+      "elapsed": 25.867912166984752,
+      "fps": 239.51,
+      "draws": 7,
+      "prepareMs": 0.04345,
+      "uploadMs": 0.0135,
+      "bindMs": 0.00943333
+    },
+    {
+      "elapsed": 26.118154541996773,
+      "fps": 239.782,
+      "draws": 7,
+      "prepareMs": 0.0423667,
+      "uploadMs": 0.0133667,
+      "bindMs": 0.00865
+    },
+    {
+      "elapsed": 26.368778042000486,
+      "fps": 239.456,
+      "draws": 7,
+      "prepareMs": 0.0472833,
+      "uploadMs": 0.0143833,
+      "bindMs": 0.0108
+    },
+    {
+      "elapsed": 26.618711874994915,
+      "fps": 240.013,
+      "draws": 7,
+      "prepareMs": 0.0512167,
+      "uploadMs": 0.0141667,
+      "bindMs": 0.0113167
+    },
+    {
+      "elapsed": 26.867010624991963,
+      "fps": 241.675,
+      "draws": 7,
+      "prepareMs": 0.0552167,
+      "uploadMs": 0.0145333,
+      "bindMs": 0.0124167
+    },
+    {
+      "elapsed": 27.11745316698216,
+      "fps": 239.563,
+      "draws": 7,
+      "prepareMs": 0.0526833,
+      "uploadMs": 0.01425,
+      "bindMs": 0.0112167
+    },
+    {
+      "elapsed": 27.36756595800398,
+      "fps": 239.917,
+      "draws": 7,
+      "prepareMs": 0.0362333,
+      "uploadMs": 0.00936667,
+      "bindMs": 0.00766667
+    },
+    {
+      "elapsed": 27.618611249985406,
+      "fps": 238.95,
+      "draws": 7,
+      "prepareMs": 0.0461667,
+      "uploadMs": 0.01215,
+      "bindMs": 0.0105833
+    },
+    {
+      "elapsed": 27.867173582984833,
+      "fps": 241.397,
+      "draws": 5,
+      "prepareMs": 0.04125,
+      "uploadMs": 0.0129333,
+      "bindMs": 0.00945
+    },
+    {
+      "elapsed": 28.11761212500278,
+      "fps": 239.582,
+      "draws": 5,
+      "prepareMs": 0.03785,
+      "uploadMs": 0.0129333,
+      "bindMs": 0.00828333
+    },
+    {
+      "elapsed": 28.36801654199371,
+      "fps": 239.621,
+      "draws": 5,
+      "prepareMs": 0.04055,
+      "uploadMs": 0.0141333,
+      "bindMs": 0.00796667
+    },
+    {
+      "elapsed": 28.620823208009824,
+      "fps": 237.354,
+      "draws": 5,
+      "prepareMs": 0.0399667,
+      "uploadMs": 0.0132167,
+      "bindMs": 0.0085
+    },
+    {
+      "elapsed": 28.866287249984453,
+      "fps": 244.375,
+      "draws": 6,
+      "prepareMs": 0.0417167,
+      "uploadMs": 0.0126167,
+      "bindMs": 0.0088
+    },
+    {
+      "elapsed": 29.11754354200093,
+      "fps": 238.828,
+      "draws": 7,
+      "prepareMs": 0.0420333,
+      "uploadMs": 0.0114833,
+      "bindMs": 0.0086
+    },
+    {
+      "elapsed": 29.367626166989794,
+      "fps": 239.932,
+      "draws": 7,
+      "prepareMs": 0.0505333,
+      "uploadMs": 0.01425,
+      "bindMs": 0.0111
+    },
+    {
+      "elapsed": 29.621135166991735,
+      "fps": 236.655,
+      "draws": 7,
+      "prepareMs": 0.0488833,
+      "uploadMs": 0.0131167,
+      "bindMs": 0.0103833
+    },
+    {
+      "elapsed": 29.867542082996806,
+      "fps": 243.496,
+      "draws": 5,
+      "prepareMs": 0.0363333,
+      "uploadMs": 0.0122333,
+      "bindMs": 0.00753333
+    },
+    {
+      "elapsed": 30.14941974999965,
+      "fps": 212.856,
+      "draws": 5,
+      "prepareMs": 0.0285667,
+      "uploadMs": 0.0106167,
+      "bindMs": 0.00596667
+    },
+    {
+      "elapsed": 30.39986829200643,
+      "fps": 239.578,
+      "draws": 5,
+      "prepareMs": 0.0284167,
+      "uploadMs": 0.0107667,
+      "bindMs": 0.00566667
+    },
+    {
+      "elapsed": 30.649369207996642,
+      "fps": 240.489,
+      "draws": 5,
+      "prepareMs": 0.0367667,
+      "uploadMs": 0.0129,
+      "bindMs": 0.00776667
+    },
+    {
+      "elapsed": 30.899082166986773,
+      "fps": 240.267,
+      "draws": 6,
+      "prepareMs": 0.0459333,
+      "uploadMs": 0.0126833,
+      "bindMs": 0.01015
+    },
+    {
+      "elapsed": 31.14926641699276,
+      "fps": 239.833,
+      "draws": 7,
+      "prepareMs": 0.0467833,
+      "uploadMs": 0.0128,
+      "bindMs": 0.0110333
+    },
+    {
+      "elapsed": 31.399764500005404,
+      "fps": 239.52,
+      "draws": 7,
+      "prepareMs": 0.0453833,
+      "uploadMs": 0.0123167,
+      "bindMs": 0.0102333
+    },
+    {
+      "elapsed": 31.649177874991437,
+      "fps": 240.568,
+      "draws": 7,
+      "prepareMs": 0.04995,
+      "uploadMs": 0.01415,
+      "bindMs": 0.0117167
+    },
+    {
+      "elapsed": 31.9005018750031,
+      "fps": 238.761,
+      "draws": 7,
+      "prepareMs": 0.0490167,
+      "uploadMs": 0.01335,
+      "bindMs": 0.0113
+    },
+    {
+      "elapsed": 32.14991912498954,
+      "fps": 240.533,
+      "draws": 7,
+      "prepareMs": 0.0461667,
+      "uploadMs": 0.0135667,
+      "bindMs": 0.0100333
+    },
+    {
+      "elapsed": 32.44994241700624,
+      "fps": 200.084,
+      "draws": 7,
+      "prepareMs": 0.0763667,
+      "uploadMs": 0.0158333,
+      "bindMs": 0.0313167
+    },
+    {
+      "elapsed": 32.69989095799974,
+      "fps": 240.022,
+      "draws": 7,
+      "prepareMs": 0.0774,
+      "uploadMs": 0.0171667,
+      "bindMs": 0.0156667
+    },
+    {
+      "elapsed": 32.94973487500101,
+      "fps": 240.041,
+      "draws": 7,
+      "prepareMs": 0.06455,
+      "uploadMs": 0.0184,
+      "bindMs": 0.0143833
+    },
+    {
+      "elapsed": 33.19903345798957,
+      "fps": 240.669,
+      "draws": 7,
+      "prepareMs": 0.0495167,
+      "uploadMs": 0.0129833,
+      "bindMs": 0.0112333
+    },
+    {
+      "elapsed": 33.542701500002295,
+      "fps": 174.564,
+      "draws": 7,
+      "prepareMs": 0.06665,
+      "uploadMs": 0.0214667,
+      "bindMs": 0.0122333
+    },
+    {
+      "elapsed": 33.793790958006866,
+      "fps": 238.983,
+      "draws": 6,
+      "prepareMs": 0.02855,
+      "uploadMs": 0.00873333,
+      "bindMs": 0.00626667
+    },
+    {
+      "elapsed": 34.04172170799575,
+      "fps": 242.032,
+      "draws": 5,
+      "prepareMs": 0.0319833,
+      "uploadMs": 0.0109833,
+      "bindMs": 0.0064
+    },
+    {
+      "elapsed": 34.29416287498316,
+      "fps": 237.681,
+      "draws": 5,
+      "prepareMs": 0.0402,
+      "uploadMs": 0.0134,
+      "bindMs": 0.00883333
+    },
+    {
+      "elapsed": 34.54158062499482,
+      "fps": 242.475,
+      "draws": 5,
+      "prepareMs": 0.0377167,
+      "uploadMs": 0.0129667,
+      "bindMs": 0.00806667
+    },
+    {
+      "elapsed": 34.79443770798389,
+      "fps": 237.346,
+      "draws": 5,
+      "prepareMs": 0.04645,
+      "uploadMs": 0.0137833,
+      "bindMs": 0.0095
+    },
+    {
+      "elapsed": 35.04188891701051,
+      "fps": 242.451,
+      "draws": 7,
+      "prepareMs": 0.0540333,
+      "uploadMs": 0.0149,
+      "bindMs": 0.01095
+    },
+    {
+      "elapsed": 35.292757541988976,
+      "fps": 239.153,
+      "draws": 7,
+      "prepareMs": 0.0462167,
+      "uploadMs": 0.0129833,
+      "bindMs": 0.00961667
+    },
+    {
+      "elapsed": 35.54271495799185,
+      "fps": 240.132,
+      "draws": 7,
+      "prepareMs": 0.0478833,
+      "uploadMs": 0.01305,
+      "bindMs": 0.0123333
+    },
+    {
+      "elapsed": 35.79309520800598,
+      "fps": 239.557,
+      "draws": 7,
+      "prepareMs": 0.0527333,
+      "uploadMs": 0.0143333,
+      "bindMs": 0.0107833
+    },
+    {
+      "elapsed": 36.04313608299708,
+      "fps": 239.961,
+      "draws": 7,
+      "prepareMs": 0.04765,
+      "uploadMs": 0.0135333,
+      "bindMs": 0.01025
+    },
+    {
+      "elapsed": 36.294821957999375,
+      "fps": 238.377,
+      "draws": 7,
+      "prepareMs": 0.0502167,
+      "uploadMs": 0.0138333,
+      "bindMs": 0.0111833
+    },
+    {
+      "elapsed": 36.54232029200648,
+      "fps": 242.503,
+      "draws": 7,
+      "prepareMs": 0.0474667,
+      "uploadMs": 0.0142333,
+      "bindMs": 0.01035
+    },
+    {
+      "elapsed": 36.79251733300043,
+      "fps": 239.717,
+      "draws": 5,
+      "prepareMs": 0.04165,
+      "uploadMs": 0.0131333,
+      "bindMs": 0.00836667
+    },
+    {
+      "elapsed": 37.04243224998936,
+      "fps": 240.157,
+      "draws": 5,
+      "prepareMs": 0.0362833,
+      "uploadMs": 0.0127167,
+      "bindMs": 0.0072
+    },
+    {
+      "elapsed": 37.2929629170103,
+      "fps": 239.429,
+      "draws": 5,
+      "prepareMs": 0.0348167,
+      "uploadMs": 0.0123833,
+      "bindMs": 0.00705
+    },
+    {
+      "elapsed": 37.54222683300031,
+      "fps": 240.764,
+      "draws": 5,
+      "prepareMs": 0.0389167,
+      "uploadMs": 0.0131667,
+      "bindMs": 0.00815
+    },
+    {
+      "elapsed": 37.79416795799625,
+      "fps": 238.091,
+      "draws": 6,
+      "prepareMs": 0.0409333,
+      "uploadMs": 0.0126167,
+      "bindMs": 0.0087
+    },
+    {
+      "elapsed": 38.04213650000747,
+      "fps": 242.002,
+      "draws": 7,
+      "prepareMs": 0.0469333,
+      "uploadMs": 0.01295,
+      "bindMs": 0.0103667
+    },
+    {
+      "elapsed": 38.29425370800891,
+      "fps": 237.956,
+      "draws": 7,
+      "prepareMs": 0.04855,
+      "uploadMs": 0.0135167,
+      "bindMs": 0.00973333
+    },
+    {
+      "elapsed": 38.543351166998036,
+      "fps": 240.921,
+      "draws": 7,
+      "prepareMs": 0.04885,
+      "uploadMs": 0.0126833,
+      "bindMs": 0.0107333
+    },
+    {
+      "elapsed": 38.79400708299363,
+      "fps": 239.348,
+      "draws": 7,
+      "prepareMs": 0.0506833,
+      "uploadMs": 0.014,
+      "bindMs": 0.0114667
+    },
+    {
+      "elapsed": 39.041828207991784,
+      "fps": 242.138,
+      "draws": 7,
+      "prepareMs": 0.0476167,
+      "uploadMs": 0.0131167,
+      "bindMs": 0.0108
+    },
+    {
+      "elapsed": 39.291607499995735,
+      "fps": 240.157,
+      "draws": 7,
+      "prepareMs": 0.05085,
+      "uploadMs": 0.0147833,
+      "bindMs": 0.0117833
+    },
+    {
+      "elapsed": 39.54221979199792,
+      "fps": 239.414,
+      "draws": 7,
+      "prepareMs": 0.0464833,
+      "uploadMs": 0.0134167,
+      "bindMs": 0.0104167
+    },
+    {
+      "elapsed": 39.79459208299522,
+      "fps": 237.785,
+      "draws": 7,
+      "prepareMs": 0.0556333,
+      "uploadMs": 0.01565,
+      "bindMs": 0.01205
+    },
+    {
+      "elapsed": 40.0414322919969,
+      "fps": 243.039,
+      "draws": 7,
+      "prepareMs": 0.05925,
+      "uploadMs": 0.0158667,
+      "bindMs": 0.0131
+    },
+    {
+      "elapsed": 40.29546424999717,
+      "fps": 236.24,
+      "draws": 7,
+      "prepareMs": 0.0510667,
+      "uploadMs": 0.0148333,
+      "bindMs": 0.01115
+    },
+    {
+      "elapsed": 40.542686625005445,
+      "fps": 242.904,
+      "draws": 7,
+      "prepareMs": 0.0457833,
+      "uploadMs": 0.0134,
+      "bindMs": 0.00998333
+    },
+    {
+      "elapsed": 40.79158770799404,
+      "fps": 240.8,
+      "draws": 7,
+      "prepareMs": 0.0528333,
+      "uploadMs": 0.0140833,
+      "bindMs": 0.0119
+    },
+    {
+      "elapsed": 41.041912707994925,
+      "fps": 239.709,
+      "draws": 7,
+      "prepareMs": 0.0496,
+      "uploadMs": 0.0142167,
+      "bindMs": 0.01005
+    },
+    {
+      "elapsed": 41.29183904200909,
+      "fps": 240.04,
+      "draws": 7,
+      "prepareMs": 0.0457333,
+      "uploadMs": 0.0125167,
+      "bindMs": 0.0107667
+    },
+    {
+      "elapsed": 41.543904041987844,
+      "fps": 238.051,
+      "draws": 7,
+      "prepareMs": 0.0465,
+      "uploadMs": 0.0135833,
+      "bindMs": 0.0107167
+    },
+    {
+      "elapsed": 41.79140133300098,
+      "fps": 242.451,
+      "draws": 7,
+      "prepareMs": 0.0438667,
+      "uploadMs": 0.0128333,
+      "bindMs": 0.00955
+    },
+    {
+      "elapsed": 42.043375417008065,
+      "fps": 238.081,
+      "draws": 7,
+      "prepareMs": 0.0422,
+      "uploadMs": 0.0127167,
+      "bindMs": 0.00968333
+    },
+    {
+      "elapsed": 42.291689167002914,
+      "fps": 241.642,
+      "draws": 7,
+      "prepareMs": 0.0421833,
+      "uploadMs": 0.01305,
+      "bindMs": 0.00895
+    },
+    {
+      "elapsed": 42.54228808300104,
+      "fps": 239.418,
+      "draws": 7,
+      "prepareMs": 0.0455667,
+      "uploadMs": 0.0129,
+      "bindMs": 0.0108
+    },
+    {
+      "elapsed": 42.79217304199119,
+      "fps": 240.145,
+      "draws": 7,
+      "prepareMs": 0.0500167,
+      "uploadMs": 0.01345,
+      "bindMs": 0.0112667
+    },
+    {
+      "elapsed": 43.04304183300701,
+      "fps": 239.138,
+      "draws": 7,
+      "prepareMs": 0.0462333,
+      "uploadMs": 0.0130667,
+      "bindMs": 0.01075
+    },
+    {
+      "elapsed": 43.292276749998564,
+      "fps": 240.772,
+      "draws": 7,
+      "prepareMs": 0.0531333,
+      "uploadMs": 0.0146167,
+      "bindMs": 0.0120833
+    },
+    {
+      "elapsed": 43.55030483298469,
+      "fps": 232.466,
+      "draws": 7,
+      "prepareMs": 0.0489,
+      "uploadMs": 0.0123167,
+      "bindMs": 0.01305
+    },
+    {
+      "elapsed": 43.801428707985906,
+      "fps": 238.949,
+      "draws": 5,
+      "prepareMs": 0.0330333,
+      "uploadMs": 0.0104,
+      "bindMs": 0.00838333
+    },
+    {
+      "elapsed": 44.050503625010606,
+      "fps": 240.904,
+      "draws": 5,
+      "prepareMs": 0.0362167,
+      "uploadMs": 0.0121333,
+      "bindMs": 0.00823333
+    },
+    {
+      "elapsed": 44.305728667008225,
+      "fps": 235.077,
+      "draws": 5,
+      "prepareMs": 0.0385833,
+      "uploadMs": 0.0133833,
+      "bindMs": 0.00918333
+    },
+    {
+      "elapsed": 44.55064820800908,
+      "fps": 244.982,
+      "draws": 5,
+      "prepareMs": 0.0306,
+      "uploadMs": 0.0111,
+      "bindMs": 0.00586667
+    },
+    {
+      "elapsed": 44.803428624989465,
+      "fps": 237.389,
+      "draws": 5,
+      "prepareMs": 0.0334833,
+      "uploadMs": 0.0124167,
+      "bindMs": 0.00663333
+    },
+    {
+      "elapsed": 45.05005162500311,
+      "fps": 243.274,
+      "draws": 5,
+      "prepareMs": 0.0305,
+      "uploadMs": 0.0112,
+      "bindMs": 0.00643333
+    },
+    {
+      "elapsed": 45.30208166700322,
+      "fps": 238.061,
+      "draws": 5,
+      "prepareMs": 0.0350333,
+      "uploadMs": 0.0114333,
+      "bindMs": 0.00751667
+    },
+    {
+      "elapsed": 45.551510541990865,
+      "fps": 240.507,
+      "draws": 5,
+      "prepareMs": 0.02705,
+      "uploadMs": 0.00963333,
+      "bindMs": 0.0056
+    },
+    {
+      "elapsed": 45.80136329200468,
+      "fps": 240.149,
+      "draws": 5,
+      "prepareMs": 0.0267667,
+      "uploadMs": 0.00828333,
+      "bindMs": 0.00608333
+    },
+    {
+      "elapsed": 46.05135575000895,
+      "fps": 240.004,
+      "draws": 5,
+      "prepareMs": 0.0273667,
+      "uploadMs": 0.00803333,
+      "bindMs": 0.00595
+    },
+    {
+      "elapsed": 46.71460008301074,
+      "fps": 90.4664,
+      "draws": 1111,
+      "prepareMs": 4.49895,
+      "uploadMs": 2.0649,
+      "bindMs": 0.69695
+    },
+    {
+      "elapsed": 47.066369582986226,
+      "fps": 170.562,
+      "draws": 869,
+      "prepareMs": 2.71362,
+      "uploadMs": 0.77005,
+      "bindMs": 0.640617
+    },
+    {
+      "elapsed": 47.311460041993996,
+      "fps": 244.847,
+      "draws": 400,
+      "prepareMs": 1.30235,
+      "uploadMs": 0.399617,
+      "bindMs": 0.30135
+    },
+    {
+      "elapsed": 47.56125387499924,
+      "fps": 240.267,
+      "draws": 311,
+      "prepareMs": 1.01313,
+      "uploadMs": 0.3114,
+      "bindMs": 0.23595
+    },
+    {
+      "elapsed": 47.82673891700688,
+      "fps": 225.948,
+      "draws": 274,
+      "prepareMs": 0.85075,
+      "uploadMs": 0.260133,
+      "bindMs": 0.191933
+    },
+    {
+      "elapsed": 48.10339787500561,
+      "fps": 216.837,
+      "draws": 496,
+      "prepareMs": 1.45132,
+      "uploadMs": 0.454017,
+      "bindMs": 0.3149
+    },
+    {
+      "elapsed": 48.56618858300499,
+      "fps": 129.724,
+      "draws": 1451,
+      "prepareMs": 4.30125,
+      "uploadMs": 1.29368,
+      "bindMs": 0.95475
+    },
+    {
+      "elapsed": 49.07381987498957,
+      "fps": 118.156,
+      "draws": 1458,
+      "prepareMs": 4.48597,
+      "uploadMs": 1.34562,
+      "bindMs": 0.994433
+    },
+    {
+      "elapsed": 49.608029833005276,
+      "fps": 112.297,
+      "draws": 1472,
+      "prepareMs": 4.72358,
+      "uploadMs": 1.43257,
+      "bindMs": 1.04943
+    },
+    {
+      "elapsed": 50.13071191700874,
+      "fps": 114.79,
+      "draws": 1466,
+      "prepareMs": 4.67663,
+      "uploadMs": 1.38263,
+      "bindMs": 1.04782
+    },
+    {
+      "elapsed": 50.63281958299922,
+      "fps": 119.504,
+      "draws": 1380,
+      "prepareMs": 4.47767,
+      "uploadMs": 1.32115,
+      "bindMs": 1.01437
+    },
+    {
+      "elapsed": 51.067779250006424,
+      "fps": 137.93,
+      "draws": 1301,
+      "prepareMs": 3.86153,
+      "uploadMs": 1.11515,
+      "bindMs": 0.876733
+    },
+    {
+      "elapsed": 51.49433237500489,
+      "fps": 140.669,
+      "draws": 1381,
+      "prepareMs": 3.89562,
+      "uploadMs": 1.14665,
+      "bindMs": 0.871883
+    },
+    {
+      "elapsed": 51.92799162500887,
+      "fps": 138.355,
+      "draws": 1368,
+      "prepareMs": 3.93843,
+      "uploadMs": 1.15792,
+      "bindMs": 0.885767
+    },
+    {
+      "elapsed": 52.35153837499092,
+      "fps": 141.659,
+      "draws": 1364,
+      "prepareMs": 3.85373,
+      "uploadMs": 1.12982,
+      "bindMs": 0.86605
+    },
+    {
+      "elapsed": 52.780540832987754,
+      "fps": 139.861,
+      "draws": 1356,
+      "prepareMs": 3.86642,
+      "uploadMs": 1.13245,
+      "bindMs": 0.874367
+    },
+    {
+      "elapsed": 53.20626166698639,
+      "fps": 140.942,
+      "draws": 1346,
+      "prepareMs": 3.83983,
+      "uploadMs": 1.12557,
+      "bindMs": 0.86815
+    },
+    {
+      "elapsed": 53.63259595798445,
+      "fps": 140.73,
+      "draws": 1343,
+      "prepareMs": 3.8415,
+      "uploadMs": 1.1274,
+      "bindMs": 0.864417
+    },
+    {
+      "elapsed": 54.061071250005625,
+      "fps": 140.041,
+      "draws": 1360,
+      "prepareMs": 3.88632,
+      "uploadMs": 1.1409,
+      "bindMs": 0.877567
+    },
+    {
+      "elapsed": 54.48982058299589,
+      "fps": 139.931,
+      "draws": 1360,
+      "prepareMs": 3.86357,
+      "uploadMs": 1.12837,
+      "bindMs": 0.874617
+    },
+    {
+      "elapsed": 54.91751720799948,
+      "fps": 140.289,
+      "draws": 1319,
+      "prepareMs": 3.8058,
+      "uploadMs": 1.09498,
+      "bindMs": 0.867083
+    },
+    {
+      "elapsed": 55.39689133298816,
+      "fps": 125.197,
+      "draws": 1342,
+      "prepareMs": 4.27025,
+      "uploadMs": 1.25997,
+      "bindMs": 0.959083
+    },
+    {
+      "elapsed": 55.873346042004414,
+      "fps": 125.894,
+      "draws": 1332,
+      "prepareMs": 4.1773,
+      "uploadMs": 1.23858,
+      "bindMs": 0.946383
+    },
+    {
+      "elapsed": 56.344062041986035,
+      "fps": 127.465,
+      "draws": 1379,
+      "prepareMs": 4.21527,
+      "uploadMs": 1.26048,
+      "bindMs": 0.946233
+    },
+    {
+      "elapsed": 56.83076091698604,
+      "fps": 123.282,
+      "draws": 1420,
+      "prepareMs": 4.3462,
+      "uploadMs": 1.2848,
+      "bindMs": 0.984017
+    },
+    {
+      "elapsed": 57.33212325000204,
+      "fps": 119.674,
+      "draws": 1444,
+      "prepareMs": 4.23265,
+      "uploadMs": 1.22555,
+      "bindMs": 0.962983
+    },
+    {
+      "elapsed": 57.80695262498921,
+      "fps": 126.36,
+      "draws": 1422,
+      "prepareMs": 4.22787,
+      "uploadMs": 1.20898,
+      "bindMs": 0.963333
+    },
+    {
+      "elapsed": 58.27117233298486,
+      "fps": 129.248,
+      "draws": 1414,
+      "prepareMs": 4.2109,
+      "uploadMs": 1.20162,
+      "bindMs": 0.953467
+    },
+    {
+      "elapsed": 58.699616666999646,
+      "fps": 140.057,
+      "draws": 1395,
+      "prepareMs": 3.94233,
+      "uploadMs": 1.132,
+      "bindMs": 0.896617
+    },
+    {
+      "elapsed": 59.166995125007816,
+      "fps": 128.371,
+      "draws": 1388,
+      "prepareMs": 4.18478,
+      "uploadMs": 1.20595,
+      "bindMs": 0.9469
+    },
+    {
+      "elapsed": 59.64782854198711,
+      "fps": 124.784,
+      "draws": 1443,
+      "prepareMs": 4.29957,
+      "uploadMs": 1.21937,
+      "bindMs": 0.981767
+    },
+    {
+      "elapsed": 60.12622924998868,
+      "fps": 125.413,
+      "draws": 1409,
+      "prepareMs": 4.12103,
+      "uploadMs": 1.17652,
+      "bindMs": 0.938417
+    },
+    {
+      "elapsed": 60.59354216698557,
+      "fps": 128.393,
+      "draws": 1429,
+      "prepareMs": 4.2785,
+      "uploadMs": 1.21838,
+      "bindMs": 0.967433
+    },
+    {
+      "elapsed": 61.108013749995735,
+      "fps": 116.63,
+      "draws": 1550,
+      "prepareMs": 4.63807,
+      "uploadMs": 1.31713,
+      "bindMs": 1.04382
+    },
+    {
+      "elapsed": 61.68066208300297,
+      "fps": 104.775,
+      "draws": 1800,
+      "prepareMs": 5.24915,
+      "uploadMs": 1.49307,
+      "bindMs": 1.1789
+    },
+    {
+      "elapsed": 62.17927329198574,
+      "fps": 120.331,
+      "draws": 1450,
+      "prepareMs": 4.3958,
+      "uploadMs": 1.23072,
+      "bindMs": 0.986433
+    },
+    {
+      "elapsed": 62.724590958008775,
+      "fps": 110.037,
+      "draws": 1699,
+      "prepareMs": 4.96898,
+      "uploadMs": 1.41532,
+      "bindMs": 1.13038
+    },
+    {
+      "elapsed": 63.24477045799722,
+      "fps": 115.335,
+      "draws": 1714,
+      "prepareMs": 4.78515,
+      "uploadMs": 1.36475,
+      "bindMs": 1.06953
+    },
+    {
+      "elapsed": 63.74434587499127,
+      "fps": 120.1,
+      "draws": 1705,
+      "prepareMs": 4.66152,
+      "uploadMs": 1.34513,
+      "bindMs": 1.04518
+    },
+    {
+      "elapsed": 64.2578328329837,
+      "fps": 116.85,
+      "draws": 1689,
+      "prepareMs": 4.72892,
+      "uploadMs": 1.36485,
+      "bindMs": 1.05583
+    },
+    {
+      "elapsed": 64.74918479198823,
+      "fps": 122.135,
+      "draws": 1661,
+      "prepareMs": 4.505,
+      "uploadMs": 1.28153,
+      "bindMs": 1.0094
+    },
+    {
+      "elapsed": 65.26915237499634,
+      "fps": 115.371,
+      "draws": 1588,
+      "prepareMs": 4.66088,
+      "uploadMs": 1.32995,
+      "bindMs": 1.049
+    },
+    {
+      "elapsed": 65.74631754198344,
+      "fps": 125.743,
+      "draws": 1361,
+      "prepareMs": 4.24902,
+      "uploadMs": 1.2374,
+      "bindMs": 0.938017
+    },
+    {
+      "elapsed": 66.11539333299152,
+      "fps": 162.57,
+      "draws": 946,
+      "prepareMs": 3.01448,
+      "uploadMs": 0.892867,
+      "bindMs": 0.657067
+    },
+    {
+      "elapsed": 66.39836866699625,
+      "fps": 212.031,
+      "draws": 668,
+      "prepareMs": 2.1411,
+      "uploadMs": 0.65485,
+      "bindMs": 0.464333
+    },
+    {
+      "elapsed": 66.78796483299811,
+      "fps": 154.029,
+      "draws": 993,
+      "prepareMs": 3.20713,
+      "uploadMs": 0.9598,
+      "bindMs": 0.711117
+    },
+    {
+      "elapsed": 67.318049583002,
+      "fps": 113.18,
+      "draws": 1603,
+      "prepareMs": 4.68052,
+      "uploadMs": 1.33543,
+      "bindMs": 1.0476
+    },
+    {
+      "elapsed": 67.77495491699665,
+      "fps": 131.313,
+      "draws": 1448,
+      "prepareMs": 4.1267,
+      "uploadMs": 1.17643,
+      "bindMs": 0.933667
+    },
+    {
+      "elapsed": 68.20141666699783,
+      "fps": 140.704,
+      "draws": 1199,
+      "prepareMs": 3.6071,
+      "uploadMs": 1.01803,
+      "bindMs": 0.81735
+    },
+    {
+      "elapsed": 68.61719854199328,
+      "fps": 144.295,
+      "draws": 1178,
+      "prepareMs": 3.60618,
+      "uploadMs": 1.03057,
+      "bindMs": 0.814383
+    },
+    {
+      "elapsed": 68.98767429200234,
+      "fps": 161.97,
+      "draws": 966,
+      "prepareMs": 3.0483,
+      "uploadMs": 0.917983,
+      "bindMs": 0.668017
+    },
+    {
+      "elapsed": 69.37929524999345,
+      "fps": 153.199,
+      "draws": 1020,
+      "prepareMs": 3.28755,
+      "uploadMs": 0.998967,
+      "bindMs": 0.721833
+    },
+    {
+      "elapsed": 69.75566254198202,
+      "fps": 159.437,
+      "draws": 1051,
+      "prepareMs": 3.32143,
+      "uploadMs": 1.0078,
+      "bindMs": 0.735967
+    },
+    {
+      "elapsed": 70.13864950000425,
+      "fps": 156.652,
+      "draws": 1088,
+      "prepareMs": 3.33978,
+      "uploadMs": 0.99375,
+      "bindMs": 0.732483
+    },
+    {
+      "elapsed": 70.56131508300314,
+      "fps": 141.948,
+      "draws": 1127,
+      "prepareMs": 3.58435,
+      "uploadMs": 1.09277,
+      "bindMs": 0.7919
+    },
+    {
+      "elapsed": 70.88048504199833,
+      "fps": 187.988,
+      "draws": 763,
+      "prepareMs": 2.36743,
+      "uploadMs": 0.68975,
+      "bindMs": 0.533817
+    },
+    {
+      "elapsed": 71.22822320798878,
+      "fps": 172.552,
+      "draws": 999,
+      "prepareMs": 3.024,
+      "uploadMs": 0.90775,
+      "bindMs": 0.666917
+    },
+    {
+      "elapsed": 71.62911887498922,
+      "fps": 149.661,
+      "draws": 1203,
+      "prepareMs": 3.65393,
+      "uploadMs": 1.13242,
+      "bindMs": 0.782617
+    },
+    {
+      "elapsed": 72.07333899999503,
+      "fps": 135.069,
+      "draws": 1298,
+      "prepareMs": 4.02052,
+      "uploadMs": 1.206,
+      "bindMs": 0.88285
+    },
+    {
+      "elapsed": 72.51649775000988,
+      "fps": 135.395,
+      "draws": 1412,
+      "prepareMs": 4.13983,
+      "uploadMs": 1.22968,
+      "bindMs": 0.895367
+    },
+    {
+      "elapsed": 72.93425066699274,
+      "fps": 143.619,
+      "draws": 1409,
+      "prepareMs": 3.88737,
+      "uploadMs": 1.17383,
+      "bindMs": 0.836833
+    },
+    {
+      "elapsed": 73.31774729199242,
+      "fps": 156.455,
+      "draws": 1215,
+      "prepareMs": 3.46038,
+      "uploadMs": 0.982667,
+      "bindMs": 0.7651
+    },
+    {
+      "elapsed": 73.67241608299082,
+      "fps": 169.171,
+      "draws": 1108,
+      "prepareMs": 3.11733,
+      "uploadMs": 0.867483,
+      "bindMs": 0.696067
+    },
+    {
+      "elapsed": 74.14452837500721,
+      "fps": 127.095,
+      "draws": 1633,
+      "prepareMs": 4.47903,
+      "uploadMs": 1.30998,
+      "bindMs": 0.989917
+    },
+    {
+      "elapsed": 74.54555487498874,
+      "fps": 149.607,
+      "draws": 1305,
+      "prepareMs": 3.66495,
+      "uploadMs": 1.07263,
+      "bindMs": 0.819667
+    },
+    {
+      "elapsed": 74.95453141699545,
+      "fps": 146.714,
+      "draws": 1374,
+      "prepareMs": 3.79895,
+      "uploadMs": 1.10348,
+      "bindMs": 0.8439
+    },
+    {
+      "elapsed": 75.39837787498254,
+      "fps": 135.177,
+      "draws": 1348,
+      "prepareMs": 3.95548,
+      "uploadMs": 1.15695,
+      "bindMs": 0.881567
+    },
+    {
+      "elapsed": 75.82036337500904,
+      "fps": 142.196,
+      "draws": 1304,
+      "prepareMs": 3.84783,
+      "uploadMs": 1.14997,
+      "bindMs": 0.8544
+    },
+    {
+      "elapsed": 76.27138495800318,
+      "fps": 133.02,
+      "draws": 1307,
+      "prepareMs": 3.9965,
+      "uploadMs": 1.17525,
+      "bindMs": 0.88555
+    },
+    {
+      "elapsed": 76.64075550000416,
+      "fps": 162.442,
+      "draws": 1034,
+      "prepareMs": 3.17585,
+      "uploadMs": 0.873833,
+      "bindMs": 0.725117
+    },
+    {
+      "elapsed": 76.96130950000952,
+      "fps": 187.195,
+      "draws": 838,
+      "prepareMs": 2.52372,
+      "uploadMs": 0.669317,
+      "bindMs": 0.582567
+    },
+    {
+      "elapsed": 77.21939795798971,
+      "fps": 232.448,
+      "draws": 575,
+      "prepareMs": 1.67625,
+      "uploadMs": 0.428933,
+      "bindMs": 0.3945
+    },
+    {
+      "elapsed": 77.48018154199235,
+      "fps": 230.112,
+      "draws": 559,
+      "prepareMs": 1.71413,
+      "uploadMs": 0.420067,
+      "bindMs": 0.403567
+    },
+    {
+      "elapsed": 77.73304808299872,
+      "fps": 237.257,
+      "draws": 527,
+      "prepareMs": 1.60333,
+      "uploadMs": 0.398717,
+      "bindMs": 0.372467
+    },
+    {
+      "elapsed": 77.98254170798464,
+      "fps": 240.495,
+      "draws": 508,
+      "prepareMs": 1.57698,
+      "uploadMs": 0.397367,
+      "bindMs": 0.360417
+    },
+    {
+      "elapsed": 78.23335887500434,
+      "fps": 239.206,
+      "draws": 508,
+      "prepareMs": 1.56412,
+      "uploadMs": 0.379967,
+      "bindMs": 0.368967
+    },
+    {
+      "elapsed": 78.48407533299178,
+      "fps": 239.302,
+      "draws": 591,
+      "prepareMs": 1.82788,
+      "uploadMs": 0.457133,
+      "bindMs": 0.433733
+    },
+    {
+      "elapsed": 78.73481883300701,
+      "fps": 239.313,
+      "draws": 533,
+      "prepareMs": 1.54998,
+      "uploadMs": 0.401767,
+      "bindMs": 0.354183
+    },
+    {
+      "elapsed": 78.99235129199224,
+      "fps": 232.958,
+      "draws": 567,
+      "prepareMs": 1.63865,
+      "uploadMs": 0.418033,
+      "bindMs": 0.385167
+    },
+    {
+      "elapsed": 79.39700108300894,
+      "fps": 148.276,
+      "draws": 1116,
+      "prepareMs": 3.46285,
+      "uploadMs": 1.03278,
+      "bindMs": 0.762633
+    },
+    {
+      "elapsed": 79.85304975000327,
+      "fps": 131.611,
+      "draws": 1391,
+      "prepareMs": 4.20892,
+      "uploadMs": 1.30297,
+      "bindMs": 0.912367
+    },
+    {
+      "elapsed": 80.29409058298916,
+      "fps": 136.001,
+      "draws": 1364,
+      "prepareMs": 4.01613,
+      "uploadMs": 1.23117,
+      "bindMs": 0.867717
+    },
+    {
+      "elapsed": 80.69653608300723,
+      "fps": 149.081,
+      "draws": 1152,
+      "prepareMs": 3.55187,
+      "uploadMs": 1.0714,
+      "bindMs": 0.778933
+    },
+    {
+      "elapsed": 81.06215474999044,
+      "fps": 164.099,
+      "draws": 1068,
+      "prepareMs": 3.25277,
+      "uploadMs": 0.9787,
+      "bindMs": 0.7011
+    },
+    {
+      "elapsed": 81.43075733300066,
+      "fps": 162.784,
+      "draws": 1171,
+      "prepareMs": 3.4141,
+      "uploadMs": 1.00212,
+      "bindMs": 0.750967
+    },
+    {
+      "elapsed": 81.78247866700985,
+      "fps": 170.59,
+      "draws": 1090,
+      "prepareMs": 3.17843,
+      "uploadMs": 0.940233,
+      "bindMs": 0.701283
+    },
+    {
+      "elapsed": 82.12239837500965,
+      "fps": 176.51,
+      "draws": 1053,
+      "prepareMs": 3.07878,
+      "uploadMs": 0.912367,
+      "bindMs": 0.674967
+    },
+    {
+      "elapsed": 82.48158583298209,
+      "fps": 167.048,
+      "draws": 1049,
+      "prepareMs": 3.21195,
+      "uploadMs": 0.960867,
+      "bindMs": 0.704983
+    },
+    {
+      "elapsed": 82.8187835419958,
+      "fps": 177.934,
+      "draws": 1047,
+      "prepareMs": 3.03612,
+      "uploadMs": 0.909417,
+      "bindMs": 0.659283
+    },
+    {
+      "elapsed": 83.16319829199347,
+      "fps": 174.222,
+      "draws": 1042,
+      "prepareMs": 3.0657,
+      "uploadMs": 0.9173,
+      "bindMs": 0.67285
+    },
+    {
+      "elapsed": 83.5047977080103,
+      "fps": 175.624,
+      "draws": 1046,
+      "prepareMs": 3.03178,
+      "uploadMs": 0.905,
+      "bindMs": 0.664133
+    },
+    {
+      "elapsed": 83.8535732080054,
+      "fps": 172.067,
+      "draws": 1077,
+      "prepareMs": 3.11263,
+      "uploadMs": 0.925433,
+      "bindMs": 0.683917
+    },
+    {
+      "elapsed": 84.21268224998494,
+      "fps": 167.062,
+      "draws": 1098,
+      "prepareMs": 3.15045,
+      "uploadMs": 0.931533,
+      "bindMs": 0.69775
+    },
+    {
+      "elapsed": 84.56959437500336,
+      "fps": 168.095,
+      "draws": 1103,
+      "prepareMs": 3.15125,
+      "uploadMs": 0.92795,
+      "bindMs": 0.696117
+    },
+    {
+      "elapsed": 84.92939195799408,
+      "fps": 166.76,
+      "draws": 1101,
+      "prepareMs": 3.1592,
+      "uploadMs": 0.9345,
+      "bindMs": 0.69825
+    },
+    {
+      "elapsed": 85.29806433300837,
+      "fps": 162.759,
+      "draws": 1100,
+      "prepareMs": 3.24983,
+      "uploadMs": 0.960883,
+      "bindMs": 0.71875
+    },
+    {
+      "elapsed": 85.78527916700114,
+      "fps": 123.145,
+      "draws": 824,
+      "prepareMs": 2.60012,
+      "uploadMs": 0.765533,
+      "bindMs": 0.57905
+    },
+    {
+      "elapsed": 86.04336041701026,
+      "fps": 232.467,
+      "draws": 369,
+      "prepareMs": 1.18632,
+      "uploadMs": 0.380383,
+      "bindMs": 0.2462
+    },
+    {
+      "elapsed": 86.48237433299073,
+      "fps": 136.676,
+      "draws": 1438,
+      "prepareMs": 4.1469,
+      "uploadMs": 1.23857,
+      "bindMs": 0.925667
+    },
+    {
+      "elapsed": 86.95249579200754,
+      "fps": 127.624,
+      "draws": 1433,
+      "prepareMs": 4.25675,
+      "uploadMs": 1.27818,
+      "bindMs": 0.952
+    },
+    {
+      "elapsed": 87.40167824999662,
+      "fps": 133.581,
+      "draws": 1418,
+      "prepareMs": 4.10617,
+      "uploadMs": 1.23492,
+      "bindMs": 0.912433
+    },
+    {
+      "elapsed": 87.83784970798297,
+      "fps": 137.554,
+      "draws": 1369,
+      "prepareMs": 3.9712,
+      "uploadMs": 1.17732,
+      "bindMs": 0.896933
+    },
+    {
+      "elapsed": 88.25378508298309,
+      "fps": 144.253,
+      "draws": 1331,
+      "prepareMs": 3.78667,
+      "uploadMs": 1.12475,
+      "bindMs": 0.847017
+    },
+    {
+      "elapsed": 88.66164895799011,
+      "fps": 147.108,
+      "draws": 1297,
+      "prepareMs": 3.67062,
+      "uploadMs": 1.0844,
+      "bindMs": 0.81715
+    },
+    {
+      "elapsed": 89.07617837499129,
+      "fps": 144.742,
+      "draws": 1285,
+      "prepareMs": 3.72923,
+      "uploadMs": 1.0966,
+      "bindMs": 0.8351
+    },
+    {
+      "elapsed": 89.48556929201004,
+      "fps": 146.563,
+      "draws": 1276,
+      "prepareMs": 3.6898,
+      "uploadMs": 1.0805,
+      "bindMs": 0.8326
+    },
+    {
+      "elapsed": 89.88623579198611,
+      "fps": 149.748,
+      "draws": 1247,
+      "prepareMs": 3.58595,
+      "uploadMs": 1.03503,
+      "bindMs": 0.813083
+    }
+  ],
+  "exitAfterTestStop": -9,
+  "arguments": [
+    "+set",
+    "com_recommendedSet",
+    "1",
+    "+set",
+    "com_introPlayed",
+    "1",
+    "+set",
+    "r_fullscreen",
+    "0",
+    "+set",
+    "r_mode",
+    "1280x720",
+    "+set",
+    "r_vsync",
+    "0",
+    "+set",
+    "com_maxfps",
+    "0",
+    "+set",
+    "logfile",
+    "2",
+    "+set",
+    "developer",
+    "1",
+    "+set",
+    "sv_cheats",
+    "1",
+    "+devmap",
+    "bog_a"
+  ]
+}

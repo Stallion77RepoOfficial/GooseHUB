@@ -1,0 +1,248 @@
+{
+  "version": "11.11",
+  "duration": 65.60493408306502,
+  "frameGroups": [
+    {
+      "elapsed": 6.870932125020772,
+      "fps": 22.3649,
+      "drawsPerFrame": 4
+    },
+    {
+      "elapsed": 8.458679083036259,
+      "fps": 37.6786,
+      "drawsPerFrame": 1146
+    },
+    {
+      "elapsed": 8.861086082994007,
+      "fps": 149.13,
+      "drawsPerFrame": 644
+    },
+    {
+      "elapsed": 9.212845708010718,
+      "fps": 170.52,
+      "drawsPerFrame": 506
+    },
+    {
+      "elapsed": 9.626206000102684,
+      "fps": 145.154,
+      "drawsPerFrame": 514
+    },
+    {
+      "elapsed": 10.506618582992814,
+      "fps": 68.1479,
+      "drawsPerFrame": 2161
+    },
+    {
+      "elapsed": 11.484268208034337,
+      "fps": 61.3815,
+      "drawsPerFrame": 2135
+    },
+    {
+      "elapsed": 12.486446166993119,
+      "fps": 59.8596,
+      "drawsPerFrame": 2018
+    },
+    {
+      "elapsed": 13.45958804199472,
+      "fps": 61.6548,
+      "drawsPerFrame": 1911
+    },
+    {
+      "elapsed": 14.385246042045765,
+      "fps": 64.8196,
+      "drawsPerFrame": 1887
+    },
+    {
+      "elapsed": 15.283639542059973,
+      "fps": 66.7841,
+      "drawsPerFrame": 1929
+    },
+    {
+      "elapsed": 16.25045825005509,
+      "fps": 62.0603,
+      "drawsPerFrame": 1927
+    },
+    {
+      "elapsed": 17.41801462508738,
+      "fps": 51.3923,
+      "drawsPerFrame": 1803
+    },
+    {
+      "elapsed": 18.911522625014186,
+      "fps": 40.301,
+      "drawsPerFrame": 1795
+    },
+    {
+      "elapsed": 20.13936804200057,
+      "fps": 48.6766,
+      "drawsPerFrame": 1892
+    },
+    {
+      "elapsed": 23.03499020799063,
+      "fps": 20.7207,
+      "drawsPerFrame": 1810
+    },
+    {
+      "elapsed": 25.37173854210414,
+      "fps": 25.6764,
+      "drawsPerFrame": 1805
+    },
+    {
+      "elapsed": 27.29380983300507,
+      "fps": 31.2165,
+      "drawsPerFrame": 2042
+    },
+    {
+      "elapsed": 28.823103292030282,
+      "fps": 39.2328,
+      "drawsPerFrame": 1633
+    },
+    {
+      "elapsed": 29.400696458062157,
+      "fps": 103.89,
+      "drawsPerFrame": 1147
+    },
+    {
+      "elapsed": 30.426359708071686,
+      "fps": 58.4948,
+      "drawsPerFrame": 2085
+    },
+    {
+      "elapsed": 31.340193875017576,
+      "fps": 65.6553,
+      "drawsPerFrame": 1943
+    },
+    {
+      "elapsed": 32.23298575007357,
+      "fps": 67.2059,
+      "drawsPerFrame": 1846
+    },
+    {
+      "elapsed": 33.12430350005161,
+      "fps": 67.3145,
+      "drawsPerFrame": 1809
+    },
+    {
+      "elapsed": 33.98991633299738,
+      "fps": 69.318,
+      "drawsPerFrame": 1789
+    },
+    {
+      "elapsed": 35.24268895806745,
+      "fps": 47.8963,
+      "drawsPerFrame": 1785
+    },
+    {
+      "elapsed": 36.264107541996054,
+      "fps": 58.7378,
+      "drawsPerFrame": 1741
+    },
+    {
+      "elapsed": 37.13328225002624,
+      "fps": 69.0276,
+      "drawsPerFrame": 1669
+    },
+    {
+      "elapsed": 38.26657608302776,
+      "fps": 52.9424,
+      "drawsPerFrame": 1709
+    },
+    {
+      "elapsed": 39.534217333071865,
+      "fps": 47.3313,
+      "drawsPerFrame": 1683
+    },
+    {
+      "elapsed": 40.83215158304665,
+      "fps": 46.2291,
+      "drawsPerFrame": 1563
+    },
+    {
+      "elapsed": 42.192326500080526,
+      "fps": 44.1156,
+      "drawsPerFrame": 1765
+    },
+    {
+      "elapsed": 44.55288775009103,
+      "fps": 25.4158,
+      "drawsPerFrame": 2114
+    },
+    {
+      "elapsed": 46.48956095799804,
+      "fps": 30.9805,
+      "drawsPerFrame": 1995
+    },
+    {
+      "elapsed": 48.177540542092174,
+      "fps": 35.5454,
+      "drawsPerFrame": 1838
+    },
+    {
+      "elapsed": 50.02922487503383,
+      "fps": 32.4035,
+      "drawsPerFrame": 1262
+    },
+    {
+      "elapsed": 52.13864254206419,
+      "fps": 28.443,
+      "drawsPerFrame": 1735
+    },
+    {
+      "elapsed": 53.90132750000339,
+      "fps": 34.0386,
+      "drawsPerFrame": 1685
+    },
+    {
+      "elapsed": 55.10556241706945,
+      "fps": 49.8247,
+      "drawsPerFrame": 1545
+    },
+    {
+      "elapsed": 56.37701816705521,
+      "fps": 47.1921,
+      "drawsPerFrame": 1330
+    },
+    {
+      "elapsed": 57.04537087504286,
+      "fps": 89.7599,
+      "drawsPerFrame": 1320
+    },
+    {
+      "elapsed": 58.17155541700777,
+      "fps": 53.2872,
+      "drawsPerFrame": 2137
+    },
+    {
+      "elapsed": 59.25377483305056,
+      "fps": 55.4368,
+      "drawsPerFrame": 1967
+    },
+    {
+      "elapsed": 60.24718450009823,
+      "fps": 60.4172,
+      "drawsPerFrame": 1864
+    },
+    {
+      "elapsed": 61.16042708302848,
+      "fps": 65.67,
+      "drawsPerFrame": 1857
+    },
+    {
+      "elapsed": 62.12011925003026,
+      "fps": 62.5188,
+      "drawsPerFrame": 1813
+    },
+    {
+      "elapsed": 63.18071037507616,
+      "fps": 56.5751,
+      "drawsPerFrame": 1762
+    },
+    {
+      "elapsed": 64.21789045806509,
+      "fps": 57.845,
+      "drawsPerFrame": 1718
+    }
+  ],
+  "criticalSectionWarnings": [],
+  "exitAfterTestStop": -9
+}

@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-28",
+  "policy": "Local forks are authoritative. Import selected upstream changes without replacing the source tree.",
+  "wine": {
+    "canonicalSource": "wine-adrenalin-edition",
+    "baselineCommit": "11114aaca915120b0c8e714dd04129bd75583db5",
+    "baseline": "original native ARM64 fork working tree, including MSync additions",
+    "identicalSourceFiles": 13250,
+    "changedFiles": [
+      "dlls/ntdll/signal_arm64ec.c",
+      "dlls/ntdll/sync.c",
+      "dlls/ntdll/unwind.h",
+      "dlls/winemac.drv/clipboard.c",
+      "dlls/winemac.drv/window.c"
+    ],
+    "missingSourceFiles": [],
+    "selectedPatchesReverseApply": true,
+    "sourceTreeSHA256": "38e20b09323bc31162ac413b1d88c7793021f5695ba8f372a6b6f55614f90eb9",
+    "rejectedCandidate": "Full upstream Wine 11.20 port omitted other fork patches; removed from the delivered runtime."
+  },
+  "dxmt": {
+    "source": "src/",
+    "d3d9BaselineUnchangedFiles": 38,
+    "d3d9ChangedFiles": [
+      "d3d9_device.cpp",
+      "d3d9_device.hpp"
+    ],
+    "d3d9Changes": "Per-slot sampler cache from 2026-10-27; 13 pixel checks on x86 and x64.",
+    "customSourceComponents": {
+      "src/d3d8": true,
+      "src/d3d9/sm3": true,
+      "src/d3d9/sm4": true,
+      "src/d3d9/d3d9_stateblock.cpp": true,
+      "src/d3d12": true,
+      "src/winemetal/msc_thunks.c": true,
+      "src/dxmt/dxmt_pipeline_state_map.hpp": true
+    },
+    "upstreamImports": "Five reviewed fixes recorded in engine-sources.json; shader cache version 21."
+  }
+}

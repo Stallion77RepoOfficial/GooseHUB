@@ -1,0 +1,197 @@
+{
+  "hostMonotonicStart": 636403.704114208,
+  "nativeMonotonicStart": 1194067.733301,
+  "arguments": [
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-nojoy",
+    "-noipx",
+    "+exec",
+    "codex_probe.cfg"
+  ],
+  "presentationSamples": [
+    {
+      "kind": "front",
+      "monotonicEnd": "1194077.673705",
+      "seconds": "2.015997",
+      "count": "27",
+      "fps": "13.393",
+      "meanMilliseconds": "11.885",
+      "maximumMilliseconds": "16.361",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194079.698734",
+      "seconds": "2.025029",
+      "count": "34",
+      "fps": "16.790",
+      "meanMilliseconds": "12.145",
+      "maximumMilliseconds": "16.383",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194081.706953",
+      "seconds": "2.008219",
+      "count": "70",
+      "fps": "34.857",
+      "meanMilliseconds": "12.630",
+      "maximumMilliseconds": "16.466",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194083.715280",
+      "seconds": "2.008327",
+      "count": "81",
+      "fps": "40.332",
+      "meanMilliseconds": "12.220",
+      "maximumMilliseconds": "21.432",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194085.715290",
+      "seconds": "2.000010",
+      "count": "69",
+      "fps": "34.500",
+      "meanMilliseconds": "12.716",
+      "maximumMilliseconds": "26.668",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194087.723726",
+      "seconds": "2.008436",
+      "count": "81",
+      "fps": "40.330",
+      "meanMilliseconds": "12.202",
+      "maximumMilliseconds": "16.586",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194089.740333",
+      "seconds": "2.016607",
+      "count": "100",
+      "fps": "49.588",
+      "meanMilliseconds": "11.762",
+      "maximumMilliseconds": "16.644",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194091.765562",
+      "seconds": "2.025229",
+      "count": "93",
+      "fps": "45.921",
+      "meanMilliseconds": "11.876",
+      "maximumMilliseconds": "17.039",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194093.790428",
+      "seconds": "2.024866",
+      "count": "75",
+      "fps": "37.039",
+      "meanMilliseconds": "11.801",
+      "maximumMilliseconds": "24.552",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194095.816026",
+      "seconds": "2.025598",
+      "count": "76",
+      "fps": "37.520",
+      "meanMilliseconds": "11.732",
+      "maximumMilliseconds": "24.341",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194097.857110",
+      "seconds": "2.041084",
+      "count": "57",
+      "fps": "27.926",
+      "meanMilliseconds": "13.346",
+      "maximumMilliseconds": "27.316",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194099.882465",
+      "seconds": "2.025355",
+      "count": "78",
+      "fps": "38.512",
+      "meanMilliseconds": "13.477",
+      "maximumMilliseconds": "16.960",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194101.923809",
+      "seconds": "2.041344",
+      "count": "83",
+      "fps": "40.659",
+      "meanMilliseconds": "12.768",
+      "maximumMilliseconds": "16.559",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194103.948621",
+      "seconds": "2.024812",
+      "count": "75",
+      "fps": "37.040",
+      "meanMilliseconds": "11.930",
+      "maximumMilliseconds": "16.645",
+      "flags": "0x8"
+    },
+    {
+      "kind": "front",
+      "monotonicEnd": "1194105.973715",
+      "seconds": "2.025094",
+      "count": "73",
+      "fps": "36.048",
+      "meanMilliseconds": "12.466",
+      "maximumMilliseconds": "23.478",
+      "flags": "0x8"
+    }
+  ],
+  "label": "counted-d3d32-default",
+  "mode": 1,
+  "bitsPerPixel": 32,
+  "requestedFPS": 100,
+  "metalHUD": true,
+  "bottleBackend": "dxmt",
+  "seconds": 51.16761329199653,
+  "exitCode": 0,
+  "timeout": false,
+  "markers": {
+    "CODEX_START": 7.684357666992582,
+    "CODEX_FRAMES_BEGIN": 15.035382583038881,
+    "CODEX_FRAMES_END": 38.362197792041115,
+    "CODEX_DONE": 39.94444662495516
+  },
+  "waitFrames": 900,
+  "timerefresh": [
+    "1.588551 seconds (80.576598 fps)"
+  ],
+  "graphicsModules": [
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\opengl32.dll\" at 64400000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\wined3d.dll\" at 64980000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\DDRAW.dll\" at 66290000: builtin"
+  ],
+  "waitBasedFPSApproximation": 38.58220644079497,
+  "framebufferInitializationWarnings": 4,
+  "runtimeModulesMissingDXMT": true,
+  "testOnlyProbe": true
+}

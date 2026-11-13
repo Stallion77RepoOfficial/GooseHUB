@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDisplayName</key>
+	<string>Goose HUB Adrenalin Edition</string>
+	<key>CFBundleExecutable</key>
+	<string>GooseHUB</string>
+	<key>CFBundleIconFile</key>
+	<string>GooseHUB</string>
+	<key>CFBundleIdentifier</key>
+	<string>dev.goosehub.adrenalin</string>
+	<key>CFBundleName</key>
+	<string>Goose HUB Adrenalin Edition</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.3.0</string>
+	<key>CFBundleVersion</key>
+	<string>15</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>27.0</string>
+	<key>NSCameraUsageDescription</key>
+	<string>A Windows application launched by Goose HUB requested camera access.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Goose HUB Adrenalin Edition. Open source component licenses are included in Resources.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>A Windows application launched by Goose HUB requested microphone access.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>

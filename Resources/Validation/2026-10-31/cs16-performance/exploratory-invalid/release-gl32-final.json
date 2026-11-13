@@ -1,0 +1,48 @@
+{
+  "hostMonotonicStart": 636478.929775791,
+  "nativeMonotonicStart": 1194142.959266,
+  "arguments": [
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-nojoy",
+    "-noipx",
+    "-gl",
+    "-32bpp",
+    "+exec",
+    "codex_probe.cfg"
+  ],
+  "presentationSamples": [],
+  "label": "release-gl32-final",
+  "mode": 1,
+  "bitsPerPixel": 16,
+  "requestedFPS": 100,
+  "metalHUD": true,
+  "bottleBackend": "dxmt",
+  "seconds": 34.374984084046446,
+  "exitCode": 0,
+  "timeout": false,
+  "markers": {
+    "CODEX_START": 8.589892958989367,
+    "CODEX_FRAMES_BEGIN": 13.579061749973334,
+    "CODEX_FRAMES_END": 22.778694459004328,
+    "CODEX_DONE": 23.038529459037818
+  },
+  "waitFrames": 900,
+  "timerefresh": [
+    "0.241486 seconds (530.052319 fps)"
+  ],
+  "graphicsModules": [
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\opengl32.dll\" at 64400000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\wined3d.dll\" at 64980000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\DDRAW.dll\" at 66290000: builtin"
+  ],
+  "waitBasedFPSApproximation": 97.82999261660719,
+  "framebufferInitializationWarnings": 2,
+  "runtimeModulesMissingDXMT": true,
+  "testOnlyProbe": false
+}

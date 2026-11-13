@@ -1,0 +1,19 @@
+{
+  "DISPLAY": "/var/run/com.apple.launchd.swWo5SmjBA/org.xquartz:0",
+  "HOME": "/Users/berkegulacar",
+  "LANG": "C.UTF-8",
+  "LC_ALL": "C.UTF-8",
+  "LC_CTYPE": "C.UTF-8",
+  "LOGNAME": "berkegulacar",
+  "TMPDIR": "/var/folders/9m/vtt_0jr55lz9qxskxfb9vf1c0000gn/T/",
+  "USER": "berkegulacar",
+  "__CF_USER_TEXT_ENCODING": "0x1F5:0:0",
+  "PATH": "/Applications/CrossOver.app/Contents/SharedSupport/CrossOver/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+  "CX_BOTTLE_PATH": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/dxmt-performance-20261027/CrossOverBottles",
+  "CX_BOTTLE": "CoD4Perf",
+  "CX_GRAPHICS_BACKEND": "dxvk",
+  "WINEMSYNC": "1",
+  "WINEDEBUG": "err+all,fixme-all",
+  "MTL_HUD_ENABLED": "0",
+  "DXVK_HUD": "0"
+}

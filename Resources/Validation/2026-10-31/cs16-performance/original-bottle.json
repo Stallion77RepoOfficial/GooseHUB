@@ -1,0 +1,54 @@
+{
+  "bottle" : {
+    "applications" : [
+      {
+        "arguments" : [
+
+        ],
+        "executablePath" : "/Users/berkegulacar/Downloads/Cult-Of-The-Lamb-AnkerGames/Cult of the Lamb/Cult Of The Lamb.exe",
+        "id" : "17F723E2-3690-45F9-907E-C66955205278",
+        "isFavorite" : false,
+        "name" : "Cult Of The Lamb"
+      },
+      {
+        "arguments" : [
+
+        ],
+        "executablePath" : "/Users/berkegulacar/Downloads/Call-of-Duty-4-Modern-Warfare-AnkerGames/Call of Duty 4 Modern Warfare (2007)/iw3sp.exe",
+        "id" : "D13F3A7A-D81C-4841-9730-D7E1383369F2",
+        "isFavorite" : false,
+        "name" : "iw3sp"
+      },
+      {
+        "arguments" : [
+          "-game",
+          "cstrike"
+        ],
+        "executablePath" : "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+        "id" : "4BA204CA-B7D6-4263-AFB3-C599A8833B89",
+        "isFavorite" : false,
+        "name" : "hl"
+      }
+    ],
+    "architecture" : "arm64ec",
+    "createdAt" : "2026-10-23T15:33:02Z",
+    "debugLogging" : false,
+    "dxmt" : {
+      "asyncPipelineCompilation" : true,
+      "metalHUD" : true,
+      "shaderCache" : true
+    },
+    "highResolution" : false,
+    "id" : "77D0FB5A-9D0D-44C5-B53F-20A3BD53B226",
+    "metalGoose" : {
+      "enabled" : true
+    },
+    "name" : "games",
+    "renderer" : "dxmt",
+    "state" : "ready",
+    "synchronization" : "msync",
+    "updatedAt" : "2026-10-31T12:09:12Z",
+    "windowsVersion" : "win10"
+  },
+  "schemaVersion" : 1
+}

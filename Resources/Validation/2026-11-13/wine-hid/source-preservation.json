@@ -1,0 +1,16 @@
+{
+  "wine": {
+    "canonicalSource": "wine-adrenalin-edition/",
+    "sourceTreeSHA256": "98aa6af645939d30e02f39a4ecf26a4998f2fe18b5bd758a05acefcdb4ab2972",
+    "previousSourceTreeSHA256": "f0afd6b0b11bf4888adda03039f6dea33f5177e4730af27def7d169db8f3c5d3",
+    "reconstructedPreviousSourceTreeSHA256": "f0afd6b0b11bf4888adda03039f6dea33f5177e4730af27def7d169db8f3c5d3",
+    "previousSourceMatches": true,
+    "enhancementFiles": [
+      "programs/powershell/main.c",
+      "programs/tasklist/tasklist.c",
+      "programs/tasklist/tasklist.h",
+      "dlls/winebus.sys/bus_iohid.c"
+    ]
+  },
+  "dxmtRuntimeUnchanged": true
+}

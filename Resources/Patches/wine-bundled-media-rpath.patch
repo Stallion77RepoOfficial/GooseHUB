@@ -1,0 +1,24 @@
+--- a/GooseHUB/scripts/stage-wine-runtime.py
++++ b/GooseHUB/scripts/stage-wine-runtime.py
+@@ -65,6 +65,8 @@
+     shutil.copy2(resources / 'engine-sources.json', source_assets)
+     shutil.copy2(resources.parent / 'ENGINE-POLICY.md', source_assets)
+     shutil.copytree(resources / 'Patches', source_assets / 'Patches')
++    if (resources / 'Validation').is_dir():
++        shutil.copytree(resources / 'Validation', source_assets / 'Validation')
+     for filename in ['COPYING.LIB', 'LICENSE', 'NOTICES.md']:
+         if (source / filename).is_file():
+             shutil.copy2(source / filename, output / 'Licenses/Wine' / filename)
+@@ -129,6 +131,12 @@
+                 needs_dependencies = True
+             commands += ['-change', dependency, '@rpath/' + name]
+         load_commands = run('otool', '-l', str(path))
++        # Build-machine rpaths must not take precedence over bundled libraries.
++        # Otherwise winegstreamer and its plugins can load different GStreamer
++        # copies, with separate GType registries and a broken decodebin.
++        for rpath in re.findall(r'cmd LC_RPATH\s+cmdsize \d+\s+path (.+?) \(offset', load_commands):
++            if rpath.startswith('/') and not rpath.startswith(('/System/', '/usr/lib/')):
++                commands += ['-delete_rpath', rpath]
+         # The loader and server use system libraries. Only Unix DLLs dlopen
+         # Homebrew dependencies, and Wine already gives them @loader_path/.
+         directories = [output / 'Dependencies/arm64'] if path.suffix == '.so' and needs_dependencies else []

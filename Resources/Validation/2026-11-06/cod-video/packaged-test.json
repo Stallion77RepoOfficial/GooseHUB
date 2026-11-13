@@ -1,0 +1,30 @@
+{
+  "arch": "x86",
+  "baseline": false,
+  "dllSHA256": "c2542996f33337945a49b905ec9f3dc779b15adc54b06e32e378b86909bfa2a4",
+  "exeSHA256": "23d22ed0e0f4b787533542109e87edb1fde31adb92db7ae5f03508079b06ba97",
+  "returnCode": 0,
+  "results": [
+    "PASS ARGB: ffff0000 expected ffff0000",
+    "PASS L8 video plane: ff808080 expected ff808080",
+    "PASS A8: c8000000 expected c8000000",
+    "PASS expanded A4R4G4B4: ff00ff00 expected ff00ff00",
+    "PASS DXT1 blocks: ff00ff00 expected ff00ff00",
+    "PASS mip zero: ffff0000 expected ffff0000",
+    "PASS mip one: ff00ff00 expected ff00ff00",
+    "PASS repeated update: ff0000ff expected ff0000ff",
+    "PASS ordinary lock update: ff00ffff expected ff00ffff",
+    "PASS preserve GPU-written texture: ffff00ff expected ffff00ff",
+    "PASS surface rectangle: ffffff00 expected ffffff00",
+    "PASS surface outside rectangle: ff0000ff expected ff0000ff",
+    "PASS preserve GPU-written surface: ffff00ff expected ffff00ff",
+    "PASS cube face 0: ffff0000 expected ffff0000",
+    "PASS cube face 1: ff00ff00 expected ff00ff00",
+    "PASS cube face 2: ff0000ff expected ff0000ff",
+    "PASS cube face 3: ffffffff expected ffffffff",
+    "PASS cube face 4: ff00ffff expected ff00ffff",
+    "PASS cube face 5: ffff00ff expected ffff00ff",
+    "PASS volume: ffff8000 expected ffff8000",
+    "RESULT checks=20 failures=0"
+  ]
+}

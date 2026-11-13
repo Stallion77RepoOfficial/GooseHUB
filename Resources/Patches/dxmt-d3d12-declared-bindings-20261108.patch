@@ -1,0 +1,312 @@
+--- a/src/d3d12/d3d12.cpp
++++ b/src/d3d12/d3d12.cpp
+@@ -1218,6 +1218,29 @@
+   return static_cast<D3D11_FILTER>(filter);
+ }
+ 
++struct LegacyShaderBindingMask {
++  uint16_t cbvs = 0, samplers = 0;
++  uint64_t srvs_lo = 0, srvs_hi = 0, uavs = 0;
++
++  bool srv(UINT slot) const {
++    return slot < 64 ? (srvs_lo & (uint64_t(1) << slot)) != 0
++                     : slot < 128 && (srvs_hi & (uint64_t(1) << (slot - 64))) != 0;
++  }
++  static LegacyShaderBindingMask reflect(IUnknown *object) {
++    if (!object) return {};
++    ComPtr<IMTLD3D11Shader> shader;
++    if (SUCCEEDED(object->QueryInterface(__uuidof(IMTLD3D11Shader),
++                                         reinterpret_cast<void **>(shader.put())))) {
++      if (auto *managed = shader->GetManagedShader()) {
++        const auto &r = managed->reflection();
++        return {r.ConstantBufferSlotMask, r.SamplerSlotMask, r.SRVSlotMaskLo, r.SRVSlotMaskHi, r.UAVSlotMask};
++      }
++    }
++    // Unknown reflection must preserve all bindings, never drop a shader input.
++    return {UINT16_MAX, UINT16_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX};
++  }
++};
++
+ class DxmtD3D12PipelineState final : public ID3D12PipelineState,
+                                      public D3D12ChildMethods,
+                                      public UnknownRef {
+@@ -1227,7 +1250,8 @@
+   HRESULT init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *desc);
+   HRESULT init_compute(const D3D12_COMPUTE_PIPELINE_STATE_DESC *desc);
+   ID3D11ComputeShader *legacy_compute_shader() const { return cs_.get(); }
+-  uint64_t legacy_compute_uav_mask() const { return cs_uav_mask_; }
++  const LegacyShaderBindingMask &legacy_bindings(UINT stage) const { return legacy_bindings_[stage]; }
++  uint64_t legacy_compute_uav_mask() const { return legacy_bindings_[3].uavs; }
+   void apply(ID3D11DeviceContext *context, const FLOAT *blend_factor, UINT stencil_ref);
+ 
+   WMT::ComputePipelineState
+@@ -1289,7 +1313,9 @@
+   ComPtr<ID3D11PixelShader> ps_;
+   ComPtr<ID3D11GeometryShader> gs_;
+   ComPtr<ID3D11ComputeShader> cs_;
+-  uint64_t cs_uav_mask_ = UINT64_MAX;
++  // Vertex, pixel, geometry, compute. Use the same declaration reflection
++  // that selects shader inputs in the shared D3D11 encoder.
++  std::array<LegacyShaderBindingMask, 4> legacy_bindings_ = {};
+   /* Metal side: the libraries have to outlive the functions taken from them. */
+   WMT::Reference<WMT::Library> vertex_library_;
+   WMT::Reference<WMT::Library> fragment_library_;
+@@ -2940,18 +2966,14 @@
+       )) {
+     HRESULT hr = device_->d3d11_device()->CreateComputeShader(desc->CS.pShaderBytecode,
+                                                             desc->CS.BytecodeLength, nullptr, cs_.put());
+-    ComPtr<IMTLD3D11Shader> shader;
+-    if (SUCCEEDED(hr) && cs_ && SUCCEEDED(cs_->QueryInterface(__uuidof(IMTLD3D11Shader),
+-                                                       reinterpret_cast<void **>(shader.put())))) {
+-      if (auto *managed = shader->GetManagedShader()) cs_uav_mask_ = managed->reflection().UAVSlotMask;
+-    }
++    if (SUCCEEDED(hr)) legacy_bindings_[3] = LegacyShaderBindingMask::reflect(cs_.get());
+     if (d3d12_diagnostics()) {
+       static std::atomic<unsigned> traced_compute_masks = 0;
+       if (traced_compute_masks.fetch_add(1) < 128)
+         Logger::warn(str::format("D3D12 compute shader=",
+                                  dxmt::Sha1HashState::compute(desc->CS.pShaderBytecode,
+                                                             desc->CS.BytecodeLength).string().substr(0, 8),
+-                                 " UAV mask=", cs_uav_mask_));
++                                 " UAV mask=", legacy_compute_uav_mask()));
+     }
+     return hr;
+   }
+@@ -3069,6 +3091,9 @@
+     hr = device->CreateGeometryShader(desc->GS.pShaderBytecode, desc->GS.BytecodeLength, nullptr, gs_.put());
+     if (FAILED(hr)) return hr;
+   }
++  legacy_bindings_[0] = LegacyShaderBindingMask::reflect(vs_.get());
++  legacy_bindings_[1] = LegacyShaderBindingMask::reflect(ps_.get());
++  legacy_bindings_[2] = LegacyShaderBindingMask::reflect(gs_.get());
+   if (d3d12_diagnostics() && ps_) {
+     ComPtr<IMTLD3D11Shader> shader;
+     if (SUCCEEDED(ps_->QueryInterface(__uuidof(IMTLD3D11Shader), reinterpret_cast<void **>(shader.put())))) {
+@@ -3228,7 +3253,7 @@
+       if (pipeline)
+         pipeline->apply(context, blend_factor.data(), stencil_ref);
+ 
+-      bind_legacy_graphics(bindings);
++      bind_legacy_graphics(bindings, pipeline.get());
+ 
+       bind_legacy_vertex_buffers(vbvs);
+ 
+@@ -3364,7 +3389,7 @@
+       if (pipeline)
+         pipeline->apply(context, blend_factor.data(), stencil_ref);
+ 
+-      bind_legacy_graphics(bindings);
++      bind_legacy_graphics(bindings, pipeline.get());
+ 
+       bind_legacy_vertex_buffers(vbvs);
+ 
+@@ -3390,7 +3415,7 @@
+       LegacyRootBindings bindings = {compute_root_signature_, compute_root_arguments_, compute_root_descriptors_, resource_heap_, sampler_heap_};
+       record([=, this]() {
+         device_->context()->CSSetShader(owner->legacy_compute_shader(), nullptr, 0);
+-        bind_legacy_graphics(bindings, true, owner->legacy_compute_uav_mask());
++        bind_legacy_graphics(bindings, owner.get(), true);
+         device_->context()->Dispatch(x, y, z);
+         device_->synchronize_compute_for_diagnostics();
+       });
+@@ -4187,10 +4212,10 @@
+       if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH) {
+         if (!pipeline->legacy_compute_shader()) { ERR("D3D12: SM6 indirect dispatch is not implemented"); return; }
+         context->CSSetShader(pipeline->legacy_compute_shader(), nullptr, 0);
+-        bind_legacy_graphics(compute, true, pipeline->legacy_compute_uav_mask());
++        bind_legacy_graphics(compute, pipeline.get(), true);
+       } else {
+         pipeline->apply(context, blend.data(), stencil);
+-        bind_legacy_graphics(graphics); bind_legacy_vertex_buffers(vbvs);
++        bind_legacy_graphics(graphics, pipeline.get()); bind_legacy_vertex_buffers(vbvs);
+         if (type == D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED) {
+           auto *resource = device_->resource_from_gpu_va(ibv.BufferLocation);
+           if (!resource) return;
+@@ -4538,28 +4563,36 @@
+   /* DXBC stages run through the shared D3D11 core, with the D3D12 signature
+    * deciding registers and stage visibility. Root arguments are captured per
+    * draw; volatile table descriptors are resolved when the list executes. */
+-  void bind_legacy_graphics(const LegacyRootBindings &bindings, bool compute = false,
+-                            uint64_t used_uavs = UINT64_MAX) {
++  void bind_legacy_graphics(const LegacyRootBindings &bindings, DxmtD3D12PipelineState *pipeline,
++                            bool compute = false) {
+     CpuTimingScope binding_time(bridge_cpu_statistics().legacy_bind_ticks);
+     if (!bindings.signature || !device_->context1()) return;
+     auto *context = device_->context1();
+-    if (compute) {
+-      // D3D12 permits the next dispatch to read the previous UAV through an
+-      // SRV after a barrier. D3D11 rejects that SRV while the old output view
+-      // is still bound, so release outputs before installing the new tables.
+-      std::array<ID3D11UnorderedAccessView *, D3D11_PS_CS_UAV_REGISTER_COUNT> empty = {};
+-      context->CSSetUnorderedAccessViews(0, UINT(empty.size()), empty.data(), nullptr);
+-    }
+-    auto visible = [compute](UINT visibility, bool vertex) {
+-      return !compute && (visibility == D3D12_SHADER_VISIBILITY_ALL ||
+-             visibility == (vertex ? D3D12_SHADER_VISIBILITY_VERTEX : D3D12_SHADER_VISIBILITY_PIXEL));
++    const LegacyShaderBindingMask unknown = {UINT16_MAX, UINT16_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX};
++    auto stages = [&](UINT visibility, auto bind) {
++      const UINT visibility_by_stage[] = {D3D12_SHADER_VISIBILITY_VERTEX, D3D12_SHADER_VISIBILITY_PIXEL,
++                                          D3D12_SHADER_VISIBILITY_GEOMETRY};
++      for (UINT stage = compute ? 3 : 0; stage < (compute ? 4 : 3); ++stage)
++        if (compute || visibility == D3D12_SHADER_VISIBILITY_ALL || visibility == visibility_by_stage[stage])
++          bind(stage, pipeline ? pipeline->legacy_bindings(stage) : unknown);
+     };
+-    auto geometry_visible = [compute](UINT visibility) {
+-      return !compute && (visibility == D3D12_SHADER_VISIBILITY_ALL ||
+-                          visibility == D3D12_SHADER_VISIBILITY_GEOMETRY);
++    auto cbv_stages = [&](UINT slot, UINT visibility) {
++      UINT used = 0;
++      if (slot < D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT)
++        stages(visibility, [&](UINT stage, const auto &mask) {
++          if (mask.cbvs & (1u << slot)) used |= 1u << stage;
++        });
++      return used;
++    };
++    auto bind_cbv = [&](UINT used, UINT slot, ID3D11Buffer *buffer, UINT first, UINT count) {
++      if (used & 1) context->VSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      if (used & 2) context->PSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      if (used & 4) context->GSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      if (used & 8) context->CSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+     };
+     auto cbv = [&](UINT slot, UINT visibility, UINT64 address, UINT bytes) {
+-      if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT) return;
++      const UINT used = cbv_stages(slot, visibility);
++      if (!used) return;
+       ID3D11Buffer *buffer = nullptr;
+       UINT first = 0, count = 0;
+       if (auto *resource = address ? device_->resource_from_gpu_va(address) : nullptr) {
+@@ -4575,11 +4608,12 @@
+       static std::atomic<unsigned> missing_cbvs = 0;
+       if (d3d12_diagnostics() && address && !buffer && missing_cbvs.fetch_add(1) < 24)
+         Logger::warn(str::format("D3D12 unresolved CBV slot=", slot, " address=", address, " compute=", compute));
+-      if (compute) context->CSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+-      if (visible(visibility, true)) context->VSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+-      if (visible(visibility, false)) context->PSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
+-      if (geometry_visible(visibility)) context->GSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      bind_cbv(used, slot, buffer, first, count);
+     };
++    if (compute) {
++      std::array<ID3D11UnorderedAccessView *, D3D11_PS_CS_UAV_REGISTER_COUNT> empty = {};
++      context->CSSetUnorderedAccessViews(0, UINT(empty.size()), empty.data(), nullptr);
++    }
+     const auto &description = bindings.signature->description();
+     for (UINT index = 0; index < description.parameters.size(); ++index) {
+       const auto &parameter = description.parameters[index];
+@@ -4591,16 +4625,11 @@
+         std::memcpy(&address, argument, sizeof(address));
+         cbv(parameter.shader_register, parameter.shader_visibility, address, 0);
+       } else if (parameter.kind == dxmt::RootParameterKind::Constants) {
+-        if (parameter.shader_register >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT) continue;
++        UINT used = cbv_stages(parameter.shader_register, parameter.shader_visibility);
++        if (!used) continue;
+         UINT first = 0, count = 0;
+         ID3D11Buffer *buffer = device_->upload_root_constants(argument, parameter.num_32bit_values * 4, first, count);
+-        if (compute) context->CSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
+-        if (visible(parameter.shader_visibility, true))
+-          context->VSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
+-        if (visible(parameter.shader_visibility, false))
+-          context->PSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
+-        if (geometry_visible(parameter.shader_visibility))
+-          context->GSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
++        bind_cbv(used, parameter.shader_register, buffer, first, count);
+       } else if (parameter.kind == dxmt::RootParameterKind::DescriptorTable) {
+         Descriptor *table = index < bindings.tables.size() ? DxmtD3D12DescriptorHeap::from_gpu(bindings.tables[index]) : nullptr;
+         UINT available = 0;
+@@ -4622,37 +4651,51 @@
+           auto entry_at = [&](UINT i) {
+             return table && offset < available && i < available - offset ? table + offset + i : nullptr;
+           };
+-          // A D3D12 table is one binding operation. Let the shared core check
+-          // the range under one context lock instead of one lock per slot.
+           if (length && range.range_type == dxmt::DescriptorRangeType::ShaderResourceView) {
+-            std::array<ComPtr<ID3D11ShaderResourceView>, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> retained;
+-            std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> views = {};
+-            for (UINT i = 0; i < length; ++i) if (auto *entry = entry_at(i); entry && entry->type == DescriptorType::Srv) {
+-              retained[i] = entry->srv;
+-              views[i] = retained[i].get();
+-            }
+-            if (compute) context->CSSetShaderResources(range.base_shader_register, length, views.data());
+-            if (visible(parameter.shader_visibility, true)) context->VSSetShaderResources(range.base_shader_register, length, views.data());
+-            if (visible(parameter.shader_visibility, false)) context->PSSetShaderResources(range.base_shader_register, length, views.data());
+-            if (geometry_visible(parameter.shader_visibility)) context->GSSetShaderResources(range.base_shader_register, length, views.data());
++            stages(parameter.shader_visibility, [&](UINT stage, const auto &mask) {
++              if (!(mask.srvs_lo | mask.srvs_hi)) return;
++              std::array<ComPtr<ID3D11ShaderResourceView>, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> retained;
++              std::array<ID3D11ShaderResourceView *, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT> views = {};
++              UINT first = length, last = 0;
++              for (UINT i = 0; i < length; ++i) if (mask.srv(range.base_shader_register + i)) {
++                first = std::min(first, i); last = i + 1;
++                if (auto *entry = entry_at(i); entry && entry->type == DescriptorType::Srv) {
++                  retained[i] = entry->srv; views[i] = retained[i].get();
++                }
++              }
++              if (first == length) return;
++              UINT slot = range.base_shader_register + first, count = last - first;
++              if (stage == 0) context->VSSetShaderResources(slot, count, views.data() + first);
++              if (stage == 1) context->PSSetShaderResources(slot, count, views.data() + first);
++              if (stage == 2) context->GSSetShaderResources(slot, count, views.data() + first);
++              if (stage == 3) context->CSSetShaderResources(slot, count, views.data() + first);
++            });
+           } else if (length && range.range_type == dxmt::DescriptorRangeType::Sampler) {
+-            std::array<ComPtr<ID3D11SamplerState>, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> retained;
+-            std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> samplers = {};
+-            for (UINT i = 0; i < length; ++i) if (auto *entry = entry_at(i); entry && entry->type == DescriptorType::Sampler) {
+-              retained[i] = entry->sampler11;
+-              samplers[i] = retained[i].get();
+-            }
+-            if (compute) context->CSSetSamplers(range.base_shader_register, length, samplers.data());
+-            if (visible(parameter.shader_visibility, true)) context->VSSetSamplers(range.base_shader_register, length, samplers.data());
+-            if (visible(parameter.shader_visibility, false)) context->PSSetSamplers(range.base_shader_register, length, samplers.data());
+-            if (geometry_visible(parameter.shader_visibility)) context->GSSetSamplers(range.base_shader_register, length, samplers.data());
++            stages(parameter.shader_visibility, [&](UINT stage, const auto &mask) {
++              if (!mask.samplers) return;
++              std::array<ComPtr<ID3D11SamplerState>, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> retained;
++              std::array<ID3D11SamplerState *, D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT> samplers = {};
++              UINT first = length, last = 0;
++              for (UINT i = 0; i < length; ++i) if (mask.samplers & (1u << (range.base_shader_register + i))) {
++                first = std::min(first, i); last = i + 1;
++                if (auto *entry = entry_at(i); entry && entry->type == DescriptorType::Sampler) {
++                  retained[i] = entry->sampler11; samplers[i] = retained[i].get();
++                }
++              }
++              if (first == length) return;
++              UINT slot = range.base_shader_register + first, count = last - first;
++              if (stage == 0) context->VSSetSamplers(slot, count, samplers.data() + first);
++              if (stage == 1) context->PSSetSamplers(slot, count, samplers.data() + first);
++              if (stage == 2) context->GSSetSamplers(slot, count, samplers.data() + first);
++              if (stage == 3) context->CSSetSamplers(slot, count, samplers.data() + first);
++            });
+           } else for (UINT i = 0; i < length; ++i) {
+             UINT slot = range.base_shader_register + i;
+-            // Unreferenced D3D12 descriptors may contain aliases or change
+-            // independently. Binding one as a D3D11 output can evict a UAV
+-            // the shader does use, so never resolve those unused entries.
++            const auto &mask = pipeline ? pipeline->legacy_bindings(3) : unknown;
++            if (range.range_type == dxmt::DescriptorRangeType::ConstantBufferView &&
++                !cbv_stages(slot, parameter.shader_visibility)) continue;
+             if (compute && range.range_type == dxmt::DescriptorRangeType::UnorderedAccessView &&
+-                !(used_uavs & (uint64_t(1) << slot))) continue;
++                !(mask.uavs & (uint64_t(1) << slot))) continue;
+             Descriptor *entry = entry_at(i);
+             if (range.range_type == dxmt::DescriptorRangeType::ConstantBufferView) {
+               cbv(slot, parameter.shader_visibility, entry ? entry->cbv.BufferLocation : 0,
+@@ -4673,11 +4716,14 @@
+     for (UINT i = 0; i < samplers.size(); ++i) {
+       const auto &desc = description.static_samplers[i];
+       if (desc.shader_register >= D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT) continue;
+-      ID3D11SamplerState *sampler = samplers[i].get();
+-      if (compute) context->CSSetSamplers(desc.shader_register, 1, &sampler);
+-      if (visible(desc.shader_visibility, true)) context->VSSetSamplers(desc.shader_register, 1, &sampler);
+-      if (visible(desc.shader_visibility, false)) context->PSSetSamplers(desc.shader_register, 1, &sampler);
+-      if (geometry_visible(desc.shader_visibility)) context->GSSetSamplers(desc.shader_register, 1, &sampler);
++      stages(desc.shader_visibility, [&](UINT stage, const auto &mask) {
++        if (!(mask.samplers & (1u << desc.shader_register))) return;
++        ID3D11SamplerState *sampler = samplers[i].get();
++        if (stage == 0) context->VSSetSamplers(desc.shader_register, 1, &sampler);
++        if (stage == 1) context->PSSetSamplers(desc.shader_register, 1, &sampler);
++        if (stage == 2) context->GSSetSamplers(desc.shader_register, 1, &sampler);
++        if (stage == 3) context->CSSetSamplers(desc.shader_register, 1, &sampler);
++      });
+     }
+   }
+ 

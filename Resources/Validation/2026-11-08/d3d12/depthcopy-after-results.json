@@ -1,0 +1,25 @@
+{
+  "dllSHA256": "f162248ba5f77ba347ce4c9c98f721f9f4191147fbc17d8da4d347b99ab51695",
+  "tests": [
+    {
+      "mode": "dxbc-placed-prepass-depthcopy",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-prepass-depthcopy",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-geometry",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-texture-bc1",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-texpingpong",
+      "exit": 0
+    }
+  ]
+}

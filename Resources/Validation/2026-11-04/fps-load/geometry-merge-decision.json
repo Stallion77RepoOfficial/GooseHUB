@@ -1,0 +1,33 @@
+{
+  "runs": [
+    {
+      "run": "geometry-merge-off01",
+      "frames": 980,
+      "seconds": 5.216,
+      "fps": 187.873
+    },
+    {
+      "run": "geometry-merge-on01",
+      "frames": 980,
+      "seconds": 4.978,
+      "fps": 196.875
+    },
+    {
+      "run": "geometry-merge-on02",
+      "frames": 980,
+      "seconds": 5.367,
+      "fps": 182.606
+    },
+    {
+      "run": "geometry-merge-off02",
+      "frames": 980,
+      "seconds": 5.074,
+      "fps": 193.16
+    }
+  ],
+  "medianOff": 190.5165,
+  "medianOn": 189.7405,
+  "ratio": 0.9959268619778339,
+  "selected": false,
+  "reason": "Only a small, unstable gain relative to normal run variance; additional conversion and state-tracking complexity is not justified. Keep the validated 512-command batching path."
+}

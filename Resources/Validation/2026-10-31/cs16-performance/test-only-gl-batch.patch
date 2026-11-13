@@ -1,0 +1,281 @@
+--- a/dlls/opengl32/unixlib.h
++++ b/dlls/opengl32/unixlib.h
+@@ -25848,6 +25848,12 @@
+     unsigned int num_formats;
+     unsigned int num_onscreen_formats;
+ };
++
++
++/* Test-only bounded command buffer for the i386/Unix transition experiment. */
++#define GOOSE_GL_BATCH_CAPACITY 128
++struct goose_gl_command { UINT code; BYTE args[24]; BYTE data[16]; };
++struct goose_gl_batch { UINT count; BOOL flushing; struct goose_gl_command commands[GOOSE_GL_BATCH_CAPACITY]; };
+ 
+ enum unix_funcs
+ {
+@@ -28952,6 +28958,7 @@
+     unix_wglSetPbufferAttribARB,
+     unix_wglSetPixelFormatWINE,
+     unix_wglSwapIntervalEXT,
++    unix_goose_gl_batch,
+     funcs_count
+ };
+ 
+@@ -28968,6 +28975,11 @@
+     char message[1];
+ };
+ 
++#ifdef __i386__
++extern NTSTATUS goose_gl_unix_call( unsigned int code, void *args );
++#define UNIX_CALL( func, params ) goose_gl_unix_call( unix_ ## func, params )
++#else
+ #define UNIX_CALL( func, params ) WINE_UNIX_CALL( unix_ ## func, params )
++#endif
+ 
+ #endif /* __WINE_OPENGL32_UNIXLIB_H */
+--- a/dlls/opengl32/wgl.c
++++ b/dlls/opengl32/wgl.c
+@@ -39,6 +39,128 @@
+ 
+ WINE_DEFAULT_DEBUG_CHANNEL(opengl);
+ WINE_DECLARE_DEBUG_CHANNEL(fps);
++
++
++#ifdef __i386__
++#define WINE_GL_RESERVED_BATCH 6
++static BOOL goose_gl_batch_enabled;
++
++static NTSTATUS goose_flush_gl_batch( struct goose_gl_batch *batch )
++{
++    NTSTATUS status;
++    if (!batch || !batch->count || batch->flushing) return STATUS_SUCCESS;
++    batch->flushing = TRUE;
++    status = WINE_UNIX_CALL( unix_goose_gl_batch, batch );
++    batch->count = 0;
++    batch->flushing = FALSE;
++    return status;
++}
++
++NTSTATUS goose_gl_unix_call( unsigned int code, void *args )
++{
++    struct goose_gl_batch *batch = NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_BATCH];
++    struct goose_gl_command *command;
++    UINT size = 0;
++    NTSTATUS status;
++    if (!batch || batch->flushing) return WINE_UNIX_CALL( code, args );
++    switch (code)
++    {
++    case unix_glBegin: size = sizeof(struct glBegin_params); break;
++    case unix_glEnd: size = sizeof(struct glEnd_params); break;
++    case unix_glVertex2f: size = sizeof(struct glVertex2f_params); break;
++    case unix_glVertex3f: size = sizeof(struct glVertex3f_params); break;
++    case unix_glVertex4f: size = sizeof(struct glVertex4f_params); break;
++    case unix_glTexCoord1f: size = sizeof(struct glTexCoord1f_params); break;
++    case unix_glTexCoord2f: size = sizeof(struct glTexCoord2f_params); break;
++    case unix_glTexCoord3f: size = sizeof(struct glTexCoord3f_params); break;
++    case unix_glTexCoord4f: size = sizeof(struct glTexCoord4f_params); break;
++    case unix_glMultiTexCoord2f: size = sizeof(struct glMultiTexCoord2f_params); break;
++    case unix_glMultiTexCoord2fARB: size = sizeof(struct glMultiTexCoord2fARB_params); break;
++    case unix_glMultiTexCoord2fSGIS: size = sizeof(struct glMultiTexCoord2fSGIS_params); break;
++    case unix_glColor3f: size = sizeof(struct glColor3f_params); break;
++    case unix_glColor4f: size = sizeof(struct glColor4f_params); break;
++    case unix_glColor4ub: size = sizeof(struct glColor4ub_params); break;
++    case unix_glNormal3f: size = sizeof(struct glNormal3f_params); break;
++    case unix_glEdgeFlag: size = sizeof(struct glEdgeFlag_params); break;
++    case unix_glVertex2fv: size = sizeof(struct glVertex2fv_params); break;
++    case unix_glVertex3fv: size = sizeof(struct glVertex3fv_params); break;
++    case unix_glVertex4fv: size = sizeof(struct glVertex4fv_params); break;
++    case unix_glTexCoord1fv: size = sizeof(struct glTexCoord1fv_params); break;
++    case unix_glTexCoord2fv: size = sizeof(struct glTexCoord2fv_params); break;
++    case unix_glTexCoord3fv: size = sizeof(struct glTexCoord3fv_params); break;
++    case unix_glTexCoord4fv: size = sizeof(struct glTexCoord4fv_params); break;
++    case unix_glMultiTexCoord2fv: size = sizeof(struct glMultiTexCoord2fv_params); break;
++    case unix_glMultiTexCoord2fvARB: size = sizeof(struct glMultiTexCoord2fvARB_params); break;
++    case unix_glColor3fv: size = sizeof(struct glColor3fv_params); break;
++    case unix_glColor4fv: size = sizeof(struct glColor4fv_params); break;
++    case unix_glColor4ubv: size = sizeof(struct glColor4ubv_params); break;
++    case unix_glNormal3fv: size = sizeof(struct glNormal3fv_params); break;
++    default:
++        if ((status = goose_flush_gl_batch( batch ))) return status;
++        return WINE_UNIX_CALL( code, args );
++    }
++    if (batch->count == GOOSE_GL_BATCH_CAPACITY && (status = goose_flush_gl_batch( batch ))) return status;
++    command = &batch->commands[batch->count++];
++    command->code = code;
++    memcpy( command->args, args, size );
++    switch (code)
++    {
++    case unix_glVertex2fv:
++        memcpy( command->data, ((struct glVertex2fv_params *)args)->v, 8 );
++        ((struct glVertex2fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glVertex3fv:
++        memcpy( command->data, ((struct glVertex3fv_params *)args)->v, 12 );
++        ((struct glVertex3fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glVertex4fv:
++        memcpy( command->data, ((struct glVertex4fv_params *)args)->v, 16 );
++        ((struct glVertex4fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glTexCoord1fv:
++        memcpy( command->data, ((struct glTexCoord1fv_params *)args)->v, 4 );
++        ((struct glTexCoord1fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glTexCoord2fv:
++        memcpy( command->data, ((struct glTexCoord2fv_params *)args)->v, 8 );
++        ((struct glTexCoord2fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glTexCoord3fv:
++        memcpy( command->data, ((struct glTexCoord3fv_params *)args)->v, 12 );
++        ((struct glTexCoord3fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glTexCoord4fv:
++        memcpy( command->data, ((struct glTexCoord4fv_params *)args)->v, 16 );
++        ((struct glTexCoord4fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glMultiTexCoord2fv:
++        memcpy( command->data, ((struct glMultiTexCoord2fv_params *)args)->v, 8 );
++        ((struct glMultiTexCoord2fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glMultiTexCoord2fvARB:
++        memcpy( command->data, ((struct glMultiTexCoord2fvARB_params *)args)->v, 8 );
++        ((struct glMultiTexCoord2fvARB_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glColor3fv:
++        memcpy( command->data, ((struct glColor3fv_params *)args)->v, 12 );
++        ((struct glColor3fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glColor4fv:
++        memcpy( command->data, ((struct glColor4fv_params *)args)->v, 16 );
++        ((struct glColor4fv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glColor4ubv:
++        memcpy( command->data, ((struct glColor4ubv_params *)args)->v, 4 );
++        ((struct glColor4ubv_params *)command->args)->v = (void *)command->data;
++        break;
++    case unix_glNormal3fv:
++        memcpy( command->data, ((struct glNormal3fv_params *)args)->v, 12 );
++        ((struct glNormal3fv_params *)command->args)->v = (void *)command->data;
++        break;
++    }
++    return STATUS_SUCCESS;
++}
++#endif
+ 
+ static const MAT2 identity = { {0,1},{0,0},{0,0},{0,1} };
+ 
+@@ -2757,6 +2879,9 @@
+             return FALSE;
+         }
+ 
++#ifdef __i386__
++        { char enabled[2]; goose_gl_batch_enabled = GetEnvironmentVariableA( "GOOSE_GL_BATCH", enabled, sizeof(enabled) ) && enabled[0] == '1'; }
++#endif
+         /* fallthrough */
+     case DLL_THREAD_ATTACH:
+         if ((status = UNIX_CALL( thread_attach, NtCurrentTeb() )))
+@@ -2764,6 +2889,9 @@
+             WARN( "Failed to initialize thread, status %#lx\n", status );
+             return FALSE;
+         }
++#ifdef __i386__
++        if (goose_gl_batch_enabled) NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_BATCH] = calloc( 1, sizeof(struct goose_gl_batch) );
++#endif
+         break;
+ 
+     case DLL_PROCESS_DETACH:
+@@ -2774,6 +2902,11 @@
+ #endif
+         /* fallthrough */
+     case DLL_THREAD_DETACH:
++#ifdef __i386__
++        goose_flush_gl_batch( NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_BATCH] );
++        free( NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_BATCH] );
++        NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_BATCH] = NULL;
++#endif
+         free( NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_FORMATS_PTR] );
+         return TRUE;
+     }
+--- a/dlls/opengl32/unix_thunks.c
++++ b/dlls/opengl32/unix_thunks.c
+@@ -30553,6 +30553,8 @@
+     params->ret = funcs->p_wglSwapIntervalEXT( params->interval );
+     return STATUS_SUCCESS;
+ }
++
++static NTSTATUS goose_batch_unavailable( void *args ) { return STATUS_NOT_IMPLEMENTED; }
+ 
+ const unixlib_entry_t __wine_unix_call_funcs[] =
+ {
+@@ -33657,6 +33659,7 @@
+     ext_wglSetPbufferAttribARB,
+     ext_wglSetPixelFormatWINE,
+     ext_wglSwapIntervalEXT,
++    goose_batch_unavailable,
+ };
+ 
+ C_ASSERT(ARRAYSIZE(__wine_unix_call_funcs) == funcs_count);
+@@ -86946,6 +86949,55 @@
+     return STATUS_SUCCESS;
+ }
+ 
++
++
++static NTSTATUS goose_batch_commands( void *args )
++{
++    struct goose_gl_batch *batch = args;
++    UINT i;
++    NTSTATUS status;
++    if (batch->count > GOOSE_GL_BATCH_CAPACITY) return STATUS_INVALID_PARAMETER;
++    for (i = 0; i < batch->count; i++)
++    {
++        struct goose_gl_command *cmd = &batch->commands[i];
++        switch (cmd->code)
++        {
++        case unix_glBegin: status = wow64_gl_glBegin( cmd->args ); break;
++        case unix_glEnd: status = wow64_gl_glEnd( cmd->args ); break;
++        case unix_glVertex2f: status = wow64_gl_glVertex2f( cmd->args ); break;
++        case unix_glVertex3f: status = wow64_gl_glVertex3f( cmd->args ); break;
++        case unix_glVertex4f: status = wow64_gl_glVertex4f( cmd->args ); break;
++        case unix_glTexCoord1f: status = wow64_gl_glTexCoord1f( cmd->args ); break;
++        case unix_glTexCoord2f: status = wow64_gl_glTexCoord2f( cmd->args ); break;
++        case unix_glTexCoord3f: status = wow64_gl_glTexCoord3f( cmd->args ); break;
++        case unix_glTexCoord4f: status = wow64_gl_glTexCoord4f( cmd->args ); break;
++        case unix_glMultiTexCoord2f: status = wow64_ext_glMultiTexCoord2f( cmd->args ); break;
++        case unix_glMultiTexCoord2fARB: status = wow64_ext_glMultiTexCoord2fARB( cmd->args ); break;
++        case unix_glMultiTexCoord2fSGIS: status = wow64_ext_glMultiTexCoord2fSGIS( cmd->args ); break;
++        case unix_glColor3f: status = wow64_gl_glColor3f( cmd->args ); break;
++        case unix_glColor4f: status = wow64_gl_glColor4f( cmd->args ); break;
++        case unix_glColor4ub: status = wow64_gl_glColor4ub( cmd->args ); break;
++        case unix_glNormal3f: status = wow64_gl_glNormal3f( cmd->args ); break;
++        case unix_glEdgeFlag: status = wow64_gl_glEdgeFlag( cmd->args ); break;
++        case unix_glVertex2fv: status = wow64_gl_glVertex2fv( cmd->args ); break;
++        case unix_glVertex3fv: status = wow64_gl_glVertex3fv( cmd->args ); break;
++        case unix_glVertex4fv: status = wow64_gl_glVertex4fv( cmd->args ); break;
++        case unix_glTexCoord1fv: status = wow64_gl_glTexCoord1fv( cmd->args ); break;
++        case unix_glTexCoord2fv: status = wow64_gl_glTexCoord2fv( cmd->args ); break;
++        case unix_glTexCoord3fv: status = wow64_gl_glTexCoord3fv( cmd->args ); break;
++        case unix_glTexCoord4fv: status = wow64_gl_glTexCoord4fv( cmd->args ); break;
++        case unix_glMultiTexCoord2fv: status = wow64_ext_glMultiTexCoord2fv( cmd->args ); break;
++        case unix_glMultiTexCoord2fvARB: status = wow64_ext_glMultiTexCoord2fvARB( cmd->args ); break;
++        case unix_glColor3fv: status = wow64_gl_glColor3fv( cmd->args ); break;
++        case unix_glColor4fv: status = wow64_gl_glColor4fv( cmd->args ); break;
++        case unix_glColor4ubv: status = wow64_gl_glColor4ubv( cmd->args ); break;
++        case unix_glNormal3fv: status = wow64_gl_glNormal3fv( cmd->args ); break;
++        default: return STATUS_INVALID_PARAMETER;
++        }
++        if (status) return status;
++    }
++    return STATUS_SUCCESS;
++}
+ 
+ const unixlib_entry_t __wine_unix_call_wow64_funcs[] =
+ {
+@@ -90050,6 +90102,7 @@
+     wow64_ext_wglSetPbufferAttribARB,
+     wow64_ext_wglSetPixelFormatWINE,
+     wow64_ext_wglSwapIntervalEXT,
++    goose_batch_commands,
+ };
+ 
+ C_ASSERT(ARRAYSIZE(__wine_unix_call_wow64_funcs) == funcs_count);

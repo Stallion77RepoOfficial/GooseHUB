@@ -1,0 +1,17 @@
+[
+  {
+    "version": "11.19",
+    "commit": "455e3509b98a6919fd4ad1def4803e08c41c03b2",
+    "minor": 19
+  },
+  {
+    "version": "11.20",
+    "commit": "7298a818b79446bae153b8d5aa27235ab3703bf9",
+    "minor": 20
+  },
+  {
+    "version": "11.21",
+    "commit": "2528aff26208257fdbf980666a4f0e66d47563ce",
+    "minor": 21
+  }
+]

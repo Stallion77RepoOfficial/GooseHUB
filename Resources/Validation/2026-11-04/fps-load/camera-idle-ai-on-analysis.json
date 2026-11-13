@@ -1,0 +1,88 @@
+{
+  "primaryContext": [
+    2401472,
+    "0xa01007b"
+  ],
+  "phases": [
+    {
+      "phase": "hidden-16-frozen",
+      "frames": 3133,
+      "fps": 447.82383861370346,
+      "medianMs": 1.9629583333333334,
+      "p95Ms": 3.94375,
+      "p99Ms": 5.482375,
+      "maxMs": 64.70358333333333,
+      "low1PercentFPS": 101.06600952705055,
+      "swapMeanMs": 0.6178386796467709,
+      "swapP99Ms": 2.8975,
+      "beginPerFrame": 425,
+      "drawPerFrame": 77.22438557293329,
+      "uploadsPerFrame": 0,
+      "sceneReport": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=0 effects=0\n\u0000\u0000"
+    },
+    {
+      "phase": "visible-15-frozen",
+      "frames": 1092,
+      "fps": 156.01925723403576,
+      "medianMs": 6.210916666666666,
+      "p95Ms": 8.439791666666666,
+      "p99Ms": 9.448541666666666,
+      "maxMs": 15.736916666666666,
+      "low1PercentFPS": 89.19536657099563,
+      "swapMeanMs": 0.8330730692918192,
+      "swapP99Ms": 2.967125,
+      "beginPerFrame": 3633,
+      "drawPerFrame": 79.61538461538461,
+      "uploadsPerFrame": 0,
+      "sceneReport": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000"
+    },
+    {
+      "phase": "hidden-16-repeat",
+      "frames": 2886,
+      "fps": 412.37361368515514,
+      "medianMs": 2.2233125,
+      "p95Ms": 4.359458333333333,
+      "p99Ms": 5.6790416666666665,
+      "maxMs": 9.549791666666666,
+      "low1PercentFPS": 156.14841098800215,
+      "swapMeanMs": 0.7331722972972973,
+      "swapP99Ms": 4.258291666666667,
+      "beginPerFrame": 426.3295218295218,
+      "drawPerFrame": 85.56306306306307,
+      "uploadsPerFrame": 0.003465003465003465,
+      "sceneReport": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=0 effects=0\n\u0000\u0000"
+    },
+    {
+      "phase": "visible-15-smoke-light",
+      "frames": 857,
+      "fps": 122.65679118086223,
+      "medianMs": 8.097416666666666,
+      "p95Ms": 10.685375,
+      "p99Ms": 12.474791666666667,
+      "maxMs": 15.762916666666666,
+      "low1PercentFPS": 75.90471568588521,
+      "swapMeanMs": 0.7237795604823026,
+      "swapP99Ms": 3.6614166666666668,
+      "beginPerFrame": 3692.7619603267212,
+      "drawPerFrame": 81.11318553092183,
+      "uploadsPerFrame": 2,
+      "sceneReport": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=3\n\u0000\u0000"
+    },
+    {
+      "phase": "visible-15-clean-repeat",
+      "frames": 1058,
+      "fps": 151.26755112710083,
+      "medianMs": 6.380354166666667,
+      "p95Ms": 8.845333333333333,
+      "p99Ms": 10.401041666666666,
+      "maxMs": 12.184458333333334,
+      "low1PercentFPS": 89.10757748562044,
+      "swapMeanMs": 0.7337272369250157,
+      "swapP99Ms": 4.292916666666667,
+      "beginPerFrame": 3633,
+      "drawPerFrame": 87.6578449905482,
+      "uploadsPerFrame": 0,
+      "sceneReport": "\u00ff\u00ff\u00ff\u00fflBENCH_CAMERA id=110 origin=448.00,2368.00,-74.93 yaw=180.00 offgrid=0\nBENCH_REPORT human=1 human_alive=1 alive=16 ct=8 t=8 peers_visible=15 effects=0\n\u0000\u0000"
+    }
+  ]
+}

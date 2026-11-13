@@ -1,0 +1,108 @@
+[
+  {
+    "description": "LOADING",
+    "seconds": 0.0,
+    "directoryFrames": 0,
+    "typeCounts": {
+      "0": 16,
+      "5": 1
+    },
+    "sampleCount": 16,
+    "ranges": {
+      "origin": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "angles": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "healthRange": [
+      0,
+      0
+    ],
+    "onlyClientDraw": [
+      0
+    ],
+    "commands": [],
+    "bytesParsed": 38916,
+    "entryLength": 38916
+  },
+  {
+    "description": "Playback",
+    "seconds": 10.434816360473633,
+    "directoryFrames": 965,
+    "typeCounts": {
+      "2": 1,
+      "9": 965,
+      "4": 965,
+      "1": 965,
+      "3": 1,
+      "5": 1
+    },
+    "sampleCount": 965,
+    "ranges": {
+      "origin": [
+        [
+          448.03125,
+          448.03125
+        ],
+        [
+          2368.03125,
+          2368.03125
+        ],
+        [
+          -74.9375,
+          -74.9375
+        ]
+      ],
+      "angles": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          -180.0,
+          -180.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "healthRange": [
+      100,
+      100
+    ],
+    "onlyClientDraw": [
+      0
+    ],
+    "commands": [
+      "-right"
+    ],
+    "bytesParsed": 587143,
+    "entryLength": 587143
+  }
+]

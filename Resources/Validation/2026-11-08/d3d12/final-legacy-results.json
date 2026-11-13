@@ -1,0 +1,38 @@
+[
+  {
+    "arch": "arm64ec",
+    "test": "d3d11-geometry-validation",
+    "exit": 0,
+    "exeSHA256": "a1d755979dfd9a95c00a10f206163c021773cabb213df22378eb1815e199d311"
+  },
+  {
+    "arch": "arm64ec",
+    "test": "d3d9-constant-validation",
+    "exit": 0,
+    "exeSHA256": "3bcd6bf757b01234d79ff52daa948b8824b85f23b67e48bcca3f87b986638205"
+  },
+  {
+    "arch": "x64",
+    "test": "d3d11-geometry-validation",
+    "exit": 0,
+    "exeSHA256": "a1d755979dfd9a95c00a10f206163c021773cabb213df22378eb1815e199d311"
+  },
+  {
+    "arch": "x64",
+    "test": "d3d9-constant-validation",
+    "exit": 0,
+    "exeSHA256": "3bcd6bf757b01234d79ff52daa948b8824b85f23b67e48bcca3f87b986638205"
+  },
+  {
+    "arch": "x86",
+    "test": "d3d11-geometry-validation",
+    "exit": 0,
+    "exeSHA256": "06a5ef65ec65de7234ecf055af0688d02bfcd1f7c98811dc774b33278a196a82"
+  },
+  {
+    "arch": "x86",
+    "test": "d3d9-constant-validation",
+    "exit": 0,
+    "exeSHA256": "baff71b6aacc2c5b2fc818a2bc5d86716b89af92a868ebebd8e8913d00fc506e"
+  }
+]

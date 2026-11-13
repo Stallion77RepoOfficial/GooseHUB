@@ -1,0 +1,328 @@
+{
+  "exe_sha256": "edd01e53f8679b66948bdd3ab1f2c5c7ff7b226e3cb9b5bae320ccce4b9d1ad1",
+  "runs": [
+    {
+      "version": "before",
+      "sha256": "427502ce143d65ebf9c430b6155fbe6946357e3e7d99486b6e51a08bb1334985",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 2.676125,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 2.622842,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 2.695005,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "after",
+      "sha256": "4c7eb9b7a2fdf5ce4c1913754263c519c1a40f29ef9579a51d0f80f3d2003a72",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.69535,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.718522,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.835157,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "after",
+      "sha256": "4c7eb9b7a2fdf5ce4c1913754263c519c1a40f29ef9579a51d0f80f3d2003a72",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.695068,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.817802,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.835523,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "before",
+      "sha256": "427502ce143d65ebf9c430b6155fbe6946357e3e7d99486b6e51a08bb1334985",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 2.875972,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 2.69279,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 2.742212,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "before",
+      "sha256": "427502ce143d65ebf9c430b6155fbe6946357e3e7d99486b6e51a08bb1334985",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 2.784369,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 2.773962,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 2.728577,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "after",
+      "sha256": "4c7eb9b7a2fdf5ce4c1913754263c519c1a40f29ef9579a51d0f80f3d2003a72",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.676877,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.684202,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 2.496417,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "after",
+      "sha256": "4c7eb9b7a2fdf5ce4c1913754263c519c1a40f29ef9579a51d0f80f3d2003a72",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.804833,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 2.379197,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.986402,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "before",
+      "sha256": "427502ce143d65ebf9c430b6155fbe6946357e3e7d99486b6e51a08bb1334985",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 2.726099,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 2.729175,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 2.775575,
+          "pixel": 4286545664
+        }
+      ]
+    },
+    {
+      "version": "crossover_wined3d",
+      "sha256": "fb459bda9df24cfbfe3e976fe4d8e6f1ac15fd63b70abbb4341216e6f3812a7d",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 0.321752,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 0.32073,
+          "pixel": 4286611456
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 0.408828,
+          "pixel": 4286611456
+        }
+      ]
+    },
+    {
+      "version": "crossover_wined3d",
+      "sha256": "fb459bda9df24cfbfe3e976fe4d8e6f1ac15fd63b70abbb4341216e6f3812a7d",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 0.302675,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 0.301282,
+          "pixel": 4286611456
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 0.393477,
+          "pixel": 4286611456
+        }
+      ]
+    },
+    {
+      "version": "crossover_wined3d",
+      "sha256": "fb459bda9df24cfbfe3e976fe4d8e6f1ac15fd63b70abbb4341216e6f3812a7d",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 0.311128,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 0.307885,
+          "pixel": 4286611456
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 0.403328,
+          "pixel": 4286611456
+        }
+      ]
+    },
+    {
+      "version": "crossover_wined3d",
+      "sha256": "fb459bda9df24cfbfe3e976fe4d8e6f1ac15fd63b70abbb4341216e6f3812a7d",
+      "pixel_checks": 13,
+      "timings": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 0.300778,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 0.30425,
+          "pixel": 4286611456
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 0.397338,
+          "pixel": 4286611456
+        }
+      ]
+    }
+  ],
+  "summary": [
+    {
+      "mode": "stable",
+      "before_us": 2.7552339999999997,
+      "after_us": 1.695209,
+      "crossover_wined3d_us": 0.30690150000000005,
+      "reduction_percent": 38.47313876062795
+    },
+    {
+      "mode": "change_every_64",
+      "before_us": 2.7109825,
+      "after_us": 1.768162,
+      "crossover_wined3d_us": 0.30606750000000005,
+      "reduction_percent": 34.7778157918762
+    },
+    {
+      "mode": "change_every_draw",
+      "before_us": 2.7353945,
+      "after_us": 1.9109625000000001,
+      "crossover_wined3d_us": 0.40033300000000005,
+      "reduction_percent": 30.13941864692643
+    }
+  ]
+}

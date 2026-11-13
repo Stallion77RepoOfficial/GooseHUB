@@ -1,0 +1,4 @@
+{
+  "exitCode": 1,
+  "output": "reg: Unable to find the specified registry key\nmsync: bootstrapped mach port on wine-5531529-msync.\nmsync: up and running.\n"
+}

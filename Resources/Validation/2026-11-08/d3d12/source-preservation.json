@@ -1,0 +1,21 @@
+{
+  "productionSourceTreeSHA256": "802cd7cb1a46553ef6dc8245a063d91fe6df53f2ca29f2b2f950fe2d11484e45",
+  "reconstructedProductionSourceTreeSHA256": "802cd7cb1a46553ef6dc8245a063d91fe6df53f2ca29f2b2f950fe2d11484e45",
+  "priorCustomForkPreserved": true,
+  "currentSourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
+  "incrementalFiles": [
+    "src/airconv/airconv_context.cpp",
+    "src/d3d11/d3d11.def",
+    "src/d3d11/d3d11_buffer.cpp",
+    "src/d3d11/d3d11_context_impl.cpp",
+    "src/d3d11/d3d11_resource_view_helper.cpp",
+    "src/d3d11/d3d11_texture_device.cpp",
+    "src/d3d12/d3d12.cpp",
+    "src/d3d12/d3d12.def",
+    "src/d3d12/d3d12_state_map.hpp",
+    "src/dxmt/dxmt_buffer.cpp",
+    "src/dxmt/dxmt_buffer.hpp",
+    "src/dxmt/dxmt_texture.cpp",
+    "src/dxmt/dxmt_texture.hpp"
+  ]
+}

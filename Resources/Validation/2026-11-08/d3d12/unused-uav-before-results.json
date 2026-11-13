@@ -1,0 +1,13 @@
+{
+  "dllSHA256": "21c9e663acdc553b63477349450458a34f9b9201f5ac5f9db462bd742b0781b9",
+  "tests": [
+    {
+      "mode": "dxbc-compute-unused-uav-null-unused",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-unused-uav",
+      "exit": 1
+    }
+  ]
+}

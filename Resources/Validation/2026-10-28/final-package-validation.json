@@ -1,0 +1,21 @@
+{
+  "appVersion": "0.2.1",
+  "build": "4",
+  "wine": "11.11 Adrenalin 2026.10.28",
+  "dxmt": "Adrenalin 2026.10.28",
+  "verifiedAssets": 2219,
+  "hashFailures": [],
+  "uiPagesInspected": [
+    "Library",
+    "Engines",
+    "Bottle",
+    "MetalGoose",
+    "Sessions"
+  ],
+  "uiCopy": "Ready/status pills, hero, generated artwork and filler text removed.",
+  "metalGoosePermissions": "Screen Recording and Accessibility not granted in current launch; controls correctly disabled.",
+  "oldBuildCleanupCompleted": true,
+  "onlyDeliveredApp": [
+    "Goose HUB latest.app"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "dllSHA256": "bdcc78441aca048b5dd22b15add4972cb02ec293935b73d9c5dc4f724a16de6a",
+  "tests": [
+    {
+      "mode": "dxbc-placed-texture-table128",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-constants-slot13",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-structured-vertex-resource-skin-cache-typed",
+      "exit": 0
+    }
+  ]
+}

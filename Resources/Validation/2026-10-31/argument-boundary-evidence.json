@@ -1,0 +1,537 @@
+{
+  "evidence_id": "ev_86a305534280b255d0b37403ec618a05579d939461014ad35bb7e2f73bae9f93",
+  "subject": null,
+  "provider": {
+    "id": "rea-process",
+    "name": "REA process capture",
+    "version": "3"
+  },
+  "analysis_profile": null,
+  "predicate_type": "rea.process-capture",
+  "operation": "capture_process_scenario",
+  "parameters": {
+    "executable_name": "python3",
+    "argument_count": 1,
+    "event_count": 0,
+    "filesystem_observation_path_count": 0,
+    "normalization": {
+      "paths": false,
+      "pids": true,
+      "ports": true,
+      "time_bucket_ms": 10,
+      "patterns": []
+    }
+  },
+  "raw_result": null,
+  "normalized_result": {
+    "manifest": {
+      "rea_version": "6.7.0",
+      "provider_version": "3",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "pty_backend": "node-pty",
+      "started_at": "2026-10-31T12:01:15.929Z",
+      "completed_at": "2026-10-31T12:01:24.399Z",
+      "scenario": {
+        "executable": "/usr/bin/python3",
+        "arguments": [
+          "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-diagnosis-20261031/probe-arguments.py"
+        ],
+        "working_directory": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition",
+        "environment": {},
+        "filesystem_observation_paths": [],
+        "terminal": {
+          "columns": 120,
+          "rows": 30,
+          "scrollback": 200
+        },
+        "events": [],
+        "timeout_ms": 60000,
+        "idle_timeout_ms": 30000,
+        "settle_ms": 100,
+        "limits": {
+          "output_bytes": 50000,
+          "files": 20,
+          "file_bytes": 10000000,
+          "processes": 40,
+          "filesystem_depth": 16
+        },
+        "normalization": {
+          "paths": false,
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10,
+          "patterns": []
+        },
+        "finalization_ms": 1000,
+        "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"
+      },
+      "comparison_contract": {
+        "working_directory": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition",
+        "environment": {},
+        "ambient_environment": "unknown",
+        "filesystem_observation_paths": [],
+        "terminal": {
+          "columns": 120,
+          "rows": 30,
+          "scrollback": 200
+        },
+        "events": [],
+        "timeout_ms": 60000,
+        "idle_timeout_ms": 30000,
+        "settle_ms": 100,
+        "finalization_ms": 1000,
+        "limits": {
+          "output_bytes": 50000,
+          "files": 20,
+          "file_bytes": 10000000,
+          "processes": 40,
+          "filesystem_depth": 16
+        },
+        "normalization": {
+          "paths": false,
+          "pids": true,
+          "ports": true,
+          "time_bucket_ms": 10,
+          "patterns": []
+        },
+        "port_normalization_version": "contextual-endpoints-v2",
+        "rendered_line_format": "trailing-spaces-trimmed-v1"
+      },
+      "full_scenario_sha256": "30b6bb821835262ed65e41a96983c4984861622b659c22a1d83190294113c6f9",
+      "comparison_contract_sha256": "307bc8285535174eda6feaca7bcb7c6725a7f5910bea480200d171df45479aec",
+      "selected_executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+      "executable_sha256": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2",
+      "executable_identity": {
+        "state": "path_metadata_unchanged",
+        "reason": null
+      },
+      "normalization_sha256": "5c58aa1aa890197f15f9c59ef755d01120e6e07f356fa1ef2f20787e63b6fa87"
+    },
+    "normalization": {
+      "paths": false,
+      "pids": true,
+      "ports": true,
+      "time_bucket_ms": 10,
+      "patterns": []
+    },
+    "frames": [
+      {
+        "sequence": 0,
+        "at_ms": 4330,
+        "data": "{\"case\": \"stored\", \"windowsReceived\": [\"-game cstrike\"], \"exitCode\": 0}\r\n"
+      },
+      {
+        "sequence": 1,
+        "at_ms": 8330,
+        "data": "{\"case\": \"split\", \"windowsReceived\": [\"-game\", \"cstrike\"], \"exitCode\": 0}\r\n"
+      }
+    ],
+    "rendered_frames": [
+      {
+        "sequence": 0,
+        "at_ms": 4330,
+        "columns": 120,
+        "rows": 30,
+        "cursor_x": 0,
+        "cursor_y": 1,
+        "active_buffer": "normal",
+        "lines": [
+          "{\"case\": \"stored\", \"windowsReceived\": [\"-game cstrike\"], \"exitCode\": 0}",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "serialized_state": "{\"case\": \"stored\", \"windowsReceived\": [\"-game cstrike\"], \"exitCode\": 0}\u001b[1B\u001b[71D"
+      },
+      {
+        "sequence": 1,
+        "at_ms": 8330,
+        "columns": 120,
+        "rows": 30,
+        "cursor_x": 0,
+        "cursor_y": 2,
+        "active_buffer": "normal",
+        "lines": [
+          "{\"case\": \"stored\", \"windowsReceived\": [\"-game cstrike\"], \"exitCode\": 0}",
+          "{\"case\": \"split\", \"windowsReceived\": [\"-game\", \"cstrike\"], \"exitCode\": 0}",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        "serialized_state": "{\"case\": \"stored\", \"windowsReceived\": [\"-game cstrike\"], \"exitCode\": 0}\r\n{\"case\": \"split\", \"windowsReceived\": [\"-game\", \"cstrike\"], \"exitCode\": 0}\u001b[1B\u001b[73D"
+      }
+    ],
+    "interaction_events": [],
+    "exit": {
+      "code": 0,
+      "signal": 0,
+      "reason": "exited"
+    },
+    "settlement": {
+      "state": "quiesced",
+      "elapsed_ms": 99,
+      "cleanup_outcome": "not_required"
+    },
+    "process_samples": [
+      {
+        "at_ms": 90,
+        "pid": 1,
+        "parent_pid": 2,
+        "command": "/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python /Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-diagnosis-20261031/probe-arguments.py",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 90,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "(Python)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 160,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/lib/wine/aarch64-unix/wine /Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-diagnosis-20261031/argument-echo.exe -game cstrike",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 710,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-diagnosis-20261031/argument-echo.exe -game cstrike",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 760,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "(wine)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 820,
+        "pid": 3,
+        "parent_pid": 1,
+        "command": "<defunct>",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 4370,
+        "pid": 4,
+        "parent_pid": 1,
+        "command": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/lib/wine/aarch64-unix/wine /Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-diagnosis-20261031/argument-echo.exe -game cstrike",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 4730,
+        "pid": 4,
+        "parent_pid": 1,
+        "command": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-diagnosis-20261031/argument-echo.exe -game cstrike",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 4780,
+        "pid": 4,
+        "parent_pid": 1,
+        "command": "(wine)",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 4830,
+        "pid": 4,
+        "parent_pid": 1,
+        "command": "<defunct>",
+        "process_group_id": 1,
+        "session_id": null
+      },
+      {
+        "at_ms": 8320,
+        "pid": 1,
+        "parent_pid": 2,
+        "command": "(Python)",
+        "process_group_id": 1,
+        "session_id": null
+      }
+    ],
+    "filesystem_checkpoints": [
+      {
+        "name": "before",
+        "at_ms": 0,
+        "files": [],
+        "effects": [],
+        "truncated": false
+      },
+      {
+        "name": "after_settlement",
+        "at_ms": 8470,
+        "files": [],
+        "effects": [],
+        "truncated": false
+      }
+    ],
+    "event_journal": [
+      {
+        "capture_order": 0,
+        "collection": "filesystem_checkpoints",
+        "index": 0
+      },
+      {
+        "capture_order": 1,
+        "collection": "process_samples",
+        "index": 0
+      },
+      {
+        "capture_order": 2,
+        "collection": "process_samples",
+        "index": 1
+      },
+      {
+        "capture_order": 3,
+        "collection": "process_samples",
+        "index": 2
+      },
+      {
+        "capture_order": 4,
+        "collection": "process_samples",
+        "index": 3
+      },
+      {
+        "capture_order": 5,
+        "collection": "process_samples",
+        "index": 4
+      },
+      {
+        "capture_order": 6,
+        "collection": "process_samples",
+        "index": 5
+      },
+      {
+        "capture_order": 7,
+        "collection": "frames",
+        "index": 0
+      },
+      {
+        "capture_order": 8,
+        "collection": "rendered_frames",
+        "index": 0
+      },
+      {
+        "capture_order": 9,
+        "collection": "process_samples",
+        "index": 6
+      },
+      {
+        "capture_order": 10,
+        "collection": "process_samples",
+        "index": 7
+      },
+      {
+        "capture_order": 11,
+        "collection": "process_samples",
+        "index": 8
+      },
+      {
+        "capture_order": 12,
+        "collection": "process_samples",
+        "index": 9
+      },
+      {
+        "capture_order": 13,
+        "collection": "frames",
+        "index": 1
+      },
+      {
+        "capture_order": 14,
+        "collection": "rendered_frames",
+        "index": 1
+      },
+      {
+        "capture_order": 15,
+        "collection": "lifecycle",
+        "index": 0
+      },
+      {
+        "capture_order": 16,
+        "collection": "process_samples",
+        "index": 10
+      },
+      {
+        "capture_order": 17,
+        "collection": "lifecycle",
+        "index": 1
+      },
+      {
+        "capture_order": 18,
+        "collection": "filesystem_checkpoints",
+        "index": 1
+      }
+    ],
+    "files_before": [],
+    "files_after": [],
+    "filesystem_effects": [],
+    "truncated": false,
+    "truncation_details": {
+      "raw_terminal": {
+        "budget_bytes": 50000,
+        "observed_bytes": 148,
+        "retained_bytes": 148,
+        "observed_frames": 2,
+        "retained_frames": 2
+      },
+      "rendered_terminal": {
+        "budget_bytes": 50000,
+        "observed_bytes": 450,
+        "retained_bytes": 450,
+        "observed_frames": 2,
+        "retained_frames": 2
+      },
+      "normalized_terminal": {
+        "budget_bytes": 50000,
+        "retained_bytes": 148,
+        "omitted_frames": 0
+      },
+      "filesystem_before": {
+        "files_limit": 20,
+        "depth_limit": 16,
+        "enumeration_truncated": false,
+        "enumeration_reasons": [],
+        "enumeration_omissions": [],
+        "hash_budget_bytes": 10000000,
+        "hashed_bytes": 0,
+        "hash_omissions": []
+      },
+      "filesystem_after": {
+        "files_limit": 20,
+        "depth_limit": 16,
+        "enumeration_truncated": false,
+        "enumeration_reasons": [],
+        "enumeration_omissions": [],
+        "hash_budget_bytes": 10000000,
+        "hashed_bytes": 0,
+        "hash_omissions": []
+      },
+      "process": {
+        "sample_limit": 40,
+        "sampling_partial": false,
+        "retained_samples": 11,
+        "sample_limit_reached": false,
+        "sampling_failures": 0,
+        "first_sampling_failure": null,
+        "coverage": "sampled"
+      }
+    },
+    "limitations": [
+      "The executable digest is a prelaunch file sample; matching path metadata immediately after spawn does not prove an atomic operating-system image binding.",
+      "Process trees are sampled and may omit short-lived descendants.",
+      "Filesystem observations are before/after snapshots, not syscall traces.",
+      "Inherited host environment variables are not recorded and may affect results.",
+      "No filesystem observation paths were selected; filesystem effects remain unknown."
+    ],
+    "residual_unknowns": [
+      {
+        "scope": "process",
+        "reason": "Process trees are sampled and may omit short-lived descendants."
+      },
+      {
+        "scope": "process",
+        "reason": "The executable digest is a prelaunch file sample; operating-system image binding is not atomically observed."
+      },
+      {
+        "scope": "environment",
+        "reason": "Inherited host environment variables are not recorded."
+      },
+      {
+        "scope": "network",
+        "reason": "Network activity is not observed by this capture."
+      },
+      {
+        "scope": "filesystem",
+        "reason": "No filesystem observation paths were selected; filesystem effects remain unknown."
+      }
+    ],
+    "cleanup": {
+      "owned_process_group": "verified",
+      "temporary_root": "removed"
+    }
+  },
+  "confidence": "observed",
+  "authority": "controlled-replay",
+  "environment": {
+    "id": "darwin-arm64",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "isolation": "process"
+  },
+  "limitations": [
+    "Artifact identity is unavailable for this observation.",
+    "The executable digest is a prelaunch file sample; matching path metadata immediately after spawn does not prove an atomic operating-system image binding.",
+    "Process trees are sampled and may omit short-lived descendants.",
+    "Filesystem observations are before/after snapshots, not syscall traces.",
+    "Inherited host environment variables are not recorded and may affect results.",
+    "No filesystem observation paths were selected; filesystem effects remain unknown."
+  ],
+  "relationship_coverage": null,
+  "locations": [],
+  "evidence_links": []
+}

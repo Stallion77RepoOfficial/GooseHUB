@@ -1,0 +1,25 @@
+{
+  "dllSHA256": "dac2be4feb571636199aa89edb8ae019ff1def4497ea822f2d1be053e6feb681",
+  "tests": [
+    {
+      "mode": "dxbc-compute-unused-uav-null-unused",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-unused-uav",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-dual-raw",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-texpingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-aliasing-pingpong",
+      "exit": 0
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "scope": "User confirmed entered reported slow combat scene",
+  "cadenceMs": {
+    "median": 30.994799971580505,
+    "p95": 49.30630004405975,
+    "mean": 32.816328428262054
+  },
+  "stats": {
+    "query_jobs": {
+      "median": 2.0,
+      "mean": 2.0,
+      "max": 3.0
+    },
+    "query_queue_ms": {
+      "median": 0.0527,
+      "mean": 0.0976,
+      "max": 4.2966
+    },
+    "query_wait_ms": {
+      "median": 2.814,
+      "mean": 2.8999,
+      "max": 16.6625
+    },
+    "query_cpu_ms": {
+      "median": 0.0426,
+      "mean": 0.0586,
+      "max": 1.7032
+    },
+    "query_prepare_ms": {
+      "median": 0.1292,
+      "mean": 0.1401,
+      "max": 0.4261
+    },
+    "gpu_barriers": {
+      "median": 51.0,
+      "mean": 53.2967,
+      "max": 91.0
+    },
+    "execute_calls": {
+      "median": 3.0,
+      "mean": 3.7167,
+      "max": 10.0
+    },
+    "command_lists": {
+      "median": 22.0,
+      "mean": 23.0833,
+      "max": 52.0
+    },
+    "command_buffers": {
+      "median": 16.0,
+      "mean": 18.15,
+      "max": 34.0
+    },
+    "render_passes": {
+      "median": 52.0,
+      "mean": 51.1267,
+      "max": 75.0
+    },
+    "compute_passes": {
+      "median": 10.0,
+      "mean": 10.6533,
+      "max": 12.0
+    },
+    "encode_ms": {
+      "median": 0.6426,
+      "mean": 0.7029,
+      "max": 2.4492
+    },
+    "sync_ms": {
+      "median": 0.0,
+      "mean": 0.0,
+      "max": 0.0
+    },
+    "commit_ms": {
+      "median": 0.0017,
+      "mean": 0.0019,
+      "max": 0.0108
+    },
+    "present_ms": {
+      "median": 0.0557,
+      "mean": 0.0662,
+      "max": 0.3387
+    },
+    "present_latency_ms": {
+      "median": 0.0,
+      "mean": 0.0,
+      "max": 0.0001
+    }
+  },
+  "HUD": {
+    "intervalMedianMs": 33.33,
+    "gpuMedianMs": 8.0
+  }
+}

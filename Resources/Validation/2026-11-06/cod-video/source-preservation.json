@@ -1,0 +1,13 @@
+{
+  "previousSourceTreeSHA256": "21b8ca534f998cd1d37ab783051fba08c6804bb8f4c761474af7682bff5e39e0",
+  "reversedNewFixSHA256": "21b8ca534f998cd1d37ab783051fba08c6804bb8f4c761474af7682bff5e39e0",
+  "currentSourceTreeSHA256": "802cd7cb1a46553ef6dc8245a063d91fe6df53f2ca29f2b2f950fe2d11484e45",
+  "previousTreeReproduced": true,
+  "changedSourceFiles": [
+    "src/d3d9/d3d9_device.cpp",
+    "src/d3d9/d3d9_surface.cpp",
+    "src/d3d9/d3d9_surface.hpp",
+    "src/d3d9/d3d9_volume.cpp",
+    "src/d3d9/d3d9_volume.hpp"
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "dllSHA256": "ea1f527965832329533338741f9eb187f1a3c1825057361c4cb22038f3198018",
+  "tests": [
+    {
+      "mode": "dxbc-placed-texture-table64",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-texture-table128",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-slot13",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-cbv-slot13",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-constants-slot13",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-geometry",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-structured-vertex-resource-skin-cache-typed",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-structured-vertex-resource",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-unused-uav",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-dual-raw",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-aliasing-pingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-texpingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-texture-volatile",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-cube",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-cold-single",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-prepass-depthcopy",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-prepass-depth32s8-mrt",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-streams-retire-alias-old",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-streams-retire-alias-new",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-old",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-new",
+      "exit": 0
+    },
+    {
+      "mode": "multi-list-queries",
+      "exit": 0
+    },
+    {
+      "mode": "queries",
+      "exit": 0
+    }
+  ]
+}

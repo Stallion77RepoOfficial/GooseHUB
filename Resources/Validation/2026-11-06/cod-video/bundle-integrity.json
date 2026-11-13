@@ -1,0 +1,22 @@
+{
+  "version": "0.2.7",
+  "build": "10",
+  "candidate": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cod-video-20261106/Goose HUB candidate.app",
+  "assetCount": 2268,
+  "allHashesMatch": true,
+  "deepStrictSignature": true,
+  "changedExistingAssets": [
+    "DXMT/arm64ec/d3d9.dll",
+    "DXMT/x64/d3d9.dll",
+    "DXMT/x86/d3d9.dll",
+    "Sources/engine-sources.json"
+  ],
+  "unchangedExistingAssets": 2235,
+  "unchangedWineAssets": 1896,
+  "allD3D11AndD3D12DLLsByteIdentical": true,
+  "wine": "11.11 Adrenalin 2026.11.04",
+  "dxmt": "Adrenalin 2026.11.06",
+  "previousCustomSourceTreeReproduced": true,
+  "installedPath": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app",
+  "atomicBundleSwap": true
+}

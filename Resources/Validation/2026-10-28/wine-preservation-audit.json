@@ -1,0 +1,1270 @@
+{
+  "comparison": "native fork committed HEAD vs official Wine 11.11; overlay merged onto official Wine 11.20 for audit only",
+  "files": [
+    {
+      "path": "LICENSE",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "configure.ac",
+      "result": "needs-review",
+      "conflicts": 2
+    },
+    {
+      "path": "dlls/advapi32/tests/registry.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/advapi32/tests/security.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/comctl32/animate.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/comctl32/rebar.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/comdlg32/filedlg.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/d3drm_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/device.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/face.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/frame.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/meshbuilder.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/tests/d3drm.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/texture.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3drm/viewport.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_24/d3dx9_24.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_25/d3dx9_25.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_26/d3dx9_26.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_27/d3dx9_27.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_28/d3dx9_28.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_29/d3dx9_29.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_30/d3dx9_30.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_31/d3dx9_31.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_32/d3dx9_32.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_33/d3dx9_33.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_34/d3dx9_34.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_35/d3dx9_35.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_36/animation.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_36/d3dx9_36.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_36/effect.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_36/mesh.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/d3dx9_36/sprite.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_36/tests/effect.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_37/d3dx9_37.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_38/d3dx9_38.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_39/d3dx9_39.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_40/d3dx9_40.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_41/d3dx9_41.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_42/d3dx9_42.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/d3dx9_43/d3dx9_43.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dbghelp/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dbghelp/elf_module.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dcomp/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dcomp/dcomp.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dcomp/device.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ddraw/ddraw_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ddraw/device.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ddraw/executebuffer.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/ddraw/surface.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ddraw/tests/d3d.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ddraw/tests/ddraw1.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ddraw/tests/ddraw2.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dinput/keyboard.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dmime/audiopath.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dmime/segment.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dmscript/script.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dxgi/factory.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/dxgi/swapchain.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/gdiplus/graphics.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/inkobj/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/inkobj/inkobj.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/inkobj/inkobj_internal.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/inseng/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/inseng/inseng.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/inseng/inseng_main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernel32/heap.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernel32/kernel32.spec",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernel32/tests/file.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernelbase/debug.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernelbase/file.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernelbase/kernelbase.spec",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/kernelbase/memory.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/krnl386.exe16/instr.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mf/main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mf/mf.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mf/mf.rgs",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mf/mf_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mf/scheme_handler.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mf/tests/mf.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mfplat/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mfplat/main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mfplat/mfplat.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mfplat/mfplat_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mmsystem.dll16/message16.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mountmgr.sys/device.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mountmgr.sys/mountmgr.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mountmgr.sys/mountmgr.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mountmgr.sys/unixlib.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mountmgr.sys/unixlib.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/mshtml/oleobj.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msi/files.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/domdoc.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/factory.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/httprequest.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/msxml_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/mxwriter.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/tests/domdoc.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/tests/httpreq.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/tests/saxreader.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/tests/schema.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/msxml3/uuid.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/loader.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/ntdll/ntdll.spec",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/ntdll_misc.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/tests/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/tests/file.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/tests/om.c",
+      "result": "needs-review",
+      "conflicts": 2
+    },
+    {
+      "path": "dlls/ntdll/tests/rtl.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/tests/threadpool.c",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/threadpool.c",
+      "result": "needs-review",
+      "conflicts": 2
+    },
+    {
+      "path": "dlls/ntdll/unix/file.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/ntdll/unix/server.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/unix/socket.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ntdll/unix/unix_private.h",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/ntdll/unix/virtual.c",
+      "result": "needs-review",
+      "conflicts": 8
+    },
+    {
+      "path": "dlls/ntoskrnl.exe/tests/driver.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/odbc32/proxyodbc.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/oleaut32/olepicture.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/oleaut32/typelib.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/oleaut32/variant.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/riched20/richole.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/riched20/tests/richole.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/sapi/token.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/shell32/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/shell32/iconcache.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/shell32/shell32.rc",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/shlwapi/assoc.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/shlwapi/tests/assoc.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/stdole32.tlb/std_ole_v1.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/defdlg.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/dialog.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/input.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/msgbox.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/tests/dialog.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/tests/input.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/tests/msg.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/tests/resource.rc",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/tests/win.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/user32/text.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vbscript/interp.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vbscript/tests/lang.vbs",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vbscript/tests/run.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vbscript/utils.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp/main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp/vcomp.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp100/vcomp100.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp110/vcomp110.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp120/vcomp120.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp140/vcomp140.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/vcomp90/vcomp90.spec",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/version/tests/info.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wbemdisp/locator.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wbemprox/query.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/win32u/font.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/win32u/input.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/win32u/ntuser_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/win32u/window.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.storage/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.storage/classes.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.storage/main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.storage/private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.ui/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.ui/classes.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.ui/main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windows.ui/private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windowscodecs/metadatahandler.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/windowscodecs/tests/converter.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/adapter_gl.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/adapter_vk.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/directx.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/glsl_shader.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/swapchain.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/view.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/wined3d_main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wined3d/wined3d_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/winemac.drv/macdrv.h",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/winemac.drv/macdrv_main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/winemac.drv/opengl.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/winepulse.drv/pulse.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/winex11.drv/event.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/winex11.drv/keyboard.c",
+      "result": "needs-review",
+      "conflicts": 3
+    },
+    {
+      "path": "dlls/winex11.drv/mouse.c",
+      "result": "needs-review",
+      "conflicts": 13
+    },
+    {
+      "path": "dlls/winex11.drv/window.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/winex11.drv/wintab.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/winex11.drv/x11drv.h",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/winex11.drv/x11drv_main.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "dlls/winex11.drv/xim.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wininet/http.c",
+      "result": "needs-review",
+      "conflicts": 2
+    },
+    {
+      "path": "dlls/wininet/internet.c",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wininet/tests/http.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/winmm/mci.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wintab32/context.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/wintrust/tests/softpub.c",
+      "result": "identical-in-upstream-11.20"
+    },
+    {
+      "path": "dlls/wintrust/wintrust_main.c",
+      "result": "identical-in-upstream-11.20"
+    },
+    {
+      "path": "dlls/ws2_32/socket.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/ws2_32/ws2_32_private.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "dlls/xactengine3_7/xact_dll.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "fonts/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/inseng.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/msinkaut.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/msxml6.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/ntuser.h",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "include/peninputpanel.idl",
+      "result": "identical-in-upstream-11.20"
+    },
+    {
+      "path": "include/threadpoolapiset.h",
+      "result": "identical-in-upstream-11.20"
+    },
+    {
+      "path": "include/windows.storage.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/windows.ui.input.idl",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "include/winternl.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/include/private/vkd3d_common.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/include/private/vkd3d_version.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-common/blob.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/d3d_asm.c",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/d3dbc.c",
+      "result": "needs-review",
+      "conflicts": 9
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/dxil.c",
+      "result": "needs-review",
+      "conflicts": 3
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/glsl.c",
+      "result": "needs-review",
+      "conflicts": 14
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/hlsl.h",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/hlsl_codegen.c",
+      "result": "needs-review",
+      "conflicts": 6
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/ir.c",
+      "result": "needs-review",
+      "conflicts": 15
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/msl.c",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/preproc.l",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/spirv.c",
+      "result": "needs-review",
+      "conflicts": 9
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/tpf.c",
+      "result": "needs-review",
+      "conflicts": 3
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/vkd3d_shader_main.c",
+      "result": "needs-review",
+      "conflicts": 5
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-shader/vkd3d_shader_private.h",
+      "result": "needs-review",
+      "conflicts": 4
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d-utils/vkd3d_utils_main.c",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d/state.c",
+      "result": "identical-in-upstream-11.20"
+    },
+    {
+      "path": "libs/vkd3d/libs/vkd3d/vkd3d_private.h",
+      "result": "superseded-in-upstream-11.20",
+      "conflicts": 0
+    },
+    {
+      "path": "libs/xml2/parser.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "loader/wine.inf.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/explorer/desktop.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winecfg/Makefile.in",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winecfg/libraries.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winecfg/main.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winecfg/resource.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winecfg/winecfg.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winecfg/winecfg.rc",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winedbg/info.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "programs/winedevice/device.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/change.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/d3dkmt.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/directory.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "server/fd.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/file.c",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "server/file.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/object.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/object.h",
+      "result": "needs-review",
+      "conflicts": 1
+    },
+    {
+      "path": "server/protocol.def",
+      "result": "needs-review",
+      "conflicts": 3
+    },
+    {
+      "path": "server/queue.c",
+      "result": "needs-review",
+      "conflicts": 3
+    },
+    {
+      "path": "server/sock.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/thread.c",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "server/thread.h",
+      "result": "overlay-remains",
+      "conflicts": 0
+    },
+    {
+      "path": "tools/make_specfiles",
+      "result": "overlay-remains",
+      "conflicts": 0
+    }
+  ]
+}

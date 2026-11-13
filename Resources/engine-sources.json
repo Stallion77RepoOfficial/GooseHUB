@@ -1,0 +1,185 @@
+{
+  "reviewDate": "2026-11-04",
+  "wine": {
+    "repository": "https://github.com/Stallion77RepoOfficial/wine-adrenalin-edition",
+    "candidateVersion": "11.20",
+    "candidateTag": "wine-11.20",
+    "candidateCommit": "7298a818b79446bae153b8d5aa27235ab3703bf9",
+    "selectionPolicy": "Keep the local DXMT and Wine forks authoritative. Import individual upstream fixes only after checking behavior and compatibility. Never replace a fork wholesale with an upstream source tree or binary.",
+    "configureFlags": [
+      "--enable-archs=arm64ec,aarch64,i386",
+      "--without-x",
+      "--without-pulse",
+      "--disable-tests",
+      "LDFLAGS=-Wl,-headerpad_max_install_names"
+    ],
+    "selectedVersion": "11.11 Adrenalin 2026.11.13",
+    "selectionReason": "Preserve the complete local fork and native ARM64/MSync overlay. The full 11.20 candidate omitted additional committed fork patches, so it is not shipped. Import only the five listed upstream correctness fixes. The earlier 11.20 CPU comparison is candidate evidence and does not describe this build.",
+    "canonicalSource": "../wine-adrenalin-edition/",
+    "baseVersion": "11.11",
+    "baseForkCommit": "11114aa",
+    "nativePortPatch": "Sources/Patches/wine-native-arm64.patch",
+    "importedFixes": [
+      {
+        "commit": "81e52628b25ac173d04796e8a9b9cda637d3e233",
+        "scope": "Acquire/release ordering and waiter lifetime in RtlWaitOnAddress wake queues"
+      },
+      {
+        "commit": "48e2d50404d0b67f30cf0a149df361f4d50eac64",
+        "scope": "Initialize the extended macOS window style output"
+      },
+      {
+        "commit": "53a91cdcbe21125913b24a48cf0f429597017d6a",
+        "scope": "Release clipboard format data"
+      },
+      {
+        "commit": "80e1217aa09ff493c165f0392048046ec5f97797",
+        "scope": "Use the x64 RIP offset in the ARM64EC breakpoint handler"
+      },
+      {
+        "commit": "8c284041138dec2c38146970c5de3549ea3e007a",
+        "scope": "Preserve exception flags in ARM64/x64 context conversion"
+      }
+    ],
+    "latestCheckedVersion": "11.21",
+    "latestCheckedCommit": "2528aff26208257fdbf980666a4f0e66d47563ce",
+    "latestCheckReason": "Reviewed the 11.21 OpenGL changes. Its new WoW64 mapping path requires GL_MESA_map_buffer_client_pointer, absent from the tested Apple M4 OpenGL 2.1 context. Its context-profile fix concerns OpenGL 3.1. Neither is a demonstrated performance fix for this CS 4554 immediate-mode workload. Keep the complete local fork and the previously selected fixes.",
+    "localEnhancements": [
+      {
+        "date": "2026-11-04",
+        "scope": "Optional WoW64 immediate-mode OpenGL call batching, 512 commands per thread, pointer values captured in PE32, ordering barriers for remaining calls and a separate unbatched module fallback. Synchronous debug callback registration disables batching.",
+        "validation": "Generator/checked-in output agreement, OpenGL GPU/state/context tests and identical 980-frame 15-character CS replay."
+      },
+      {
+        "id": "bundled-media-library-search-20261108",
+        "date": "2026-11-08",
+        "scope": "Runtime packaging removes build-machine absolute library search paths before adding bundled dependencies; avoids duplicate GStreamer registries. Wine source is unchanged.",
+        "patch": "Sources/Patches/wine-bundled-media-rpath.patch"
+      },
+      {
+        "id": "hid-feature-and-installer-process-checks-20261113",
+        "date": "2026-11-13",
+        "scope": "Unsupported PowerShell commands fail instead of reporting success; tasklist preserves long executable names and spaced filter operands; macOS exposes external feature-capable HID configuration interfaces and forwards only wholly vendor-defined input report IDs. Mixed/protected reports, built-in controls and ordinary pointer/keyboard interfaces remain on the existing Mac input path.",
+        "patch": "Sources/Patches/wine-hid-installer-20261113.patch",
+        "validation": "NSIS installer completion, exact positive/negative process detection, ARM64/x86 capability probes, real B6A4:40C1 read/write feature access and vendor input, actual manufacturer UI with device connected and 93% battery."
+      }
+    ],
+    "sourcePreservation": "Validation/2026-11-13/wine-hid/source-preservation.json",
+    "upstreamRepository": "https://github.com/wine-mirror/wine"
+  },
+  "dxmt": {
+    "version": "Adrenalin 2026.11.08.1",
+    "repository": "https://github.com/Stallion77RepoOfficial/dxmt-adrenalin-edition",
+    "latestRelease": "v0.80",
+    "upstreamReviewedCommit": "3b252590cb0290e36fca6f088b5255b871d2d95a",
+    "importedFixes": [
+      {
+        "commit": "5cafc4305cddd659f72ff8cd0cc660ffaf7ffa1f",
+        "scope": "Retain NSError results in the eight APIs present in this fork"
+      },
+      {
+        "commit": "a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+        "scope": "Release display color profiles and tags; also handle invalid signatures and zero tristimulus sums"
+      },
+      {
+        "commit": "d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+        "scope": "Autorelease per-frame display-setting queries"
+      },
+      {
+        "commit": "9839e55f98d4aca103957ee4132d6395a325a9ed",
+        "scope": "Preserve a shader call's return point before replacing its block target"
+      },
+      {
+        "commit": "d162ea44a31fbf9089ea09977337f0beb30bd082",
+        "scope": "Geometry point output size and primitive count, adapted to this fork's IR effects"
+      }
+    ],
+    "selectionReason": "Keep this fork's Direct3D 8/9 implementation, sampler optimization, native ARM64 bridge and LLVM 23 compatibility. Import applicable upstream correctness fixes instead of replacing it with the older tagged binary.",
+    "shaderCacheVersion": 21,
+    "direct3D12": "experimental",
+    "localChanges": [
+      {
+        "date": "2026-10-31",
+        "scope": "Implement unlit fixed-function D3D9 ProcessVertices for legacy adapters, including viewport projection, attribute copies, range validation and overlapping buffers. Programmable and lit vertex processing remain unsupported.",
+        "validation": "x86, x64 and ARM64EC coordinate/perspective/bounds/aliasing tests and GPU pixel readback; existing sampler checks."
+      },
+      {
+        "date": "2026-11-04",
+        "scope": "Per-stage constant buffer rings with 256-byte aligned ranges, no-overwrite append, discard on wrap, shader-used register spans, unchanged float/integer/normalized-boolean setter deduplication and fixed-function stage separation.",
+        "validation": "x86, x64 and ARM64EC GPU constant/range/wrap/state tests; CoD4 Bog dense-scene CPU diagnostics."
+      },
+      {
+        "id": "incremental-d3d12-compatibility",
+        "scope": "Extend the existing D3D12 bridge: owned root signatures, shader bindings and typed resource views, coherent committed/placed buffers, stencil UI, logical flip buffers, queue dependencies, DXBC compute, native SM6 residency caching and WoW64 host ABI. Keep the local DXMT/Wine forks and the delivered D3D9/OpenGL optimizations.",
+        "patch": "Sources/Patches/dxmt-d3d12-compatibility.patch",
+        "validation": "Official unmodified ULTRAKILL Prelude with -force-d3d12 on Apple M4; real GPU readback and API checks on ARM64EC, x64 and x86; D3D9 and D3D11 regression checks. Combat fluidity is user-reported; no repeatable combat FPS comparison or complete D3D12 coverage is claimed."
+      },
+      {
+        "id": "current-system-memory-uploads",
+        "date": "2026-11-06",
+        "scope": "Read current system-memory data directly into the destination during UpdateTexture and UpdateSurface, including mip levels, cube faces and volume levels. Upload only the requested rectangle, retain newer GPU-written data and reuse format expansion. Fixes the transient green CoD4 Bink video frame without game-name rules.",
+        "patch": "Sources/Patches/dxmt-system-memory-uploads.patch",
+        "validation": "20 GPU checks per architecture on x86, x64 and ARM64EC; existing constant, sampler and ProcessVertices fixtures; CoD4 Bog GPU video-plane and pre-presentation readback."
+      },
+      {
+        "id": "d3d12-correctness-and-submission-20261108",
+        "date": "2026-11-08",
+        "scope": "Geometry stages, placed storage, copy/view lifetime, shader-used UAVs, live GPU-address aliases, real GPU barriers/fences, asynchronous query readback, grouped submissions, complete first-draw pipeline compilation and shared-memory shader constant-expression lowering. No game-name rules.",
+        "patch": "Sources/Patches/dxmt-d3d12-correctness-20261108.patch",
+        "validation": "Sources/Validation/2026-11-08/d3d12/README.md",
+        "priorForkSourceTreeSHA256": "802cd7cb1a46553ef6dc8245a063d91fe6df53f2ca29f2b2f950fe2d11484e45",
+        "sourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
+        "status": "experimental; tested games and fixtures, incomplete API coverage"
+      },
+      {
+        "id": "d3d12-declared-bindings-20261108",
+        "date": "2026-11-08",
+        "scope": "Per-stage shader declaration masks avoid unused CBV/SRV/sampler bindings, GPU-address lookups and root-constant uploads. Existing UAV masks and descriptor lifetime preserved. D3D12 DXBC bridge only.",
+        "patch": "Sources/Patches/dxmt-d3d12-declared-bindings-20261108.patch",
+        "validation": "Sources/Validation/2026-11-08/d3d12-bindings/README.md",
+        "priorForkSourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
+        "sourceTreeSHA256": "ee3ec3944fcf8b1d14c45c98e31c43d3129c9c33930e3ccef50d9ba3f78a4d5d",
+        "status": "69 three-architecture GPU checks passed; isolated submission timing improved; game FPS parity not claimed"
+      }
+    ],
+    "latestCheckedCommit": "647b0020ba5764e5593b12407afd76964fa11e20",
+    "latestCheckReason": "Reviewed the 19 commits since 3b252590. Most add DXIL or tessellation functionality to newer upstream components. The two CreateSubresourceSurface bound checks target methods absent from this fork. None resolves this legacy OpenGL or D3D9 CPU submission bottleneck; keep existing imports and add the locally tested optimizations.",
+    "upstreamRepository": "https://github.com/3Shain/dxmt",
+    "canonicalSource": "../dxmt-adrenalin-edition/"
+  },
+  "sourcePolicy": "Keep the local DXMT and Wine forks authoritative. Import individual upstream fixes only after checking behavior and compatibility. Never replace a fork wholesale with an upstream source tree or binary.",
+  "latestCheckDate": "2026-11-04",
+  "runtime": {
+    "reducedX87PrecisionDefault": true,
+    "scope": "Application launches using FEX; shared runtime setting, not game-specific. Recognized installers use full 80-bit x87 precision automatically. Wine maintenance tools retain their normal environment.",
+    "setting": "runtime-settings.json / reducedX87Precision",
+    "compatibilityControl": "The global Engines switch explicitly selects FEX_X87REDUCEDPRECISION=1 or 0 for the next application launch.",
+    "legacyOpenGLBatching": {
+      "default": true,
+      "scope": "All 32-bit OpenGL application launches using native Wine; no game-name matching.",
+      "setting": "runtime-settings.json / legacyOpenGLBatching",
+      "fallback": "Normal module without batching",
+      "disabledForDebugCallbacks": true
+    },
+    "installerCompatibility": {
+      "x87MathBits": 80,
+      "recognition": "MSI packages; standard setup/install/uninstall executable names; bounded PE-header Inno Setup and NSIS signatures, including renamed installers.",
+      "reason": "Reduced x87 precision corrupts reconstructed path characters in the tested Inno Setup bootstrap.",
+      "validation": "The same setup fails at reduced precision and opens at full precision; normal GooseHUB launch logs x87MathBits=80; installation to C:\\Games\\Severed Steel succeeded and user confirmed all files OK; 14 Swift tests pass; global game acceleration is retained."
+    }
+  },
+  "fex": {
+    "repository": "https://github.com/Stallion77RepoOfficial/fex-adrenalin-edition",
+    "upstreamRepository": "https://github.com/FEX-Emu/FEX",
+    "canonicalSource": "../fex-adrenalin-edition/",
+    "baseCommit": "14c92681f4d62cf84d901460e0358de09c8847a7",
+    "policy": "Retain the existing Darwin, JIT, allocation, host feature and memory-model adaptations."
+  },
+  "installation": {
+    "method": "fetch-source-build",
+    "sourceLock": "Resources/engine-lock.json",
+    "buildCache": "~/Library/Caches/GooseHUB/Build",
+    "engineDestination": "GooseHUB.app/Contents/Resources/Engines",
+    "bundledEngines": false
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "application": {
+    "arguments": [
+      "-game",
+      "cstrike",
+      "-gl",
+      "-32bpp",
+      "-nojoy",
+      "-noipx",
+      "+developer",
+      "1",
+      "+fps_max",
+      "999",
+      "+cl_showfps",
+      "1"
+    ],
+    "executablePath": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+    "id": "4BA204CA-B7D6-4263-AFB3-C599A8833B89",
+    "isFavorite": false,
+    "name": "hl"
+  },
+  "otherApplicationsPreserved": true,
+  "bottleOptionsPreserved": true,
+  "perApplicationRegistry": {
+    "path": "HKCU\\Software\\Wine\\AppDefaults\\hl.exe\\Mac Driver",
+    "AllowVerticalSync": "N",
+    "type": "REG_SZ"
+  },
+  "configFiles": [
+    "cstrike/config.cfg",
+    "cstrike/userconfig.cfg"
+  ],
+  "configValues": {
+    "fps_max": "999",
+    "developer": "1"
+  },
+  "gameLocalGraphicsAdaptersAdded": false,
+  "updatedThroughUI": true,
+  "runtimeSettings": {
+    "reducedX87Precision": true
+  },
+  "runtimeScope": "All FEX application launches",
+  "shortcutSpecificCPUOptionRemoved": true
+}

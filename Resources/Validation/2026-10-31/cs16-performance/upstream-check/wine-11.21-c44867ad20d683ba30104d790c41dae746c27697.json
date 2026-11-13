@@ -1,0 +1,161 @@
+{
+  "sha": "c44867ad20d683ba30104d790c41dae746c27697",
+  "node_id": "C_kwDOAVqN-toAKGM0NDg2N2FkMjBkNjgzYmEzMDEwNGQ3OTBjNDFkYWU3NDZjMjc2OTc",
+  "commit": {
+    "author": {
+      "name": "Derek Lesho",
+      "email": "dlesho@codeweavers.com",
+      "date": "2026-08-06T08:47:07Z"
+    },
+    "committer": {
+      "name": "Alexandre Julliard",
+      "email": "julliard@winehq.org",
+      "date": "2026-10-27T20:36:32Z"
+    },
+    "message": "opengl32: Implement wow64 buffer mapping on MESA_map_buffer_client_pointer.",
+    "tree": {
+      "sha": "9d15a44fce3dbb8372c396b5c27d59214ad6c56a",
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/9d15a44fce3dbb8372c396b5c27d59214ad6c56a"
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/c44867ad20d683ba30104d790c41dae746c27697",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "url": "https://api.github.com/repos/wine-mirror/wine/commits/c44867ad20d683ba30104d790c41dae746c27697",
+  "html_url": "https://github.com/wine-mirror/wine/commit/c44867ad20d683ba30104d790c41dae746c27697",
+  "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/c44867ad20d683ba30104d790c41dae746c27697/comments",
+  "author": {
+    "login": "Guy1524",
+    "id": 35645466,
+    "node_id": "MDQ6VXNlcjM1NjQ1NDY2",
+    "avatar_url": "https://avatars.githubusercontent.com/u/35645466?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/Guy1524",
+    "html_url": "https://github.com/Guy1524",
+    "followers_url": "https://api.github.com/users/Guy1524/followers",
+    "following_url": "https://api.github.com/users/Guy1524/following{/other_user}",
+    "gists_url": "https://api.github.com/users/Guy1524/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/Guy1524/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/Guy1524/subscriptions",
+    "organizations_url": "https://api.github.com/users/Guy1524/orgs",
+    "repos_url": "https://api.github.com/users/Guy1524/repos",
+    "events_url": "https://api.github.com/users/Guy1524/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/Guy1524/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "julliard",
+    "id": 1130500,
+    "node_id": "MDQ6VXNlcjExMzA1MDA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/julliard",
+    "html_url": "https://github.com/julliard",
+    "followers_url": "https://api.github.com/users/julliard/followers",
+    "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+    "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+    "organizations_url": "https://api.github.com/users/julliard/orgs",
+    "repos_url": "https://api.github.com/users/julliard/repos",
+    "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/julliard/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+      "url": "https://api.github.com/repos/wine-mirror/wine/commits/afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+      "html_url": "https://github.com/wine-mirror/wine/commit/afcea18dfe9d296548a1a3fe690f4f228e1a2f77"
+    }
+  ],
+  "stats": {
+    "total": 175,
+    "additions": 173,
+    "deletions": 2
+  },
+  "files": [
+    {
+      "sha": "aae6f1e8be9709aba8fc1ff7b216f157678a8869",
+      "filename": "dlls/opengl32/make_opengl",
+      "status": "modified",
+      "additions": 4,
+      "deletions": 0,
+      "changes": 4,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Fmake_opengl",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Fmake_opengl",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Fmake_opengl?ref=c44867ad20d683ba30104d790c41dae746c27697",
+      "patch": "@@ -1830,6 +1830,7 @@ print OUT \"{\\n\";\n print OUT \"    unix_process_attach,\\n\";\n print OUT \"    unix_thread_attach,\\n\";\n print OUT \"    unix_process_detach,\\n\";\n+print OUT \"    unix_thread_detach,\\n\";\n print OUT \"    unix_set_root_context,\\n\";\n print OUT \"    unix_get_pixel_formats,\\n\";\n foreach (sort keys %wgl_functions)\n@@ -2080,6 +2081,7 @@ print OUT \"{\\n\";\n print OUT \"    process_attach,\\n\";\n print OUT \"    thread_attach,\\n\";\n print OUT \"    process_detach,\\n\";\n+print OUT \"    thread_detach,\\n\";\n print OUT \"    set_root_context,\\n\";\n print OUT \"    get_pixel_formats,\\n\";\n foreach (sort keys %wgl_functions)\n@@ -2104,6 +2106,7 @@ print OUT \"C_ASSERT(ARRAYSIZE(__wine_unix_call_funcs) == funcs_count);\\n\\n\";\n print OUT \"#ifdef _WIN64\\n\\n\";\n print OUT \"extern NTSTATUS wow64_thread_attach( void *args );\\n\";\n print OUT \"extern NTSTATUS wow64_process_detach( void *args );\\n\";\n+print OUT \"extern NTSTATUS wow64_thread_detach( void *args );\\n\";\n print OUT \"extern NTSTATUS wow64_set_root_context( void *args );\\n\\n\";\n print OUT \"extern NTSTATUS wow64_get_pixel_formats( void *args );\\n\\n\";\n \n@@ -2129,6 +2132,7 @@ print OUT \"{\\n\";\n print OUT \"    process_attach,\\n\";\n print OUT \"    wow64_thread_attach,\\n\";\n print OUT \"    wow64_process_detach,\\n\";\n+print OUT \"    wow64_thread_detach,\\n\";\n print OUT \"    wow64_set_root_context,\\n\";\n print OUT \"    wow64_get_pixel_formats,\\n\";\n foreach (sort keys %wgl_functions)"
+    },
+    {
+      "sha": "a5b82cc2498f61a549186a74485c44c1e476e3bb",
+      "filename": "dlls/opengl32/unix_private.h",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funix_private.h",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funix_private.h",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Funix_private.h?ref=c44867ad20d683ba30104d790c41dae746c27697",
+      "patch": "@@ -88,6 +88,7 @@ extern NTSTATUS return_wow64_string( const void *str, PTR32 *wow64_str );\n extern NTSTATUS process_attach( void *args );\n extern NTSTATUS thread_attach( void *args );\n extern NTSTATUS process_detach( void *args );\n+extern NTSTATUS thread_detach( void *args );\n extern NTSTATUS set_root_context( void *args );\n extern NTSTATUS get_pixel_formats( void *args );\n extern void set_current_fbo( TEB *teb, GLenum target, GLuint framebuffer );"
+    },
+    {
+      "sha": "0ff25c6603713060c9cfe53e49fec760beb5c605",
+      "filename": "dlls/opengl32/unix_thunks.c",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0,
+      "changes": 3,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funix_thunks.c",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funix_thunks.c",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Funix_thunks.c?ref=c44867ad20d683ba30104d790c41dae746c27697",
+      "patch": "@@ -27930,6 +27930,7 @@ const unixlib_entry_t __wine_unix_call_funcs[] =\n     process_attach,\n     thread_attach,\n     process_detach,\n+    thread_detach,\n     set_root_context,\n     get_pixel_formats,\n     wgl_wglDeleteContext,\n@@ -31030,6 +31031,7 @@ C_ASSERT(ARRAYSIZE(__wine_unix_call_funcs) == funcs_count);\n \n extern NTSTATUS wow64_thread_attach( void *args );\n extern NTSTATUS wow64_process_detach( void *args );\n+extern NTSTATUS wow64_thread_detach( void *args );\n extern NTSTATUS wow64_set_root_context( void *args );\n \n extern NTSTATUS wow64_get_pixel_formats( void *args );\n@@ -81580,6 +81582,7 @@ const unixlib_entry_t __wine_unix_call_wow64_funcs[] =\n     process_attach,\n     wow64_thread_attach,\n     wow64_process_detach,\n+    wow64_thread_detach,\n     wow64_set_root_context,\n     wow64_get_pixel_formats,\n     wow64_wgl_wglDeleteContext,"
+    },
+    {
+      "sha": "26136a0dd5b5cff70594ad8297e814e93ed2eb29",
+      "filename": "dlls/opengl32/unix_wgl.c",
+      "status": "modified",
+      "additions": 163,
+      "deletions": 2,
+      "changes": 165,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funix_wgl.c",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funix_wgl.c",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Funix_wgl.c?ref=c44867ad20d683ba30104d790c41dae746c27697",
+      "patch": "@@ -476,7 +476,8 @@ static void init_client_context( TEB *teb, struct opengl_client_context *client,\n     if (!device) device = (const char *)funcs->p_glGetString( GL_RENDERER );\n     lstrcpynA( client->device_name, device, ARRAY_SIZE(client->device_name) );\n \n-    if (is_win64 && is_wow64() && !initialize_vk_device( teb, ctx ) && !ctx->extensions[GL_AMD_pinned_memory])\n+    if (is_win64 && is_wow64() && !ctx->extensions[GL_MESA_map_buffer_client_pointer] &&\n+        !initialize_vk_device( teb, ctx ) && !ctx->extensions[GL_AMD_pinned_memory])\n     {\n         if (client->attrs.major > 4 || (client->attrs.major == 4 && client->attrs.minor > 3))\n         {\n@@ -508,10 +509,43 @@ static void init_client_context( TEB *teb, struct opengl_client_context *client,\n     client->initialized = TRUE;\n }\n \n+static void free_client_pointer_ranges( TEB *teb, GLbitfield flags )\n+{\n+    const struct opengl_funcs *funcs = teb->glTable;\n+    GLsizeiptr size;\n+    void *ptr;\n+\n+    while ((ptr = funcs->p_glReleaseClientPointerRangeMESA( flags, &size )))\n+    {\n+        SIZE_T alloc_size = size;\n+        NtFreeVirtualMemory( GetCurrentProcess(), &ptr, &alloc_size, MEM_RELEASE );\n+    }\n+}\n+\n BOOL wrap_wglDeleteContext( TEB *teb, HGLRC client_context )\n {\n     const struct opengl_funcs *funcs = get_context_funcs( client_context );\n-    funcs->p_context_destroy( opengl_context_from_handle( client_context ) );\n+    struct opengl_context *ctx = opengl_context_from_handle( client_context );\n+\n+    UINT64 root_context = opengl_client_context_from_client( client_context )->root_context;\n+    bool use_client_pointer = is_wow64() && ctx->extensions[GL_MESA_map_buffer_client_pointer];\n+\n+    funcs->p_context_destroy( ctx );\n+\n+    /* destroy the context first to release client memory for still mapped buffers */\n+    if (use_client_pointer)\n+    {\n+        struct set_root_context_params params = { .teb = NtCurrentTeb() };\n+\n+        params.root_context = root_context;\n+        set_root_context( &params );\n+\n+        free_client_pointer_ranges( teb, GL_CLIENT_POINTER_RELEASE_ALL_MESA );\n+\n+        params.root_context = 0;\n+        set_root_context( &params );\n+    }\n+\n     return TRUE;\n }\n \n@@ -1200,6 +1234,11 @@ NTSTATUS process_detach( void *args )\n     return STATUS_SUCCESS;\n }\n \n+NTSTATUS thread_detach( void *args )\n+{\n+    return STATUS_SUCCESS;\n+}\n+\n NTSTATUS get_pixel_formats( void *args )\n {\n     struct get_pixel_formats_params *params = args;\n@@ -1472,6 +1511,97 @@ static struct buffer *create_buffer_storage( TEB *teb, GLenum target, GLuint nam\n     return buffer;\n }\n \n+static GLint get_buffer_param( TEB *teb, GLenum target, GLenum param )\n+{\n+    const struct opengl_funcs *funcs = teb->glTable;\n+    GLint size = 0;\n+    if (funcs->p_glGetBufferParameteriv) funcs->p_glGetBufferParameteriv( target, param, &size );\n+    return size;\n+}\n+\n+static GLint get_named_buffer_param( TEB *teb, GLint buffer, GLenum param )\n+{\n+    const struct opengl_funcs *funcs = teb->glTable;\n+    GLint size = 0;\n+    if (funcs->p_glGetNamedBufferParameteriv) funcs->p_glGetNamedBufferParameteriv( buffer, param, &size );\n+    return size;\n+}\n+\n+static BOOL use_client_pointer( TEB *teb )\n+{\n+    struct opengl_context *ctx;\n+    if (!(ctx = get_current_context( teb, NULL, NULL, NULL ))) return FALSE;\n+    return ctx->extensions[GL_MESA_map_buffer_client_pointer];\n+}\n+\n+static void *map_buffer_client_pointer( TEB *teb, GLenum target, GLuint name, GLintptr offset,\n+                                        size_t length, GLbitfield access )\n+{\n+    const struct opengl_funcs *funcs = teb->glTable;\n+    SIZE_T alloc_size;\n+    GLsizeiptr size;\n+    GLenum err;\n+    void *ptr;\n+\n+    /* save the error in the wrapper so we can check for success */\n+    set_gl_error( teb, funcs->p_glGetError() );\n+\n+    /* first approach, either this succeeds or the driver needs more client memory */\n+    if (name) ptr = funcs->p_glMapNamedBufferRange( name, offset, length, access | GL_MAP_CLIENT_POINTER_BIT_MESA );\n+    else ptr = funcs->p_glMapBufferRange( target, offset, length, access | GL_MAP_CLIENT_POINTER_BIT_MESA );\n+\n+    /* if the driver needs more client memory GL_OUT_OF_MEMORY is returned and\n+       GL_BUFFER_CLIENT_POINTER_SIZE_MESA is set to the needed size */\n+    if ((err = funcs->p_glGetError()) != GL_OUT_OF_MEMORY)\n+    {\n+        set_gl_error( teb, err );\n+        return ptr;\n+    }\n+\n+    size = name ? get_named_buffer_param( teb, name, GL_BUFFER_CLIENT_POINTER_SIZE_MESA )\n+                : get_buffer_param( teb, target, GL_BUFFER_CLIENT_POINTER_SIZE_MESA );\n+    if (!size)\n+    {\n+        set_gl_error( teb, GL_OUT_OF_MEMORY );\n+        return NULL;\n+    }\n+\n+    alloc_size = size;\n+    if (NtAllocateVirtualMemory( GetCurrentProcess(), &ptr, zero_bits, &alloc_size,\n+                                 MEM_COMMIT, PAGE_READWRITE ))\n+    {\n+        WARN( \"NtAllocateVirtualMemory failed, freeing client pointer ranges and trying again\\n\" );\n+        free_client_pointer_ranges( teb, 0 );\n+\n+        if (NtAllocateVirtualMemory( GetCurrentProcess(), &ptr, zero_bits, &alloc_size,\n+                                     MEM_COMMIT, PAGE_READWRITE ))\n+        {\n+            WARN( \"NtAllocateVirtualMemory failed, freeing all client pointer ranges and trying again\\n\" );\n+            free_client_pointer_ranges( teb, GL_CLIENT_POINTER_RELEASE_ALL_MESA );\n+\n+            if (NtAllocateVirtualMemory( GetCurrentProcess(), &ptr, zero_bits, &alloc_size,\n+                                         MEM_COMMIT, PAGE_READWRITE ))\n+            {\n+                ERR( \"NtAllocateVirtualMemory failed\\n\" );\n+                set_gl_error( teb, GL_OUT_OF_MEMORY );\n+                return NULL;\n+            }\n+        }\n+    }\n+\n+    TRACE( \"Allocated Wow64 client pointer range at %p - %p.\\n\", ptr, (uint8_t *)ptr + size );\n+    assert( size == alloc_size );\n+    funcs->p_glAddClientPointerRangeMESA( ptr, alloc_size );\n+\n+    /* second approach with new memory */\n+    if (name) ptr = funcs->p_glMapNamedBufferRange( name, offset, length, access | GL_MAP_CLIENT_POINTER_BIT_MESA );\n+    else ptr = funcs->p_glMapBufferRange( target, offset, length, access | GL_MAP_CLIENT_POINTER_BIT_MESA );\n+\n+    /* the mapping could have failed or gotten client memory from another thread */\n+    free_client_pointer_ranges( teb, 0 );\n+    return ptr;\n+}\n+\n static void *wow64_map_buffer( TEB *teb, struct buffer *buffer, GLenum target, GLuint name, GLintptr offset,\n                                size_t length, GLbitfield access, void *ptr )\n {\n@@ -1614,6 +1744,8 @@ void wow64_glBufferStorage( TEB *teb, GLenum target, GLsizeiptr size, const void\n     const struct opengl_funcs *funcs = teb->glTable;\n     struct buffer *buffer = NULL, *previous;\n \n+    if (use_client_pointer( teb )) return p_glBufferStorage( target, size, data, flags | GL_MAP_CLIENT_POINTER_BIT_MESA );\n+\n     if (flags & GL_MAP_PERSISTENT_BIT) buffer = create_buffer_storage( teb, target, 0, size, data, flags );\n     previous = set_target_buffer_storage( teb, target, buffer );\n     if (!buffer) p_glBufferStorage( target, size, data, flags );\n@@ -1626,6 +1758,8 @@ void wow64_glNamedBufferStorage( TEB *teb, GLuint name, GLsizeiptr size, const v\n     const struct opengl_funcs *funcs = teb->glTable;\n     struct buffer *buffer = NULL, *previous;\n \n+    if (use_client_pointer( teb )) return p_glNamedBufferStorage( name, size, data, flags | GL_MAP_CLIENT_POINTER_BIT_MESA );\n+\n     if (flags & GL_MAP_PERSISTENT_BIT) buffer = create_buffer_storage( teb, 0, name, size, data, flags );\n     previous = set_named_buffer_storage( teb, name, buffer );\n     if (!buffer) p_glNamedBufferStorage( name, size, data, flags );\n@@ -1669,6 +1803,8 @@ void *wow64_glMapBuffer( TEB *teb, GLenum target, GLenum access, PFN_glMapBuffer\n     struct buffer *buffer;\n     void *ptr = NULL;\n \n+    if (use_client_pointer( teb )) return map_buffer_client_pointer( teb, target, 0, 0, get_buffer_param( teb, target, GL_BUFFER_SIZE ), range_access );\n+\n     buffer = get_target_buffer_storage( teb, target );\n     if (use_driver_buffer_map( buffer )) ptr = p_glMapBuffer( target, access );\n     ptr = wow64_map_buffer( teb, buffer, target, 0, 0, 0, range_access, ptr );\n@@ -1681,6 +1817,8 @@ void *wow64_glMapBufferRange( TEB *teb, GLenum target, GLintptr offset, GLsizeip\n     struct buffer *buffer;\n     void *ptr = NULL;\n \n+    if (use_client_pointer( teb )) return map_buffer_client_pointer( teb, target, 0, offset, length, access );\n+\n     buffer = get_target_buffer_storage( teb, target );\n     if (use_driver_buffer_map( buffer )) ptr = p_glMapBufferRange( target, offset, length, access );\n     ptr = wow64_map_buffer( teb, buffer, target, 0, offset, length, access, ptr );\n@@ -1693,6 +1831,8 @@ void *wow64_glMapNamedBuffer( TEB *teb, GLuint name, GLenum access, PFN_glMapNam\n     struct buffer *buffer;\n     void *ptr = NULL;\n \n+    if (use_client_pointer( teb )) return map_buffer_client_pointer( teb, 0, name, 0, get_named_buffer_param( teb, name, GL_BUFFER_SIZE ), range_access );\n+\n     buffer = get_named_buffer_storage( teb, name );\n     if (use_driver_buffer_map( buffer )) ptr = p_glMapNamedBuffer( name, access );\n     ptr = wow64_map_buffer( teb, buffer, 0, name, 0, 0, range_access, ptr );\n@@ -1705,6 +1845,8 @@ void *wow64_glMapNamedBufferRange( TEB *teb, GLuint name, GLintptr offset, GLsiz\n     struct buffer *buffer;\n     void *ptr = NULL;\n \n+    if (use_client_pointer( teb )) return map_buffer_client_pointer( teb, 0, name, offset, length, access );\n+\n     buffer = get_named_buffer_storage( teb, name );\n     if (use_driver_buffer_map( buffer )) ptr = p_glMapNamedBufferRange( name, offset, length, access );\n     ptr = wow64_map_buffer( teb, buffer, 0, name, offset, length, access, ptr );\n@@ -1742,6 +1884,7 @@ GLboolean wow64_glUnmapBuffer( TEB *teb, GLenum target, PFN_glUnmapBuffer p_glUn\n \n     if ((buffer = get_target_buffer_storage( teb, target ))) ret = wow64_unmap_buffer( teb, buffer );\n     if (use_driver_buffer_map( buffer )) ret = p_glUnmapBuffer( target );\n+    if (use_client_pointer( teb )) free_client_pointer_ranges( teb, 0 );\n     return ret;\n }\n \n@@ -1752,6 +1895,7 @@ GLboolean wow64_glUnmapNamedBuffer( TEB *teb, GLuint name, PFN_glUnmapBuffer p_g\n \n     if ((buffer = get_named_buffer_storage( teb, name ))) ret = wow64_unmap_buffer( teb, buffer );\n     if (use_driver_buffer_map( buffer )) ret = p_glUnmapNamedBuffer( name );\n+    if (use_client_pointer( teb )) free_client_pointer_ranges( teb, 0 );\n     return ret;\n }\n \n@@ -1782,11 +1926,19 @@ void wow64_glBufferAttachMemoryNV( TEB *teb, GLenum target, GLuint memory, GLuin\n     p_glBufferAttachMemoryNV( target, memory, offset );\n }\n \n+static GLenum map_usage_client_pointer( GLenum usage )\n+{\n+    assert( usage >= GL_STREAM_DRAW && usage <= GL_DYNAMIC_COPY );\n+    return usage + GL_CLIENT_POINTER_STREAM_DRAW_MESA - GL_STREAM_DRAW;\n+}\n+\n void wow64_glBufferData( TEB *teb, GLenum target, GLsizeiptr size, const void *data, GLenum usage, PFN_glBufferData p_glBufferData )\n {\n     const struct opengl_funcs *funcs = teb->glTable;\n     struct buffer *buffer;\n \n+    if (use_client_pointer( teb )) return p_glBufferData( target, size, data, map_usage_client_pointer( usage ) );\n+\n     if ((buffer = set_target_buffer_storage( teb, target, NULL ))) free_buffer( funcs, buffer );\n     p_glBufferData( target, size, data, usage );\n }\n@@ -1814,6 +1966,8 @@ void wow64_glNamedBufferData( TEB *teb, GLuint name, GLsizeiptr size, const void\n     const struct opengl_funcs *funcs = teb->glTable;\n     struct buffer *buffer;\n \n+    if (use_client_pointer( teb )) return p_glNamedBufferData( name, size, data, map_usage_client_pointer( usage ) );\n+\n     if ((buffer = set_named_buffer_storage( teb, name, NULL ))) free_buffer( funcs, buffer );\n     p_glNamedBufferData( name, size, data, usage );\n }\n@@ -1841,6 +1995,13 @@ NTSTATUS wow64_process_detach( void *args )\n     return STATUS_SUCCESS;\n }\n \n+NTSTATUS wow64_thread_detach( void *args )\n+{\n+    TEB *teb = args;\n+    if (use_client_pointer( teb )) free_client_pointer_ranges( teb, GL_CLIENT_POINTER_RELEASE_ALL_MESA );\n+    return thread_detach( args );\n+}\n+\n NTSTATUS wow64_set_root_context( void *args )\n {\n     struct"
+    },
+    {
+      "sha": "a17c3d7c1405eb5e53a07c5eeaf0e167a43ea172",
+      "filename": "dlls/opengl32/unixlib.h",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funixlib.h",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Funixlib.h",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Funixlib.h?ref=c44867ad20d683ba30104d790c41dae746c27697",
+      "patch": "@@ -25787,6 +25787,7 @@ enum unix_funcs\n     unix_process_attach,\n     unix_thread_attach,\n     unix_process_detach,\n+    unix_thread_detach,\n     unix_set_root_context,\n     unix_get_pixel_formats,\n     unix_wglDeleteContext,"
+    },
+    {
+      "sha": "63aa6d3dbeb0d8497427a64036152df18b87756e",
+      "filename": "dlls/opengl32/wgl.c",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Fwgl.c",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/c44867ad20d683ba30104d790c41dae746c27697/dlls%2Fopengl32%2Fwgl.c",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Fwgl.c?ref=c44867ad20d683ba30104d790c41dae746c27697",
+      "patch": "@@ -3312,6 +3312,7 @@ BOOL WINAPI DllMain( HINSTANCE hinst, DWORD reason, LPVOID reserved )\n         UNIX_CALL( process_detach, NULL );\n         /* fallthrough */\n     case DLL_THREAD_DETACH:\n+        UNIX_CALL( thread_detach, NtCurrentTeb() );\n         if ((context = get_current_context())) context->base.current_tid = 0;\n         free( NtCurrentTeb()->glReserved1[WINE_GL_RESERVED_FORMATS_PTR] );\n         return TRUE;"
+    }
+  ]
+}

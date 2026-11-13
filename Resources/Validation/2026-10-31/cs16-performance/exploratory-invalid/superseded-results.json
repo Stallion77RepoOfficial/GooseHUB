@@ -1,0 +1,139 @@
+{
+  "createdAt": "2026-10-31T13:25:30.920310+00:00",
+  "appVersion": "0.2.2",
+  "appBuild": "5",
+  "engineFilesVerified": 2219,
+  "engineHashFailures": [],
+  "sourceSnapshotRestored": true,
+  "diagnosticCodeRemovedFromCurrentBuild": true,
+  "productionChange": {
+    "applicationID": "4BA204CA-B7D6-4263-AFB3-C599A8833B89",
+    "arguments": [
+      "-game",
+      "cstrike",
+      "-gl",
+      "-32bpp"
+    ]
+  },
+  "visualFlickerVerified": false,
+  "userFeedbackPending": false,
+  "measurements": [
+    {
+      "label": "counted-d3d16-default",
+      "mode": 1,
+      "bitsPerPixel": 16,
+      "requestedFPS": 100,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 37.02743536441842,
+      "timerefresh": [
+        "2.157486 seconds (59.328312 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 4,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "counted-d3d16-nohud",
+      "mode": 1,
+      "bitsPerPixel": 16,
+      "requestedFPS": 100,
+      "metalHUD": false,
+      "waitBasedFPSApproximation": 37.13257753008438,
+      "timerefresh": [
+        "2.040379 seconds (62.733456 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 4,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "counted-d3d32-default",
+      "mode": 1,
+      "bitsPerPixel": 32,
+      "requestedFPS": 100,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 38.58220644079497,
+      "timerefresh": [
+        "1.588551 seconds (80.576598 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 4,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "counted-gl32-default",
+      "mode": 0,
+      "bitsPerPixel": 32,
+      "requestedFPS": 100,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 98.1446209239718,
+      "timerefresh": [
+        "0.249020 seconds (514.015717 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 2,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "counted-gl32-flags",
+      "mode": 1,
+      "bitsPerPixel": 16,
+      "requestedFPS": 100,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 92.31985367386802,
+      "timerefresh": [
+        "0.182842 seconds (700.056999 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 2,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "counted-gl32-capacity",
+      "mode": 1,
+      "bitsPerPixel": 16,
+      "requestedFPS": 1000,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 119.11207047091263,
+      "timerefresh": [
+        "0.250113 seconds (511.769635 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 2,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "counted-gl32-capacity-nosync",
+      "mode": 1,
+      "bitsPerPixel": 16,
+      "requestedFPS": 1000,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 130.65110960369714,
+      "timerefresh": [
+        "0.183565 seconds (697.300153 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 2,
+      "testOnlyProbe": true
+    },
+    {
+      "label": "release-gl32-final",
+      "mode": 1,
+      "bitsPerPixel": 16,
+      "requestedFPS": 100,
+      "metalHUD": true,
+      "waitBasedFPSApproximation": 97.82999261660719,
+      "timerefresh": [
+        "0.241486 seconds (530.052319 fps)"
+      ],
+      "exitCode": 0,
+      "framebufferInitializationWarnings": 2,
+      "testOnlyProbe": false
+    }
+  ],
+  "productionLaunchVerified": true,
+  "productionLaunchLog": "production-gl32-launch.log",
+  "productionProcessAtCheck": 35601,
+  "measurementsInvalidated": "The local client was not active in the map. Earlier wait-based and presentation FPS values do not measure actual gameplay.",
+  "userFeedback": "Severe drops persist in a local game without bots; fps_max 999 still capped at 100."
+}

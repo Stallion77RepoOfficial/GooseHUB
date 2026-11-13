@@ -1,0 +1,163 @@
+--- a/src/d3d9/d3d9_device.cpp
++++ b/src/d3d9/d3d9_device.cpp
+@@ -861,6 +861,11 @@
+   UINT dstX = pDstPoint ? (UINT)pDstPoint->x : 0;
+   UINT dstY = pDstPoint ? (UINT)pDstPoint->y : 0;
+ 
++  if (src->UploadTo(dst, copy, POINT{px, py})) {
++    dst->MarkGpuWritten();
++    return D3D_OK;
++  }
++
+   if (pSrcRect) {
+     D3D11_BOX box;
+     box.left = pSrcRect->left; box.top = pSrcRect->top; box.front = 0;
+@@ -905,6 +910,31 @@
+ 
+   for (UINT slice = 0; slice < sliceCount; slice++) {
+     for (UINT level = 0; level < levels; level++) {
++      bool uploaded = false;
++      if (pSrc->GetType() == D3DRTYPE_VOLUMETEXTURE) {
++        Com<IDirect3DVolume9> source, destination;
++        if (SUCCEEDED(static_cast<D3D9VolumeTexture *>(pSrc)->GetVolumeLevel(level, &source)) &&
++            SUCCEEDED(static_cast<D3D9VolumeTexture *>(pDst)->GetVolumeLevel(level, &destination)))
++          uploaded = static_cast<D3D9Volume *>(source.ptr())->UploadTo(
++              static_cast<D3D9Volume *>(destination.ptr()));
++      } else {
++        Com<IDirect3DSurface9> source, destination;
++        HRESULT hr = pSrc->GetType() == D3DRTYPE_CUBETEXTURE
++            ? static_cast<D3D9CubeTexture *>(pSrc)->GetCubeMapSurface(
++                  static_cast<D3DCUBEMAP_FACES>(slice), level, &source)
++            : static_cast<D3D9Texture *>(pSrc)->GetSurfaceLevel(level, &source);
++        HRESULT dstHr = pDst->GetType() == D3DRTYPE_CUBETEXTURE
++            ? static_cast<D3D9CubeTexture *>(pDst)->GetCubeMapSurface(
++                  static_cast<D3DCUBEMAP_FACES>(slice), level, &destination)
++            : static_cast<D3D9Texture *>(pDst)->GetSurfaceLevel(level, &destination);
++        if (SUCCEEDED(hr) && SUCCEEDED(dstHr)) {
++          auto src = static_cast<D3D9Surface *>(source.ptr());
++          RECT rect = {0, 0, static_cast<LONG>(src->Desc().Width), static_cast<LONG>(src->Desc().Height)};
++          uploaded = src->UploadTo(static_cast<D3D9Surface *>(destination.ptr()), rect, POINT{0, 0});
++        }
++      }
++      if (uploaded)
++        continue;
+       UINT srcSub = level + slice * srcLevels;
+       UINT dstSub = level + slice * dstLevels;
+       d3d11_ctx_->CopySubresourceRegion(dstRes, dstSub, 0, 0, 0, srcRes, srcSub, nullptr);
+--- a/src/d3d9/d3d9_surface.cpp
++++ b/src/d3d9/d3d9_surface.cpp
+@@ -215,6 +215,33 @@
+   return true;
+ }
+ 
++bool
++D3D9Surface::UploadTo(D3D9Surface *destination, const RECT &rect, const POINT &point) {
++  if (desc_.Pool != D3DPOOL_SYSTEMMEM || gpu_newer_ || !destination->texture_ ||
++      desc_.Format != destination->desc_.Format)
++    return false;
++  D3D9LockLayout layout;
++  if (!GetD3D9LockLayout(desc_.Format, desc_.Width, desc_.Height, 1, &layout))
++    return false;
++  if (rect.left < 0 || rect.top < 0 || rect.right <= rect.left || rect.bottom <= rect.top ||
++      rect.right > static_cast<LONG>(desc_.Width) || rect.bottom > static_cast<LONG>(desc_.Height) ||
++      point.x < 0 || point.y < 0 ||
++      point.x + rect.right - rect.left > static_cast<LONG>(destination->desc_.Width) ||
++      point.y + rect.bottom - rect.top > static_cast<LONG>(destination->desc_.Height))
++    return false;
++  /* A system-memory texture can be filled through retained decoder buffers.
++   * Its last UnlockRect upload need not contain the bytes UpdateTexture is
++   * asked to copy now. Upload only the requested rectangle, directly to the
++   * destination; the source's GPU mirror is not needed for this transfer. */
++  const uint8_t *src = Memory(layout) + (rect.top / layout.block_height) * layout.stored_row_pitch +
++                       (rect.left / layout.block_width) * layout.block_bytes;
++  D3D11_BOX box = {static_cast<UINT>(point.x), static_cast<UINT>(point.y), 0,
++                   static_cast<UINT>(point.x + rect.right - rect.left),
++                   static_cast<UINT>(point.y + rect.bottom - rect.top), 1};
++  UploadData(layout, src, box, destination->texture_.ptr(), destination->subresource_);
++  return true;
++}
++
+ void
+ D3D9Surface::Upload(const D3D9LockLayout &layout, const RECT &rect) {
+   if (!texture_)
+@@ -237,15 +264,21 @@
+   D3D11_BOX box = {static_cast<UINT>(left), static_cast<UINT>(top), 0,
+                    static_cast<UINT>(right), static_cast<UINT>(bottom), 1};
+   const uint8_t *src = Memory(layout) + (top / bh) * layout.stored_row_pitch + (left / bw) * layout.block_bytes;
++  UploadData(layout, src, box, texture_.ptr(), subresource_);
++}
++
++void
++D3D9Surface::UploadData(const D3D9LockLayout &layout, const uint8_t *src, const D3D11_BOX &box,
++                       ID3D11Texture2D *target, UINT subresource) {
+   auto ctx = device_->GetD3D11Context();
+   if (D3D9FormatNeedsBgra8Expansion(desc_.Format)) {
+-    UINT width = static_cast<UINT>(right - left), height = static_cast<UINT>(bottom - top);
++    UINT width = box.right - box.left, height = box.bottom - box.top;
+     std::vector<uint8_t> expanded(static_cast<size_t>(width) * 4 * height);
+     ConvertA4R4G4B4ToBgra8(src, layout.stored_row_pitch, expanded.data(), width * 4, width, height,
+                            desc_.Format == D3DFMT_X4R4G4B4);
+-    ctx->UpdateSubresource(texture_.ptr(), subresource_, &box, expanded.data(), width * 4, 0);
++    ctx->UpdateSubresource(target, subresource, &box, expanded.data(), width * 4, 0);
+   } else {
+-    ctx->UpdateSubresource(texture_.ptr(), subresource_, &box, src, layout.stored_row_pitch, 0);
++    ctx->UpdateSubresource(target, subresource, &box, src, layout.stored_row_pitch, 0);
+   }
+ }
+ 
+--- a/src/d3d9/d3d9_surface.hpp
++++ b/src/d3d9/d3d9_surface.hpp
+@@ -149,6 +149,9 @@
+    * format. Everything else in system memory, managed or scratch locks. */
+   void SetLockable(bool lockable) { lockable_ = lockable; }
+ 
++  // Returns false when the GPU copy is newer or this is not system memory.
++  bool UploadTo(D3D9Surface *destination, const RECT &rect, const POINT &point);
++
+   // Internal accessors
+   ID3D11Texture2D *GetD3D11Texture() const { return texture_.ptr(); }
+   UINT             GetSubresource()  const { return subresource_; }
+@@ -174,6 +177,8 @@
+   Com<ID3D11ShaderResourceView> srv_;
+   bool ReadBack(const D3D9LockLayout &layout);
+   void Upload(const D3D9LockLayout &layout, const RECT &rect);
++  void UploadData(const D3D9LockLayout &layout, const uint8_t *src, const D3D11_BOX &box,
++                  ID3D11Texture2D *target, UINT subresource);
+   uint8_t *Memory(const D3D9LockLayout &layout) {
+     if (memory_)
+       return memory_;
+--- a/src/d3d9/d3d9_volume.cpp
++++ b/src/d3d9/d3d9_volume.cpp
+@@ -110,6 +110,22 @@
+   lock_active_ = true;
+   lock_readonly_ = (Flags & D3DLOCK_READONLY) != 0;
+   return D3D_OK;
++}
++
++bool
++D3D9Volume::UploadTo(D3D9Volume *destination) {
++  if (desc_.Pool != D3DPOOL_SYSTEMMEM || gpu_newer_ || !destination->texture_ ||
++      desc_.Format != destination->desc_.Format || desc_.Width != destination->desc_.Width ||
++      desc_.Height != destination->desc_.Height || desc_.Depth != destination->desc_.Depth)
++    return false;
++  D3D9LockLayout layout;
++  if (!GetD3D9LockLayout(desc_.Format, desc_.Width, desc_.Height, desc_.Depth, &layout))
++    return false;
++  D3D11_BOX box = {0, 0, 0, layout.width, layout.height, layout.depth};
++  device_->GetD3D11Context()->UpdateSubresource(
++      destination->texture_.ptr(), destination->mip_level_, &box, Memory(layout),
++      layout.stored_row_pitch, layout.stored_slice_pitch);
++  return true;
+ }
+ 
+ HRESULT STDMETHODCALLTYPE
+--- a/src/d3d9/d3d9_volume.hpp
++++ b/src/d3d9/d3d9_volume.hpp
+@@ -98,6 +98,7 @@
+ 
+   void MarkGpuWritten() { gpu_newer_ = true; }
+   void SetMemory(uint8_t *memory) { memory_ = memory; }
++  bool UploadTo(D3D9Volume *destination);
+ 
+ private:
+   D3D9PrivateData private_data_;

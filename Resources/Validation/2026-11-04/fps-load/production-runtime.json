@@ -1,0 +1,35 @@
+{
+  "processIdentifier": 58803,
+  "log": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/Logs/b0185b3c-cfa7-4f42-8343-773fe705a4d3.log",
+  "header": {
+    "arguments": [
+      "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+      "-game",
+      "cstrike",
+      "-gl",
+      "-32bpp",
+      "-nojoy",
+      "-noipx",
+      "+developer",
+      "1",
+      "+fps_max",
+      "999",
+      "+cl_showfps",
+      "1"
+    ],
+    "executable": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/bin/wine",
+    "legacyOpenGLBatching": true,
+    "prefix": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix",
+    "x87MathBits": 64
+  },
+  "loadedOpenGLModules": [
+    "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/LegacyOpenGL/i386-windows/opengl32.dll",
+    "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/LegacyOpenGL/aarch64-unix/opengl32.so"
+  ],
+  "productionD3D9MatchesBundle": true,
+  "runtimeSettings": {
+    "legacyOpenGLBatching": true,
+    "reducedX87Precision": true
+  },
+  "startedThroughLibraryUI": true
+}

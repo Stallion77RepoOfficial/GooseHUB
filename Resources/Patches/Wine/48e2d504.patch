@@ -1,0 +1,26 @@
+From 48e2d50404d0b67f30cf0a149df361f4d50eac64 Mon Sep 17 00:00:00 2001
+From: Jactry Zeng <jzeng@codeweavers.com>
+Date: Tue, 11 Aug 2026 20:28:42 -0500
+Subject: [PATCH] winemac.drv: Fix a typo to avoid usage of an uninitialized
+ variable.
+
+---
+ dlls/winemac.drv/window.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dlls/winemac.drv/window.c b/dlls/winemac.drv/window.c
+index 7d8bf131..552971f5 100644
+--- a/dlls/winemac.drv/window.c
++++ b/dlls/winemac.drv/window.c
+@@ -1610,7 +1610,7 @@ BOOL macdrv_GetWindowStyleMasks(HWND hwnd, UINT style, UINT ex_style, UINT *styl
+ {
+     struct macdrv_window_features wf = get_window_features_for_style(style, ex_style, FALSE);
+ 
+-    *style_mask = ex_style = 0;
++    *style_mask = *ex_style_mask = 0;
+     if (wf.title_bar)
+     {
+         *style_mask |= WS_CAPTION;
+-- 
+2.55.0
+

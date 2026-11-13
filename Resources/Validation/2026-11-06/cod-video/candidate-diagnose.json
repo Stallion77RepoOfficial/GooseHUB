@@ -1,0 +1,19 @@
+{
+  "dxmtAvailable" : true,
+  "fexAvailable" : true,
+  "issues" : [
+
+  ],
+  "metalGooseAvailable" : true,
+  "rootPath" : "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cod-video-20261106/Goose HUB candidate.app/Contents/Resources/Engines",
+  "summary" : "Native Wine engine detected",
+  "versions" : {
+    "dxmt" : "Adrenalin 2026.11.06",
+    "fex" : "14c92681f4",
+    "reviewedAt" : "2026-11-04",
+    "wine" : "11.11 Adrenalin 2026.11.04"
+  },
+  "vulkanAvailable" : true,
+  "wineAvailable" : true,
+  "wineX64Available" : false
+}

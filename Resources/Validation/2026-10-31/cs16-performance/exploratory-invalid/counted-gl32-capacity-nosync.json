@@ -1,0 +1,139 @@
+{
+  "hostMonotonicStart": 636364.37505475,
+  "nativeMonotonicStart": 1194028.404083,
+  "arguments": [
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-nojoy",
+    "-noipx",
+    "-gl",
+    "-32bpp",
+    "+exec",
+    "codex_probe.cfg"
+  ],
+  "presentationSamples": [
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194038.530613",
+      "seconds": "2.012858",
+      "count": "25",
+      "fps": "12.420",
+      "meanMilliseconds": "4.122",
+      "maximumMilliseconds": "9.691",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194040.538796",
+      "seconds": "2.008183",
+      "count": "80",
+      "fps": "39.837",
+      "meanMilliseconds": "3.981",
+      "maximumMilliseconds": "14.318",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194042.539229",
+      "seconds": "2.000433",
+      "count": "204",
+      "fps": "101.978",
+      "meanMilliseconds": "4.179",
+      "maximumMilliseconds": "7.075",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194044.546681",
+      "seconds": "2.007452",
+      "count": "252",
+      "fps": "125.532",
+      "meanMilliseconds": "5.038",
+      "maximumMilliseconds": "13.725",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194046.546827",
+      "seconds": "2.000146",
+      "count": "255",
+      "fps": "127.491",
+      "meanMilliseconds": "5.289",
+      "maximumMilliseconds": "7.782",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194048.555561",
+      "seconds": "2.008734",
+      "count": "259",
+      "fps": "128.937",
+      "meanMilliseconds": "5.317",
+      "maximumMilliseconds": "7.515",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194050.564122",
+      "seconds": "2.008561",
+      "count": "245",
+      "fps": "121.978",
+      "meanMilliseconds": "5.453",
+      "maximumMilliseconds": "15.285",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194052.565377",
+      "seconds": "2.001255",
+      "count": "261",
+      "fps": "130.418",
+      "meanMilliseconds": "5.259",
+      "maximumMilliseconds": "15.254",
+      "flags": "0"
+    },
+    {
+      "kind": "swap",
+      "monotonicEnd": "1194054.572120",
+      "seconds": "2.006743",
+      "count": "284",
+      "fps": "141.523",
+      "meanMilliseconds": "4.767",
+      "maximumMilliseconds": "7.745",
+      "flags": "0"
+    }
+  ],
+  "label": "counted-gl32-capacity-nosync",
+  "mode": 1,
+  "bitsPerPixel": 16,
+  "requestedFPS": 1000,
+  "metalHUD": true,
+  "bottleBackend": "dxmt",
+  "seconds": 38.26599200000055,
+  "exitCode": 0,
+  "timeout": false,
+  "markers": {
+    "CODEX_START": 7.827881749952212,
+    "CODEX_FRAMES_BEGIN": 13.139980125008151,
+    "CODEX_FRAMES_END": 26.91713062499184,
+    "CODEX_DONE": 27.118205999955535
+  },
+  "waitFrames": 1800,
+  "timerefresh": [
+    "0.183565 seconds (697.300153 fps)"
+  ],
+  "graphicsModules": [
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\opengl32.dll\" at 64400000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\wined3d.dll\" at 64980000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\DDRAW.dll\" at 66290000: builtin"
+  ],
+  "waitBasedFPSApproximation": 130.65110960369714,
+  "framebufferInitializationWarnings": 2,
+  "runtimeModulesMissingDXMT": true,
+  "testOnlyProbe": true
+}

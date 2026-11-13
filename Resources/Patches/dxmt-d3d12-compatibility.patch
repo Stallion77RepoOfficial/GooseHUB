@@ -1,0 +1,3285 @@
+diff --git a/src/d3d12/d3d12.cpp b/src/d3d12/d3d12.cpp
+index eb5693c..fe59537 100644
+--- a/src/d3d12/d3d12.cpp
++++ b/src/d3d12/d3d12.cpp
+@@ -9,6 +9,9 @@
+ 
+ #include "../d3d11/d3d11_device.hpp"
+ #include "../d3d11/d3d11_on12.hpp"
++#include "../d3d11/d3d11_resource.hpp"
++#include "dxmt_buffer.hpp"
++#include "dxmt_texture.hpp"
+ #include "Metal.hpp"
+ #include "dxmt_descriptor_heap.hpp"
+ #include "dxmt_root_signature.hpp"
+@@ -25,9 +28,13 @@
+ #include <array>
+ #include <atomic>
+ #include <cstring>
++#include <cstdio>
+ #include <functional>
++#include <deque>
+ #include <map>
++#include <limits>
+ #include <memory>
++#include <malloc.h>
+ #include <mutex>
+ #include <string>
+ #include <unordered_map>
+@@ -42,6 +49,45 @@ Logger Logger::s_instance("d3d12.log");
+ namespace dxmt::d3d12 {
+ namespace {
+ 
++static bool d3d12_diagnostics() {
++  static const bool enabled = GetEnvironmentVariableA("DXMT_D3D12_DIAGNOSTICS", nullptr, 0) != 0;
++  return enabled;
++}
++
++class PresentTrace {
++public:
++  PresentTrace() {
++    WCHAR path[32768];
++    DWORD count = GetEnvironmentVariableW(L"DXMT_D3D12_FRAME_TRACE", path, std::size(path));
++    if (count && count < std::size(path)) file_ = _wfopen(path, L"w");
++    if (file_) {
++      QueryPerformanceFrequency(&frequency_);
++      std::fprintf(file_, "swapchain,frame,start_ms,end_ms,present_ms,hresult\n");
++    }
++  }
++  ~PresentTrace() { if (file_) std::fclose(file_); }
++  LONGLONG begin() const {
++    if (!file_) return 0;
++    LARGE_INTEGER tick; QueryPerformanceCounter(&tick); return tick.QuadPart;
++  }
++  void end(const void *chain, LONGLONG start, HRESULT hr) {
++    if (!start) return;
++    LARGE_INTEGER tick; QueryPerformanceCounter(&tick);
++    const double scale = 1000.0 / frequency_.QuadPart;
++    std::lock_guard<std::mutex> lock(mutex_);
++    std::fprintf(file_, "%p,%llu,%.6f,%.6f,%.6f,%08x\n", chain,
++                 (unsigned long long)frame_++, start * scale, tick.QuadPart * scale,
++                 (tick.QuadPart - start) * scale, unsigned(hr));
++    if (frame_ % 60 == 0) std::fflush(file_);
++  }
++private:
++  FILE *file_ = nullptr;
++  LARGE_INTEGER frequency_ = {};
++  uint64_t frame_ = 0;
++  std::mutex mutex_;
++};
++PresentTrace &present_trace() { static PresentTrace trace; return trace; }
++
+ template <typename T> void add_ref(T *ptr) {
+   if (ptr)
+     ptr->AddRef();
+@@ -144,11 +190,107 @@ private:
+   std::vector<uint8_t> data_;
+ };
+ 
++/* Both descriptions own their arrays. Pointers returned by either interface
++ * stay valid until the reader is released, including after version conversion. */
++class RootSignatureDeserializer final : public ID3D12RootSignatureDeserializer,
++                                        public ID3D12VersionedRootSignatureDeserializer,
++                                        public UnknownRef {
++public:
++  bool init(const void *blob, SIZE_T size) {
++    dxmt::RootSignatureDescription parsed;
++    if (!dxmt::parseSerializedRootSignature(blob, size, parsed))
++      return false;
++    original_version_ = parsed.version == 1 ? D3D_ROOT_SIGNATURE_VERSION_1_0 : D3D_ROOT_SIGNATURE_VERSION_1_1;
++    ranges10_.resize(parsed.ranges.size());
++    ranges11_.resize(parsed.ranges.size());
++    for (size_t i = 0; i < parsed.ranges.size(); ++i) {
++      const auto &r = parsed.ranges[i];
++      ranges10_[i] = {D3D12_DESCRIPTOR_RANGE_TYPE(r.range_type), r.descriptor_count, r.base_shader_register,
++                      r.register_space, r.offset_in_descriptors_from_table_start};
++      ranges11_[i] = {D3D12_DESCRIPTOR_RANGE_TYPE(r.range_type), r.descriptor_count, r.base_shader_register,
++                      r.register_space, D3D12_DESCRIPTOR_RANGE_FLAGS(r.flags), r.offset_in_descriptors_from_table_start};
++    }
++    parameters10_.resize(parsed.parameters.size());
++    parameters11_.resize(parsed.parameters.size());
++    for (size_t i = 0; i < parsed.parameters.size(); ++i) {
++      const auto &p = parsed.parameters[i];
++      auto &a = parameters10_[i];
++      auto &b = parameters11_[i];
++      a.ParameterType = b.ParameterType = D3D12_ROOT_PARAMETER_TYPE(p.kind);
++      a.ShaderVisibility = b.ShaderVisibility = D3D12_SHADER_VISIBILITY(p.shader_visibility);
++      switch (p.kind) {
++      case dxmt::RootParameterKind::DescriptorTable:
++        a.DescriptorTable = {p.range_count, p.range_count ? ranges10_.data() + p.first_range : nullptr};
++        b.DescriptorTable = {p.range_count, p.range_count ? ranges11_.data() + p.first_range : nullptr};
++        break;
++      case dxmt::RootParameterKind::Constants:
++        a.Constants = b.Constants = {p.shader_register, p.register_space, p.num_32bit_values};
++        break;
++      default:
++        a.Descriptor = {p.shader_register, p.register_space};
++        b.Descriptor = {p.shader_register, p.register_space, D3D12_ROOT_DESCRIPTOR_FLAGS(p.descriptor_flags)};
++        break;
++      }
++    }
++    for (const auto &s : parsed.static_samplers) {
++      samplers_.push_back({D3D12_FILTER(s.filter), D3D12_TEXTURE_ADDRESS_MODE(s.address_u),
++          D3D12_TEXTURE_ADDRESS_MODE(s.address_v), D3D12_TEXTURE_ADDRESS_MODE(s.address_w), s.mip_lod_bias,
++          s.max_anisotropy, D3D12_COMPARISON_FUNC(s.comparison_func), D3D12_STATIC_BORDER_COLOR(s.border_color),
++          s.min_lod, s.max_lod, s.shader_register, s.register_space, D3D12_SHADER_VISIBILITY(s.shader_visibility)});
++    }
++    desc10_.Version = D3D_ROOT_SIGNATURE_VERSION_1_0;
++    desc10_.Desc_1_0 = {UINT(parameters10_.size()), parameters10_.data(), UINT(samplers_.size()), samplers_.data(),
++                        D3D12_ROOT_SIGNATURE_FLAGS(parsed.flags)};
++    desc11_.Version = D3D_ROOT_SIGNATURE_VERSION_1_1;
++    desc11_.Desc_1_1 = {UINT(parameters11_.size()), parameters11_.data(), UINT(samplers_.size()), samplers_.data(),
++                        D3D12_ROOT_SIGNATURE_FLAGS(parsed.flags)};
++    return true;
++  }
++  HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **object) final {
++    if (!object) return E_POINTER;
++    *object = nullptr;
++    if (iid == __uuidof(IUnknown) || iid == __uuidof(ID3D12RootSignatureDeserializer))
++      *object = static_cast<ID3D12RootSignatureDeserializer *>(this);
++    else if (iid == __uuidof(ID3D12VersionedRootSignatureDeserializer))
++      *object = static_cast<ID3D12VersionedRootSignatureDeserializer *>(this);
++    else
++      return E_NOINTERFACE;
++    AddRef();
++    return S_OK;
++  }
++  ULONG STDMETHODCALLTYPE AddRef() final { return add_ref(); }
++  ULONG STDMETHODCALLTYPE Release() final { return release_ref(); }
++  const D3D12_ROOT_SIGNATURE_DESC *STDMETHODCALLTYPE GetRootSignatureDesc() final {
++    return &desc10_.Desc_1_0;
++  }
++  HRESULT STDMETHODCALLTYPE GetRootSignatureDescAtVersion(
++      D3D_ROOT_SIGNATURE_VERSION version, const D3D12_VERSIONED_ROOT_SIGNATURE_DESC **out) final {
++    if (!out) return E_POINTER;
++    *out = nullptr;
++    if (version == D3D_ROOT_SIGNATURE_VERSION_1_0) *out = &desc10_;
++    else if (version == D3D_ROOT_SIGNATURE_VERSION_1_1) *out = &desc11_;
++    else return E_INVALIDARG;
++    return S_OK;
++  }
++  const D3D12_VERSIONED_ROOT_SIGNATURE_DESC *STDMETHODCALLTYPE GetUnconvertedRootSignatureDesc() final {
++    return original_version_ == D3D_ROOT_SIGNATURE_VERSION_1_0 ? &desc10_ : &desc11_;
++  }
++private:
++  D3D_ROOT_SIGNATURE_VERSION original_version_ = D3D_ROOT_SIGNATURE_VERSION_1_0;
++  D3D12_VERSIONED_ROOT_SIGNATURE_DESC desc10_ = {}, desc11_ = {};
++  std::vector<D3D12_DESCRIPTOR_RANGE> ranges10_;
++  std::vector<D3D12_DESCRIPTOR_RANGE1> ranges11_;
++  std::vector<D3D12_ROOT_PARAMETER> parameters10_;
++  std::vector<D3D12_ROOT_PARAMETER1> parameters11_;
++  std::vector<D3D12_STATIC_SAMPLER_DESC> samplers_;
++};
++
+ class DxmtD3D12Device;
+ class DxmtD3D12Resource;
+ class DxmtD3D12DescriptorHeap;
+ class DxmtD3D12PipelineState;
+ class DxmtD3D12GraphicsCommandList;
++class DxmtD3D12CommandQueue;
+ class DxmtD3D12SwapChainFactory;
+ class DxmtD3D12DXGIDevice;
+ 
+@@ -156,6 +298,7 @@ enum class DescriptorType {
+   Empty,
+   Cbv,
+   Srv,
++  Uav,
+   Rtv,
+   Dsv,
+   Sampler,
+@@ -167,7 +310,10 @@ struct Descriptor {
+   ComPtr<ID3D11RenderTargetView> rtv;
+   ComPtr<ID3D11DepthStencilView> dsv;
+   ComPtr<ID3D11ShaderResourceView> srv;
++  ComPtr<ID3D11UnorderedAccessView> uav;
+   D3D12_CONSTANT_BUFFER_VIEW_DESC cbv = {};
++  dxmt::DescriptorEntry gpu_entry = {};
++  WMT::Reference<WMT::Texture> texture_view;
+   /* Shader-visible descriptors also live in a Metal buffer the shaders index;
+    * these locate this descriptor's slot in it. */
+   DxmtD3D12DescriptorHeap *owner = nullptr;
+@@ -175,6 +321,7 @@ struct Descriptor {
+   /* Samplers are Metal objects in their own right and have to stay alive for
+    * as long as the descriptor references them. */
+   WMT::Reference<WMT::SamplerState> sampler;
++  ComPtr<ID3D11SamplerState> sampler11;
+ 
+   /* Copies the descriptor's contents without disturbing its identity: an
+    * application copying descriptors between heaps must not move their slots. */
+@@ -185,8 +332,12 @@ struct Descriptor {
+     rtv = other.rtv;
+     dsv = other.dsv;
+     srv = other.srv;
++    uav = other.uav;
+     cbv = other.cbv;
++    gpu_entry = other.gpu_entry;
++    texture_view = other.texture_view;
+     sampler = other.sampler;
++    sampler11 = other.sampler11;
+   }
+ };
+ 
+@@ -246,11 +397,13 @@ public:
+     if (!dxmt::parseSerializedRootSignature(blob, size, description_))
+       return false;
+     ir_builder_.build(description_);
+-    return true;
++    return initialize_samplers();
+   }
+ 
+   const dxmt::RootSignatureDescription &description() const { return description_; }
+   const dxmt::RootSignatureLayout &layout() const { return description_.layout; }
++  const std::vector<ComPtr<ID3D11SamplerState>> &samplers() const { return samplers_; }
++  bool initialize_samplers();
+ 
+   /* The shader converter wants the root signature as a
+    * D3D12_VERSIONED_ROOT_SIGNATURE_DESC, which is the layout its own
+@@ -281,6 +434,7 @@ public:
+ private:
+   dxmt::RootSignatureDescription description_;
+   dxmt::IRRootSignatureBuilder ir_builder_;
++  std::vector<ComPtr<ID3D11SamplerState>> samplers_;
+ };
+ 
+ class DxmtD3D12Fence final : public ID3D12Fence,
+@@ -320,15 +474,16 @@ public:
+    * all, so this is attached to the timeline and left to fire when the value
+    * is actually reached. */
+   HRESULT STDMETHODCALLTYPE SetEventOnCompletion(UINT64 value, HANDLE event) final;
+-  HRESULT STDMETHODCALLTYPE Signal(UINT64 value) final {
+-    value_ = value;
+-    if (timeline_.ptr())
+-      timeline_->signal(value);
+-    return S_OK;
++  HRESULT STDMETHODCALLTYPE Signal(UINT64 value) final;
++  bool scheduled(UINT64 value) const { return scheduled_.load() >= value; }
++  void mark_scheduled(UINT64 value) {
++    auto previous = scheduled_.load();
++    while (previous < value && !scheduled_.compare_exchange_weak(previous, value)) {}
+   }
+ 
+ private:
+   std::atomic<UINT64> value_;
++  std::atomic<UINT64> scheduled_{0};
+   Rc<dxmt::TimelineFence> timeline_;
+ };
+ 
+@@ -358,26 +513,41 @@ public:
+   HRESULT STDMETHODCALLTYPE Reset() final { return S_OK; }
+ };
+ 
+-UINT bytes_per_pixel(DXGI_FORMAT format) {
+-  switch (format) {
+-  case DXGI_FORMAT_R32G32B32A32_FLOAT:
+-    return 16;
+-  case DXGI_FORMAT_R32G32B32_FLOAT:
+-    return 12;
+-  case DXGI_FORMAT_R32G32_FLOAT:
+-  case DXGI_FORMAT_R16G16B16A16_FLOAT:
+-  case DXGI_FORMAT_R16G16B16A16_UNORM:
+-  case DXGI_FORMAT_R8G8B8A8_UNORM:
+-  case DXGI_FORMAT_B8G8R8A8_UNORM:
+-  case DXGI_FORMAT_D32_FLOAT:
+-    return format == DXGI_FORMAT_R32G32_FLOAT ? 8 : 4;
+-  case DXGI_FORMAT_R16_UINT:
+-    return 2;
+-  default:
+-    return 4;
++struct FormatBlock {
++  UINT width = 1, height = 1, bytes = 0;
++};
++
++/* Upload footprints describe the DXGI storage, independently of the Metal
++ * view used to render it. Unsupported video formats are rejected. */
++FormatBlock format_block(DXGI_FORMAT f) {
++  if (f >= DXGI_FORMAT_R32G32B32A32_TYPELESS && f <= DXGI_FORMAT_R32G32B32A32_SINT) return {1, 1, 16};
++  if (f >= DXGI_FORMAT_R32G32B32_TYPELESS && f <= DXGI_FORMAT_R32G32B32_SINT) return {1, 1, 12};
++  if (f >= DXGI_FORMAT_R16G16B16A16_TYPELESS && f <= DXGI_FORMAT_X32_TYPELESS_G8X24_UINT) return {1, 1, 8};
++  if (f >= DXGI_FORMAT_R10G10B10A2_TYPELESS && f <= DXGI_FORMAT_X24_TYPELESS_G8_UINT) return {1, 1, 4};
++  if (f >= DXGI_FORMAT_R8G8_TYPELESS && f <= DXGI_FORMAT_R16_SINT) return {1, 1, 2};
++  if (f >= DXGI_FORMAT_R8_TYPELESS && f <= DXGI_FORMAT_A8_UNORM) return {1, 1, 1};
++  if (f >= DXGI_FORMAT_BC1_TYPELESS && f <= DXGI_FORMAT_BC1_UNORM_SRGB) return {4, 4, 8};
++  if (f >= DXGI_FORMAT_BC2_TYPELESS && f <= DXGI_FORMAT_BC3_UNORM_SRGB) return {4, 4, 16};
++  if (f >= DXGI_FORMAT_BC4_TYPELESS && f <= DXGI_FORMAT_BC4_SNORM) return {4, 4, 8};
++  if (f >= DXGI_FORMAT_BC5_TYPELESS && f <= DXGI_FORMAT_BC5_SNORM) return {4, 4, 16};
++  if (f >= DXGI_FORMAT_B8G8R8A8_UNORM && f <= DXGI_FORMAT_B8G8R8X8_UNORM_SRGB) return {1, 1, 4};
++  if (f >= DXGI_FORMAT_BC6H_TYPELESS && f <= DXGI_FORMAT_BC7_UNORM_SRGB) return {4, 4, 16};
++  switch (f) {
++  case DXGI_FORMAT_R1_UNORM: return {8, 1, 1};
++  case DXGI_FORMAT_R9G9B9E5_SHAREDEXP: return {1, 1, 4};
++  case DXGI_FORMAT_R8G8_B8G8_UNORM:
++  case DXGI_FORMAT_G8R8_G8B8_UNORM: return {2, 1, 4};
++  case DXGI_FORMAT_B5G6R5_UNORM:
++  case DXGI_FORMAT_B5G5R5A1_UNORM:
++  case DXGI_FORMAT_B4G4R4A4_UNORM: return {1, 1, 2};
++  default: return {};
+   }
+ }
+ 
++UINT bytes_per_pixel(DXGI_FORMAT format) {
++  return format_block(format).bytes;
++}
++
+ UINT align_uint(UINT value, UINT alignment) {
+   return (value + alignment - 1) & ~(alignment - 1);
+ }
+@@ -444,6 +614,33 @@ public:
+       desc_(desc),
+       heap_(std::move(heap)) {}
+ 
++  ~DxmtD3D12Heap() {
++    cpu_buffer_ = nullptr;
++    if (cpu_memory_) _aligned_free(cpu_memory_);
++  }
++
++  WMT::Reference<WMT::Buffer> cpu_buffer(WMT::Device device, UINT64 offset, UINT64 length,
++                                        WMTBufferInfo &info) {
++    if (offset > desc_.SizeInBytes || length > desc_.SizeInBytes - offset) return {};
++    std::lock_guard lock(cpu_mutex_);
++    if (!cpu_buffer_) {
++      if (desc_.SizeInBytes > SIZE_MAX - 65535) return {};
++      size_t bytes = (size_t(desc_.SizeInBytes) + 65535) & ~size_t(65535);
++      cpu_memory_ = _aligned_malloc(bytes, 65536);
++      if (!cpu_memory_) return {};
++      WMTBufferInfo backing = {};
++      backing.length = bytes;
++      backing.options = resource_options();
++      backing.memory.set(cpu_memory_);
++      cpu_buffer_ = device.newBuffer(backing);
++      cpu_address_ = backing.gpu_address;
++      if (!cpu_buffer_) { _aligned_free(cpu_memory_); cpu_memory_ = nullptr; return {}; }
++    }
++    info.memory.set(static_cast<uint8_t *>(cpu_memory_) + offset);
++    info.gpu_address = cpu_address_ + offset;
++    return cpu_buffer_;
++  }
++
+   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) final {
+     if (!ppvObject)
+       return E_POINTER;
+@@ -478,6 +675,10 @@ public:
+ private:
+   D3D12_HEAP_DESC desc_;
+   WMT::Reference<WMT::Heap> heap_;
++  WMT::Reference<WMT::Buffer> cpu_buffer_;
++  void *cpu_memory_ = nullptr;
++  uint64_t cpu_address_ = 0;
++  std::mutex cpu_mutex_;
+ };
+ 
+ D3D12_HEAP_PROPERTIES
+@@ -500,14 +701,15 @@ public:
+    * draw path skips it until that path is replaced. */
+   DxmtD3D12Resource(
+       DxmtD3D12Device *device, const D3D12_RESOURCE_DESC &desc, DxmtD3D12Heap *heap, UINT64 heap_offset,
+-      WMT::Reference<WMT::Buffer> &&buffer, uint64_t gpu_address, void *mapped
++      WMT::Reference<WMT::Buffer> &&buffer, uint64_t gpu_address, void *mapped, uint64_t buffer_offset = 0
+   ) :
+       D3D12ChildMethods(device),
+       desc_(desc),
+       metal_buffer_(std::move(buffer)),
+       heap_(heap),
+       heap_offset_(heap_offset),
+-      mapped_(mapped) {
++      mapped_(mapped),
++      metal_buffer_base_offset_(buffer_offset) {
+     heap_properties_ = heap_desc_properties(heap);
+     gpu_va_ = gpu_address;
+     register_gpu_address();
+@@ -533,18 +735,11 @@ public:
+   DxmtD3D12Resource(DxmtD3D12Device *device, const D3D12_HEAP_PROPERTIES &heap,
+                     const D3D12_RESOURCE_DESC &desc)
+       : D3D12ChildMethods(device), heap_properties_(heap), desc_(desc) {
+-    gpu_va_ = reinterpret_cast<D3D12_GPU_VIRTUAL_ADDRESS>(this);
+-    if (heap_properties_.Type == D3D12_HEAP_TYPE_UPLOAD ||
+-        desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
+-      cpu_data_.resize(static_cast<size_t>(std::max<UINT64>(1, desc_.Width)));
+-    register_gpu_address();
+   }
+ 
+   DxmtD3D12Resource(DxmtD3D12Device *device, ID3D11Resource *resource,
+                     const D3D12_RESOURCE_DESC &desc)
+       : D3D12ChildMethods(device), desc_(desc), d3d11_resource_(resource) {
+-    gpu_va_ = reinterpret_cast<D3D12_GPU_VIRTUAL_ADDRESS>(this);
+-    register_gpu_address();
+   }
+ 
+   ~DxmtD3D12Resource() {
+@@ -594,12 +789,16 @@ public:
+       return E_POINTER;
+     /* A placed buffer in a CPU-visible heap is mapped for real; one in a
+      * private heap is not mappable at all, which is what D3D12 says too. */
+-    if (is_placed()) {
++    if (metal_buffer()) {
++      if (heap_properties_.Type == D3D12_HEAP_TYPE_DEFAULT)
++        return E_INVALIDARG;
+       if (!mapped_)
+         return E_INVALIDARG;
+       *data = mapped_;
+       return S_OK;
+     }
++    if (desc_.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER)
++      return E_INVALIDARG;
+     if (cpu_data_.empty())
+       cpu_data_.resize(static_cast<size_t>(std::max<UINT64>(1, desc_.Width)));
+     *data = cpu_data_.data();
+@@ -658,7 +857,9 @@ public:
+   }
+ 
+   bool is_placed() const { return heap_.get() != nullptr; }
+-  WMT::Buffer metal_buffer() const { return metal_buffer_; }
++  WMT::Buffer metal_buffer() const {
++    return dxmt_buffer_ ? dxmt_buffer_->current()->buffer() : WMT::Buffer(metal_buffer_);
++  }
+ 
+   /* Address-range bookkeeping. Defined out of line: the device type they need
+    * is declared further down. */
+@@ -667,11 +868,29 @@ public:
+   uint64_t gpu_address_size() const {
+     return desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER ? std::max<UINT64>(1, desc_.Width) : 1;
+   }
+-  WMT::Texture metal_texture() const { return metal_texture_; }
+-  uint64_t metal_texture_id() const { return metal_texture_id_; }
++  WMT::Texture metal_texture() const {
++    return dxmt_texture_ ? dxmt_texture_->current()->texture() : WMT::Texture(metal_texture_);
++  }
++  dxmt::GenericAccessTracker &access_tracker() { return access_tracker_; }
++  uint64_t metal_texture_id() const {
++    return dxmt_texture_ ? dxmt_texture_->current()->gpuResourceID : metal_texture_id_;
++  }
+   UINT64 heap_offset() const { return heap_offset_; }
++  uint64_t metal_buffer_offset() const {
++    return dxmt_buffer_ ? dxmt_buffer_->current()->currentSuballocationOffset() : metal_buffer_base_offset_;
++  }
+ 
+   ID3D11Resource *d3d11_resource();
++  bool initialize_backing();
++  template <PipelineStage stage>
++  void track_access(ArgumentEncodingContext &enc, int flags) {
++    if (dxmt_buffer_)
++      enc.access<stage>(dxmt_buffer_, 0, UINT(desc_.Width), flags);
++    else if (dxmt_texture_)
++      enc.access<stage>(dxmt_texture_, 0, 0, flags);
++    else
++      enc.trackExternalResource<stage>(access_tracker_, flags);
++  }
+   ID3D11Buffer *buffer_for_bind(UINT bind);
+   ID3D11Buffer *vertex_buffer() { return buffer_for_bind(D3D11_BIND_VERTEX_BUFFER); }
+   ID3D11Buffer *index_buffer() { return buffer_for_bind(D3D11_BIND_INDEX_BUFFER); }
+@@ -702,11 +921,21 @@ private:
+   ComPtr<DxmtD3D12Heap> heap_;
+   UINT64 heap_offset_ = 0;
+   void *mapped_ = nullptr;
++  uint64_t metal_buffer_base_offset_ = 0;
+   ComPtr<ID3D11Resource> d3d11_resource_;
+   ID3D11Buffer *generic_buffer_ = nullptr;
+   ID3D11Buffer *vertex_buffer_ = nullptr;
+   ID3D11Buffer *index_buffer_ = nullptr;
+   ID3D11Buffer *constant_buffer_ = nullptr;
++  dxmt::GenericAccessTracker access_tracker_;
++  Rc<dxmt::Buffer> dxmt_buffer_;
++  Rc<dxmt::Texture> dxmt_texture_;
++};
++
++struct ResidentResource {
++  WMT::Reference<WMT::Resource> object;
++  ComPtr<DxmtD3D12Resource> resource;
++  WMTResourceUsage usage;
+ };
+ 
+ class DxmtD3D12DescriptorHeap final : public ID3D12DescriptorHeap,
+@@ -730,15 +959,30 @@ public:
+     return gpu_heap_.get();
+   }
+ 
+-  /* A shader indexes the heap at runtime, so a dispatch that binds one has to
+-   * treat every populated slot as reachable. */
+-  template <typename Fn>
+-  void
+-  for_each_descriptor(Fn &&fn) {
++  void invalidate_residency() { residency_dirty_ = true; }
++
++  /* Descriptor writes invalidate this list. Stable heaps pay for one scan,
++   * rather than scanning every slot for every draw or dispatch. */
++  const std::vector<ResidentResource> &residency() {
++    if (!residency_dirty_) return resident_;
++    resident_.clear();
++    std::unordered_map<obj_handle_t, size_t> indices;
+     for (auto &descriptor : descriptors_) {
+-      if (descriptor.type != DescriptorType::Empty)
+-        fn(descriptor);
++      auto *resource = descriptor.resource.get();
++      if (!resource) continue;
++      WMT::Resource object;
++      if (descriptor.texture_view) object = WMT::Resource(descriptor.texture_view.handle);
++      else if (auto buffer = resource->metal_buffer()) object = WMT::Resource(buffer.handle);
++      else if (auto texture = resource->metal_texture()) object = WMT::Resource(texture.handle);
++      if (!object) continue;
++      auto usage = descriptor.type == DescriptorType::Uav ?
++          WMTResourceUsage(WMTResourceUsageRead | WMTResourceUsageWrite) : WMTResourceUsageRead;
++      auto [entry, inserted] = indices.emplace(object.handle, resident_.size());
++      if (inserted) resident_.push_back({WMT::Reference<WMT::Resource>(object), resource, usage});
++      else resident_[entry->second].usage = WMTResourceUsage(resident_[entry->second].usage | usage);
+     }
++    residency_dirty_ = false;
++    return resident_;
+   }
+ 
+   /* Address of a descriptor inside the Metal heap. This is what a root
+@@ -791,15 +1035,18 @@ private:
+   D3D12_DESCRIPTOR_HEAP_DESC desc_ = {};
+   std::vector<Descriptor> descriptors_;
+   std::unique_ptr<dxmt::DescriptorHeap> gpu_heap_;
++  bool residency_dirty_ = true;
++  std::vector<ResidentResource> resident_;
+ };
+ 
+-/* Writes a descriptor's Metal-side entry, if it has one. Descriptors in
+- * non-shader-visible heaps only exist on the CPU until they are copied into a
+- * shader-visible heap, so this is a no-op for them. */
++/* Keep the complete encoding in CPU heaps too: copying it into a visible
++ * heap must preserve buffer offsets, view identities, and sampler metadata. */
+ void
+ write_gpu_descriptor(Descriptor *descriptor, const dxmt::DescriptorEntry &entry) {
+-  if (!descriptor || !descriptor->owner)
+-    return;
++  if (!descriptor) return;
++  descriptor->gpu_entry = entry;
++  if (!descriptor->owner) return;
++  descriptor->owner->invalidate_residency();
+   if (dxmt::DescriptorHeap *heap = descriptor->owner->gpu_heap())
+     heap->writeRaw(descriptor->index, entry);
+ }
+@@ -860,7 +1107,8 @@ public:
+ 
+   HRESULT init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *desc);
+   HRESULT init_compute(const D3D12_COMPUTE_PIPELINE_STATE_DESC *desc);
+-  void apply(ID3D11DeviceContext *context);
++  ID3D11ComputeShader *legacy_compute_shader() const { return cs_.get(); }
++  void apply(ID3D11DeviceContext *context, const FLOAT *blend_factor, UINT stencil_ref);
+ 
+   WMT::ComputePipelineState
+   metal_compute_pipeline() const {
+@@ -919,6 +1167,7 @@ private:
+   ComPtr<ID3D11InputLayout> input_layout_;
+   ComPtr<ID3D11VertexShader> vs_;
+   ComPtr<ID3D11PixelShader> ps_;
++  ComPtr<ID3D11ComputeShader> cs_;
+   /* Metal side: the libraries have to outlive the functions taken from them. */
+   WMT::Reference<WMT::Library> vertex_library_;
+   WMT::Reference<WMT::Library> fragment_library_;
+@@ -936,6 +1185,7 @@ private:
+   std::vector<std::string> semantic_names_;
+   std::vector<dxmt::VertexInputElement> input_elements_;
+   std::vector<WMTVertexAttributeInfo> shader_attributes_;
++  std::mutex pipeline_mutex_;
+   std::unordered_map<uint64_t, WMT::Reference<WMT::RenderPipelineState>> pipelines_by_stride_;
+   WMTDepthStencilInfo metal_depth_stencil_info_ = {};
+   WMT::Reference<WMT::DepthStencilState> metal_depth_stencil_;
+@@ -945,14 +1195,15 @@ private:
+   ComPtr<ID3D11RasterizerState> rasterizer_;
+   ComPtr<ID3D11BlendState> blend_;
+   ComPtr<ID3D11DepthStencilState> depth_stencil_;
+-  ComPtr<ID3D11SamplerState> sampler_;
++  UINT sample_mask_ = UINT_MAX;
+ };
+ 
+ class DxmtD3D12SwapChain final : public IDXGISwapChain4, public UnknownRef {
+ public:
+   DxmtD3D12SwapChain(DxmtD3D12Device *device, IDXGISwapChain1 *inner,
+-                     const DXGI_SWAP_CHAIN_DESC1 &desc)
+-      : device_(device), inner_(inner), desc1_(desc) {}
++                     const DXGI_SWAP_CHAIN_DESC1 &desc, DxmtD3D12CommandQueue *queue)
++      : device_(device), queue_(queue), inner_(inner), desc1_(desc) {}
++  HRESULT initialize_buffers();
+ 
+   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) final {
+     if (!ppvObject)
+@@ -989,10 +1240,7 @@ public:
+   HRESULT STDMETHODCALLTYPE GetDevice(REFIID riid, void **device) final;
+ 
+   HRESULT STDMETHODCALLTYPE Present(UINT sync_interval, UINT flags) final {
+-    HRESULT hr = inner_->Present(sync_interval, flags);
+-    if (SUCCEEDED(hr))
+-      current_ = (current_ + 1) % std::max<UINT>(1, desc1_.BufferCount);
+-    return hr;
++    return Present1(sync_interval, flags, nullptr);
+   }
+   HRESULT STDMETHODCALLTYPE GetBuffer(UINT, REFIID riid, void **surface) final;
+   HRESULT STDMETHODCALLTYPE SetFullscreenState(BOOL fullscreen, IDXGIOutput *target) final {
+@@ -1002,12 +1250,20 @@ public:
+     return inner_->GetFullscreenState(fullscreen, target);
+   }
+   HRESULT STDMETHODCALLTYPE GetDesc(DXGI_SWAP_CHAIN_DESC *desc) final {
+-    return inner_->GetDesc(desc);
++    HRESULT hr = inner_->GetDesc(desc);
++    if (SUCCEEDED(hr) && desc) {
++      desc->BufferDesc.Width = desc1_.Width;
++      desc->BufferDesc.Height = desc1_.Height;
++      desc->BufferDesc.Format = desc1_.Format;
++      desc->BufferCount = desc1_.BufferCount;
++      desc->SwapEffect = desc1_.SwapEffect;
++      desc->BufferUsage = desc1_.BufferUsage;
++      desc->Flags = desc1_.Flags;
++    }
++    return hr;
+   }
+   HRESULT STDMETHODCALLTYPE ResizeBuffers(UINT count, UINT width, UINT height,
+-                                           DXGI_FORMAT format, UINT flags) final {
+-    return inner_->ResizeBuffers(count, width, height, format, flags);
+-  }
++                                           DXGI_FORMAT format, UINT flags) final;
+   HRESULT STDMETHODCALLTYPE ResizeTarget(const DXGI_MODE_DESC *desc) final {
+     return inner_->ResizeTarget(desc);
+   }
+@@ -1021,7 +1277,9 @@ public:
+     return inner_->GetLastPresentCount(count);
+   }
+   HRESULT STDMETHODCALLTYPE GetDesc1(DXGI_SWAP_CHAIN_DESC1 *desc) final {
+-    return inner_->GetDesc1(desc);
++    if (!desc) return E_POINTER;
++    *desc = desc1_;
++    return S_OK;
+   }
+   HRESULT STDMETHODCALLTYPE GetFullscreenDesc(DXGI_SWAP_CHAIN_FULLSCREEN_DESC *desc) final {
+     return inner_->GetFullscreenDesc(desc);
+@@ -1031,12 +1289,8 @@ public:
+     return inner_->GetCoreWindow(riid, window);
+   }
+   HRESULT STDMETHODCALLTYPE Present1(UINT sync_interval, UINT flags,
+-                                      const DXGI_PRESENT_PARAMETERS *params) final {
+-    HRESULT hr = inner_->Present1(sync_interval, flags, params);
+-    if (SUCCEEDED(hr))
+-      current_ = (current_ + 1) % std::max<UINT>(1, desc1_.BufferCount);
+-    return hr;
+-  }
++                                      const DXGI_PRESENT_PARAMETERS *params) final;
++
+   BOOL STDMETHODCALLTYPE IsTemporaryMonoSupported() final {
+     return inner_->IsTemporaryMonoSupported();
+   }
+@@ -1066,16 +1320,18 @@ public:
+     return S_OK;
+   }
+   HRESULT STDMETHODCALLTYPE SetMaximumFrameLatency(UINT max_latency) final {
+-    return S_OK;
++    ComPtr<IDXGISwapChain2> chain;
++    HRESULT hr = inner_->QueryInterface(IID_PPV_ARGS(chain.put()));
++    return SUCCEEDED(hr) ? chain->SetMaximumFrameLatency(max_latency) : hr;
+   }
+   HRESULT STDMETHODCALLTYPE GetMaximumFrameLatency(UINT *max_latency) final {
+-    if (!max_latency)
+-      return E_POINTER;
+-    *max_latency = 1;
+-    return S_OK;
++    ComPtr<IDXGISwapChain2> chain;
++    HRESULT hr = inner_->QueryInterface(IID_PPV_ARGS(chain.put()));
++    return SUCCEEDED(hr) ? chain->GetMaximumFrameLatency(max_latency) : hr;
+   }
+   HANDLE STDMETHODCALLTYPE GetFrameLatencyWaitableObject() final {
+-    return nullptr;
++    ComPtr<IDXGISwapChain2> chain;
++    return SUCCEEDED(inner_->QueryInterface(IID_PPV_ARGS(chain.put()))) ? chain->GetFrameLatencyWaitableObject() : nullptr;
+   }
+   HRESULT STDMETHODCALLTYPE SetMatrixTransform(const DXGI_MATRIX_3X2_F *matrix) final {
+     return E_NOTIMPL;
+@@ -1098,7 +1354,7 @@ public:
+                                             DXGI_FORMAT format, UINT flags,
+                                             const UINT *node_mask,
+                                             IUnknown *const *queues) final {
+-    return inner_->ResizeBuffers(count, width, height, format, flags);
++    return ResizeBuffers(count, width, height, format, flags);
+   }
+   HRESULT STDMETHODCALLTYPE SetHDRMetaData(DXGI_HDR_METADATA_TYPE type, UINT size,
+                                            void *metadata) final {
+@@ -1107,15 +1363,18 @@ public:
+ 
+ private:
+   ComPtr<DxmtD3D12Device> device_;
++  ComPtr<DxmtD3D12CommandQueue> queue_;
+   ComPtr<IDXGISwapChain1> inner_;
+   DXGI_SWAP_CHAIN_DESC1 desc1_ = {};
+   UINT current_ = 0;
++  std::vector<ComPtr<DxmtD3D12Resource>> buffers_;
+ };
+ 
+ class DxmtD3D12SwapChainFactory final : public IMTLSwapChainFactory,
+                                       public UnknownRef {
+ public:
+-  explicit DxmtD3D12SwapChainFactory(DxmtD3D12Device *device) : device_(device) {}
++  explicit DxmtD3D12SwapChainFactory(DxmtD3D12Device *device, DxmtD3D12CommandQueue *queue = nullptr)
++      : device_(device), queue_(queue) {}
+ 
+   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) final {
+     if (!ppvObject)
+@@ -1138,12 +1397,14 @@ public:
+ 
+ private:
+   ComPtr<DxmtD3D12Device> device_;
++  ComPtr<DxmtD3D12CommandQueue> queue_;
+ };
+ 
+ class DxmtD3D12DXGIDevice final : public IMTLDXGIDevice,
+                                   public UnknownRef {
+ public:
+-  explicit DxmtD3D12DXGIDevice(DxmtD3D12Device *device) : device_(device) {}
++  explicit DxmtD3D12DXGIDevice(DxmtD3D12Device *device, DxmtD3D12CommandQueue *queue = nullptr)
++      : device_(device), queue_(queue) {}
+ 
+   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) final {
+     if (!ppvObject)
+@@ -1205,14 +1466,18 @@ private:
+   HRESULT query_inner(IMTLDXGIDevice **inner) const;
+ 
+   ComPtr<DxmtD3D12Device> device_;
++  ComPtr<DxmtD3D12CommandQueue> queue_;
+ };
+ 
+ class DxmtD3D12CommandQueue final : public ID3D12CommandQueue,
+                                     public D3D12ChildMethods,
+                                     public UnknownRef {
+ public:
+-  DxmtD3D12CommandQueue(DxmtD3D12Device *device, const D3D12_COMMAND_QUEUE_DESC &desc)
+-      : D3D12ChildMethods(device), desc_(desc) {}
++  DxmtD3D12CommandQueue(DxmtD3D12Device *device, const D3D12_COMMAND_QUEUE_DESC &desc);
++  ~DxmtD3D12CommandQueue();
++  void submit(std::function<void()> work);
++  bool has_pending_work() const { return !pending_.empty(); }
++
+ 
+   HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppvObject) final {
+     if (!ppvObject)
+@@ -1226,12 +1491,12 @@ public:
+       return S_OK;
+     }
+     if (riid == __uuidof(IMTLSwapChainFactory)) {
+-      auto object = new DxmtD3D12SwapChainFactory(device_.get());
++      auto object = new DxmtD3D12SwapChainFactory(device_.get(), this);
+       *ppvObject = static_cast<IMTLSwapChainFactory *>(object);
+       return S_OK;
+     }
+     if (riid == __uuidof(IMTLDXGIDevice)) {
+-      auto object = new DxmtD3D12DXGIDevice(device_.get());
++      auto object = new DxmtD3D12DXGIDevice(device_.get(), this);
+       *ppvObject = static_cast<IMTLDXGIDevice *>(object);
+       return S_OK;
+     }
+@@ -1278,6 +1543,17 @@ public:
+   }
+ 
+ private:
++  friend class DxmtD3D12Device;
++  enum class OperationKind { Work, Wait, Signal };
++  struct Operation {
++    OperationKind kind;
++    std::function<void()> work;
++    ComPtr<DxmtD3D12Fence> fence;
++    UINT64 value = 0;
++  };
++  std::deque<Operation> pending_;
++  HRESULT emit_signal(ID3D12Fence *fence, UINT64 value);
++  HRESULT emit_wait(ID3D12Fence *fence, UINT64 value);
+   D3D12_COMMAND_QUEUE_DESC desc_ = {};
+ };
+ 
+@@ -1298,6 +1574,7 @@ public:
+        * fence be the same timeline the GPU signals. */
+       dxmt_device_ = &dxmt_capable->GetDXMTDevice();
+     }
++    if (context) context->QueryInterface(IID_PPV_ARGS(context1_.put()));
+   }
+ 
+   WMT::Device
+@@ -1314,6 +1591,28 @@ public:
+    * through the d3d11 immediate context because the chunk is its own and its
+    * commit path carries the state checks. */
+   void submit_recorded_work();
++  ID3D11DeviceContext1 *context1() const { return context1_.get(); }
++  ID3D11Buffer *upload_root_constants(const void *bytes, UINT size, UINT &first, UINT &count) {
++    if (!size || size > 256 || !bytes) return nullptr;
++    if (!root_constants_) {
++      D3D11_BUFFER_DESC desc = {};
++      desc.ByteWidth = 65536;
++      desc.Usage = D3D11_USAGE_DYNAMIC;
++      desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
++      desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
++      if (FAILED(d3d11_device_->CreateBuffer(&desc, nullptr, root_constants_.put()))) return nullptr;
++    }
++    if (root_constants_offset_ + 256 > 65536) root_constants_offset_ = 0;
++    D3D11_MAPPED_SUBRESOURCE mapped = {};
++    if (FAILED(context_->Map(root_constants_.get(), 0, root_constants_offset_ ? D3D11_MAP_WRITE_NO_OVERWRITE :
++                              D3D11_MAP_WRITE_DISCARD, 0, &mapped))) return nullptr;
++    std::memcpy(static_cast<uint8_t *>(mapped.pData) + root_constants_offset_, bytes, size);
++    context_->Unmap(root_constants_.get(), 0);
++    first = root_constants_offset_ / 16;
++    count = 16;
++    root_constants_offset_ += 256;
++    return root_constants_.get();
++  }
+ 
+   uint64_t buffer_address(DxmtD3D12Resource *resource, D3D12_GPU_VIRTUAL_ADDRESS location) const;
+   dxmt::DescriptorEntry encode_resource_descriptor(DxmtD3D12Resource *resource) const;
+@@ -1371,7 +1670,8 @@ public:
+       return E_POINTER;
+     *queue = nullptr;
+     D3D12_COMMAND_QUEUE_DESC local = desc ? *desc : D3D12_COMMAND_QUEUE_DESC{};
+-    if (local.Type != D3D12_COMMAND_LIST_TYPE_DIRECT)
++    if (local.Type != D3D12_COMMAND_LIST_TYPE_DIRECT && local.Type != D3D12_COMMAND_LIST_TYPE_COPY &&
++        local.Type != D3D12_COMMAND_LIST_TYPE_COMPUTE)
+       return E_NOTIMPL;
+     auto object = new DxmtD3D12CommandQueue(this, local);
+     HRESULT hr = object->QueryInterface(riid, queue);
+@@ -1383,7 +1683,8 @@ public:
+     if (!allocator)
+       return E_POINTER;
+     *allocator = nullptr;
+-    if (type != D3D12_COMMAND_LIST_TYPE_DIRECT)
++    if (type != D3D12_COMMAND_LIST_TYPE_DIRECT && type != D3D12_COMMAND_LIST_TYPE_COPY &&
++        type != D3D12_COMMAND_LIST_TYPE_COMPUTE)
+       return E_NOTIMPL;
+     auto object = new DxmtD3D12CommandAllocator(this);
+     HRESULT hr = object->QueryInterface(riid, allocator);
+@@ -1398,6 +1699,8 @@ public:
+     *pipeline_state = nullptr;
+     auto object = new DxmtD3D12PipelineState(this);
+     HRESULT hr = object->init(desc);
++    if (FAILED(hr) && d3d12_diagnostics())
++      Logger::warn(str::format("D3D12 graphics PSO failed hr=", hr));
+     if (SUCCEEDED(hr))
+       hr = object->QueryInterface(riid, pipeline_state);
+     object->Release();
+@@ -1414,6 +1717,7 @@ public:
+     auto object = new DxmtD3D12PipelineState(this);
+     HRESULT hr = object->init_compute(desc);
+     if (FAILED(hr)) {
++      if (d3d12_diagnostics()) Logger::warn(str::format("D3D12 compute PSO failed hr=", hr));
+       object->Release();
+       return hr;
+     }
+@@ -1476,6 +1780,7 @@ public:
+     write_gpu_descriptor(dst, dxmt::encodeBufferDescriptor(buffer_address(dst->resource.get(),
+                                                                           dst->cbv.BufferLocation),
+                                                            dst->cbv.SizeInBytes));
++
+   }
+   void STDMETHODCALLTYPE CreateShaderResourceView(ID3D12Resource *resource,
+                                                   const D3D12_SHADER_RESOURCE_VIEW_DESC *,
+@@ -1504,8 +1809,8 @@ public:
+   /* An application sizes its heaps from this, so a guess here means placed
+    * resources that do not fit or a heap several times larger than it needs to
+    * be. Metal is asked for the real numbers. Callers pass an array to learn the
+-   * size of a group of resources that will alias, hence the max rather than the
+-   * sum. */
++   * size of a group of nonoverlapping resources, including each placement's
++   * alignment and final padding. Aliasing is an explicit application choice. */
+   D3D12_RESOURCE_ALLOCATION_INFO *STDMETHODCALLTYPE GetResourceAllocationInfo(
+       D3D12_RESOURCE_ALLOCATION_INFO *__ret, UINT, UINT resource_desc_count,
+       const D3D12_RESOURCE_DESC *resource_descs) final {
+@@ -1538,10 +1843,24 @@ public:
+         measured.align = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+       }
+ 
+-      info.SizeInBytes = std::max(info.SizeInBytes, measured.size);
+-      info.Alignment = std::max<UINT64>(info.Alignment, measured.align);
++      UINT64 alignment = std::max<UINT64>(D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT, measured.align);
++      alignment = std::max(alignment, desc.Alignment);
++      if (!measured.size || !desc.Width || !alignment || (alignment & (alignment - 1))) {
++        info.SizeInBytes = UINT64_MAX;
++        break;
++      }
++      info.Alignment = std::max(info.Alignment, alignment);
++      UINT64 start = (info.SizeInBytes + alignment - 1) & ~(alignment - 1);
++      UINT64 size = (measured.size + alignment - 1) & ~(alignment - 1);
++      if (start < info.SizeInBytes || size < measured.size || start > UINT64_MAX - size) {
++        info.SizeInBytes = UINT64_MAX;
++        break;
++      }
++      info.SizeInBytes = start + size;
+     }
+ 
++    if (info.SizeInBytes != UINT64_MAX)
++      info.SizeInBytes = (info.SizeInBytes + info.Alignment - 1) & ~(info.Alignment - 1);
+     *__ret = info;
+     return __ret;
+   }
+@@ -1600,41 +1919,58 @@ public:
+                                                D3D12_PLACED_SUBRESOURCE_FOOTPRINT *layouts,
+                                                UINT *row_count, UINT64 *row_size,
+                                                UINT64 *total_bytes) final {
+-    if (!desc)
++    if (layouts) std::memset(layouts, 0xff, sizeof(*layouts) * subresource_count_in);
++    if (row_count) std::memset(row_count, 0xff, sizeof(*row_count) * subresource_count_in);
++    if (row_size) std::memset(row_size, 0xff, sizeof(*row_size) * subresource_count_in);
++    if (total_bytes) *total_bytes = UINT64_MAX;
++    if (!desc || !desc->Width || !desc->Height || !desc->DepthOrArraySize || desc->SampleDesc.Count != 1)
+       return;
+     UINT available = subresource_count(*desc);
+-    UINT64 offset = base_offset;
+-    UINT texel = bytes_per_pixel(desc->Format);
++    if (first_subresource > available || subresource_count_in > available - first_subresource)
++      return;
++    FormatBlock block = desc->Dimension == D3D12_RESOURCE_DIMENSION_BUFFER ? FormatBlock{1, 1, 1}
++                                                                         : format_block(desc->Format);
++    if (!block.bytes || desc->Width > UINT_MAX - block.width + 1)
++      return;
++    UINT64 offset = 0, total = 0;
+ 
+     for (UINT i = 0; i < subresource_count_in; i++) {
+       SubresourceLocation location = {};
+       if (!decompose_subresource(*desc, first_subresource + i, location))
+         break;
+       WMTSize extent = mip_size(*desc, location.mip);
+-      UINT pitch = align_uint(extent.width * texel, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
++      UINT width = align_uint(extent.width, block.width), height = align_uint(extent.height, block.height);
++      UINT rows = height / block.height;
++      UINT64 bytes = UINT64(width / block.width) * block.bytes;
++      if (bytes > UINT_MAX - D3D12_TEXTURE_DATA_PITCH_ALIGNMENT + 1)
++        return;
++      UINT pitch = align_uint(UINT(bytes), D3D12_TEXTURE_DATA_PITCH_ALIGNMENT);
+ 
+       if (layouts) {
+-        layouts[i].Offset = offset;
++        layouts[i].Offset = base_offset + offset;
+         layouts[i].Footprint.Format = desc->Format;
+-        layouts[i].Footprint.Width = extent.width;
+-        layouts[i].Footprint.Height = extent.height;
++        layouts[i].Footprint.Width = width;
++        layouts[i].Footprint.Height = height;
+         layouts[i].Footprint.Depth = extent.depth;
+         layouts[i].Footprint.RowPitch = pitch;
+       }
+       if (row_count)
+-        row_count[i] = extent.height;
++        row_count[i] = rows;
+       if (row_size)
+-        row_size[i] = UINT64(extent.width) * texel;
++        row_size[i] = bytes;
+ 
+       /* Each subresource starts aligned, as D3D12 requires of a placed
+        * footprint. */
+-      offset += align_uint(UINT(UINT64(pitch) * extent.height * extent.depth),
+-                           D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT);
+-      (void)available;
++      UINT64 size = UINT64(pitch) * rows * (extent.depth - 1) + UINT64(pitch) * (rows - 1) + bytes;
++      if (offset > UINT64_MAX - size || base_offset > UINT64_MAX - offset)
++        return;
++      total = offset + size;
++      offset = (total + D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT - 1) &
++               ~UINT64(D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT - 1);
+     }
+ 
+     if (total_bytes)
+-      *total_bytes = offset - base_offset;
++      *total_bytes = total;
+   }
+   HRESULT STDMETHODCALLTYPE CreateQueryHeap(const D3D12_QUERY_HEAP_DESC *, REFIID, void **) final {
+     return E_NOTIMPL;
+@@ -1689,11 +2025,21 @@ public:
+     return va < it->first + it->second.size ? it->second.resource : nullptr;
+   }
+ 
++  void register_queue(DxmtD3D12CommandQueue *queue);
++  void unregister_queue(DxmtD3D12CommandQueue *queue);
++  void pump_queues();
++  std::recursive_mutex &submission_mutex() { return submission_mutex_; }
++
+ private:
++  std::vector<DxmtD3D12CommandQueue *> queues_;
++  std::recursive_mutex submission_mutex_;
+   WMT::Device metal_device_;
+   dxmt::Device *dxmt_device_ = nullptr;
+   ComPtr<ID3D11Device> d3d11_device_;
+   ComPtr<ID3D11DeviceContext> context_;
++  ComPtr<ID3D11DeviceContext1> context1_;
++  ComPtr<ID3D11Buffer> root_constants_;
++  UINT root_constants_offset_ = 0;
+ 
+   struct GpuAddressRange {
+     uint64_t size;
+@@ -1714,17 +2060,18 @@ void DxmtD3D12Resource::unregister_gpu_address() {
+ }
+ 
+ HRESULT DxmtD3D12Fence::SetEventOnCompletion(UINT64 value, HANDLE event) {
+-  if (!event)
+-    return S_OK;
+-
++  static std::atomic<unsigned> traced = 0;
++  if (d3d12_diagnostics() && traced.fetch_add(1) < 32)
++    Logger::warn(str::format("D3D12 event fence=", this, " value=", value, " completed=", GetCompletedValue(), " event=", event));
+   dxmt::TimelineFence *timeline = timeline_.ptr();
+   dxmt::Device *dxmt_device = device_ ? device_->dxmt_device() : nullptr;
+   if (!timeline || !dxmt_device) {
+-    /* Without a timeline there is nothing to wait on, so the caller is not
+-     * left blocked forever. */
+-    SetEvent(event);
++    if (value_.load() < value) return E_FAIL;
++    if (event) SetEvent(event);
+     return S_OK;
+   }
++  /* D3D12 specifies a blocking CPU wait when the event handle is null. */
++  if (!event) return timeline->waitUntil(value, INFINITE) ? S_OK : E_FAIL;
+ 
+   if (timeline->completedValue() >= value) {
+     SetEvent(event);
+@@ -1751,6 +2098,30 @@ HRESULT D3D12ChildMethods::GetDevice(REFIID riid, void **device) {
+   return device_ ? device_->QueryInterface(riid, device) : E_NOINTERFACE;
+ }
+ 
++bool DxmtD3D12RootSignature::initialize_samplers() {
++  samplers_.clear();
++  for (const auto &s : description_.static_samplers) {
++    D3D11_SAMPLER_DESC desc = {};
++    desc.Filter = D3D11_FILTER(s.filter);
++    desc.AddressU = D3D11_TEXTURE_ADDRESS_MODE(s.address_u);
++    desc.AddressV = D3D11_TEXTURE_ADDRESS_MODE(s.address_v);
++    desc.AddressW = D3D11_TEXTURE_ADDRESS_MODE(s.address_w);
++    desc.MipLODBias = s.mip_lod_bias;
++    desc.MaxAnisotropy = std::max(1u, s.max_anisotropy);
++    desc.ComparisonFunc = D3D11_COMPARISON_FUNC(s.comparison_func);
++    desc.MinLOD = s.min_lod;
++    desc.MaxLOD = s.max_lod;
++    if (s.border_color == D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE)
++      std::fill(std::begin(desc.BorderColor), std::end(desc.BorderColor), 1.0f);
++    else if (s.border_color == D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK)
++      desc.BorderColor[3] = 1.0f;
++    ComPtr<ID3D11SamplerState> sampler;
++    if (FAILED(device_->d3d11_device()->CreateSamplerState(&desc, sampler.put()))) return false;
++    samplers_.push_back(std::move(sampler));
++  }
++  return true;
++}
++
+ ID3D11Resource *DxmtD3D12Resource::d3d11_resource() {
+   if (d3d11_resource_)
+     return d3d11_resource_.get();
+@@ -1769,9 +2140,32 @@ ID3D11Resource *DxmtD3D12Resource::d3d11_resource() {
+   if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET)
+     tex.BindFlags |= D3D11_BIND_RENDER_TARGET;
+   if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) {
+-    tex.BindFlags &= ~D3D11_BIND_SHADER_RESOURCE;
+     tex.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+   }
++  if (desc_.Flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE)
++    tex.BindFlags &= ~D3D11_BIND_SHADER_RESOURCE;
++  if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
++    tex.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
++  if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D) {
++    D3D11_TEXTURE3D_DESC volume = {tex.Width, tex.Height, desc_.DepthOrArraySize, tex.MipLevels, tex.Format,
++                                  tex.Usage, tex.BindFlags, 0, 0};
++    ID3D11Texture3D *texture = nullptr;
++    if (FAILED(device_->d3d11_device()->CreateTexture3D(&volume, nullptr, &texture))) return nullptr;
++    d3d11_resource_ = texture;
++    texture->Release();
++    return d3d11_resource_.get();
++  }
++  if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE1D) {
++    D3D11_TEXTURE1D_DESC line = {tex.Width, tex.MipLevels, tex.ArraySize, tex.Format, tex.Usage,
++                                tex.BindFlags, 0, 0};
++    ID3D11Texture1D *texture = nullptr;
++    if (FAILED(device_->d3d11_device()->CreateTexture1D(&line, nullptr, &texture))) return nullptr;
++    d3d11_resource_ = texture;
++    texture->Release();
++    return d3d11_resource_.get();
++  }
++  if (tex.Width == tex.Height && tex.ArraySize >= 6 && tex.ArraySize % 6 == 0)
++    tex.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+   ID3D11Texture2D *texture = nullptr;
+   if (FAILED(device_->d3d11_device()->CreateTexture2D(&tex, nullptr, &texture)))
+     return nullptr;
+@@ -1780,13 +2174,69 @@ ID3D11Resource *DxmtD3D12Resource::d3d11_resource() {
+   return d3d11_resource_.get();
+ }
+ 
++bool DxmtD3D12Resource::initialize_backing() {
++  if (is_placed()) return true;
++  if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && !d3d11_resource_) {
++    if (!desc_.Width || desc_.Width > UINT_MAX) return false;
++    D3D11_BUFFER_DESC desc = {};
++    desc.ByteWidth = UINT(desc_.Width);
++    desc.Usage = D3D11_USAGE_DEFAULT;
++    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_INDEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
++    desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
++    if (desc_.Flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS)
++      desc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
++    HRESULT result;
++#if defined(__i386__)
++    if (heap_properties_.Type == D3D12_HEAP_TYPE_UPLOAD || heap_properties_.Type == D3D12_HEAP_TYPE_READBACK) {
++      using Shared = HRESULT (WINAPI *)(ID3D11Device *, const D3D11_BUFFER_DESC *, ID3D11Buffer **);
++      auto shared = reinterpret_cast<Shared>(GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateSharedBuffer"));
++      result = shared ? shared(device_->d3d11_device(), &desc, &generic_buffer_) : E_NOTIMPL;
++    } else
++#endif
++      result = device_->d3d11_device()->CreateBuffer(&desc, nullptr, &generic_buffer_);
++    if (FAILED(result)) return false;
++    d3d11_resource_ = generic_buffer_;
++  }
++  ID3D11Resource *resource = d3d11_resource();
++  if (!resource) return false;
++  auto *common = GetResourceCommon(resource);
++  if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
++    dxmt_buffer_ = common->buffer();
++    if (!dxmt_buffer_) return false;
++    auto *allocation = dxmt_buffer_->current();
++    if (!allocation) return false;
++    gpu_va_ = allocation->gpuAddress() + allocation->currentSuballocationOffset();
++    mapped_ = allocation->mappedMemory(allocation->currentSuballocation());
++    register_gpu_address();
++  } else {
++    dxmt_texture_ = common->texture();
++    if (!dxmt_texture_ || !dxmt_texture_->current()) return false;
++  }
++  return true;
++}
++
+ void DxmtD3D12Resource::update_buffer(ID3D11Buffer *buffer, UINT byte_width) {
++  if (dxmt_buffer_) return;
+   if (!buffer || cpu_data_.empty())
+     return;
+   device_->context()->UpdateSubresource(buffer, 0, nullptr, cpu_data_.data(), byte_width, 0);
+ }
+ 
+ ID3D11Buffer *DxmtD3D12Resource::buffer_for_bind(UINT bind) {
++  if (dxmt_buffer_) {
++    if (bind != D3D11_BIND_CONSTANT_BUFFER) return generic_buffer_;
++    if (!constant_buffer_) {
++      using CreateAlias = HRESULT (WINAPI *)(ID3D11Buffer *, const D3D11_BUFFER_DESC *, ID3D11Buffer **);
++      auto create_alias = reinterpret_cast<CreateAlias>(
++          GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateBufferAlias"));
++      D3D11_BUFFER_DESC desc = {};
++      desc.ByteWidth = UINT(desc_.Width) & ~15u;
++      desc.Usage = D3D11_USAGE_DEFAULT;
++      desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
++      if (!create_alias || FAILED(create_alias(generic_buffer_, &desc, &constant_buffer_))) return nullptr;
++    }
++    return constant_buffer_;
++  }
+   ID3D11Buffer **slot = bind == D3D11_BIND_VERTEX_BUFFER
+                             ? &vertex_buffer_
+                             : bind == D3D11_BIND_INDEX_BUFFER ? &index_buffer_
+@@ -1840,7 +2290,17 @@ convert_dxil_stage(
+   if (root_signature) {
+     WMTConstMemoryPointer descriptor;
+     descriptor.set(root_signature);
+-    converter_root_signature = WMTShaderConverterCreateRootSignature(descriptor, nullptr);
++    obj_handle_t error = NULL_OBJECT_HANDLE;
++    converter_root_signature = WMTShaderConverterCreateRootSignature(descriptor, &error);
++    if (!converter_root_signature) {
++      char message[1024] = {};
++      if (error) {
++        WMTShaderConverterCopyErrorMessage(error, message, sizeof(message));
++        WMTShaderConverterReleaseError(error);
++      }
++      Logger::err(std::string("D3D12 root signature conversion failed: ") + message);
++      return false;
++    }
+   }
+ 
+   /* Pin the emitted function name: the converter otherwise keeps whatever the
+@@ -1861,6 +2321,14 @@ convert_dxil_stage(
+   if (converter_root_signature)
+     WMTShaderConverterReleaseRootSignature(converter_root_signature);
+   if (info.reflection) {
++    if (GetEnvironmentVariableA("DXMT_D3D12_DIAGNOSTICS", nullptr, 0)) {
++      uint64_t length = WMTShaderConverterCopyReflectionJSON(info.reflection, nullptr, 0);
++      if (length && length < 128 * 1024) {
++        std::vector<char> json(length + 1);
++        WMTShaderConverterCopyReflectionJSON(info.reflection, json.data(), json.size());
++        Logger::debug(std::string("D3D12 shader reflection: ") + json.data());
++      }
++    }
+     uint32_t threadgroup_size[3] = {};
+     if (out_threadgroup_size && WMTShaderConverterCopyComputeInfo(info.reflection, threadgroup_size))
+       *out_threadgroup_size = {threadgroup_size[0], threadgroup_size[1], threadgroup_size[2]};
+@@ -1982,6 +2450,7 @@ void DxmtD3D12PipelineState::capture_pipeline_info(const D3D12_GRAPHICS_PIPELINE
+ 
+ WMT::RenderPipelineState
+ DxmtD3D12PipelineState::metal_pipeline(const uint32_t *strides, uint32_t stride_count) {
++  std::lock_guard<std::mutex> lock(pipeline_mutex_);
+   if (!has_metal_functions() || !strides)
+     return {};
+ 
+@@ -2031,7 +2500,8 @@ HRESULT DxmtD3D12PipelineState::init_compute(const D3D12_COMPUTE_PIPELINE_STATE_
+   if (!convert_dxil_stage(
+           metal_device, desc->CS, root_signature, compute_library_, compute_function_, &compute_threadgroup_size_
+       ))
+-    return E_INVALIDARG;
++    return device_->d3d11_device()->CreateComputeShader(desc->CS.pShaderBytecode,
++                                                       desc->CS.BytecodeLength, nullptr, cs_.put());
+   if (!compute_function_)
+     return E_INVALIDARG;
+   /* A dispatch with a zero-sized threadgroup is a Metal validation failure, and
+@@ -2072,6 +2542,7 @@ HRESULT DxmtD3D12PipelineState::init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *d
+     capture_pipeline_info(*desc);
+   }
+ 
++  sample_mask_ = desc->SampleMask;
+   auto device = device_->d3d11_device();
+ 
+   std::vector<D3D11_INPUT_ELEMENT_DESC> elems(desc->InputLayout.NumElements);
+@@ -2095,32 +2566,35 @@ HRESULT DxmtD3D12PipelineState::init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *d
+   auto shader_stage_failed = [&](HRESULT hr) { return FAILED(hr) && !metal_ok; };
+ 
+   ID3D11InputLayout *input_layout = nullptr;
+-  HRESULT hr = device->CreateInputLayout(
+-      elems.data(), static_cast<UINT>(elems.size()), desc->VS.pShaderBytecode,
+-      desc->VS.BytecodeLength, &input_layout);
++  HRESULT hr = S_OK;
++  if (!elems.empty())
++    hr = device->CreateInputLayout(elems.data(), static_cast<UINT>(elems.size()), desc->VS.pShaderBytecode,
++                                    desc->VS.BytecodeLength, &input_layout);
+   if (shader_stage_failed(hr))
+     return hr;
+-  if (SUCCEEDED(hr)) {
++  if (SUCCEEDED(hr) && input_layout) {
+     input_layout_ = input_layout;
+     input_layout->Release();
+   }
+ 
+   ID3D11VertexShader *vs = nullptr;
+-  hr = device->CreateVertexShader(desc->VS.pShaderBytecode, desc->VS.BytecodeLength,
+-                                  nullptr, &vs);
++  if (desc->VS.BytecodeLength)
++    hr = device->CreateVertexShader(desc->VS.pShaderBytecode, desc->VS.BytecodeLength, nullptr, &vs);
++  else hr = S_OK;
+   if (shader_stage_failed(hr))
+     return hr;
+-  if (SUCCEEDED(hr)) {
++  if (SUCCEEDED(hr) && vs) {
+     vs_ = vs;
+     vs->Release();
+   }
+ 
+   ID3D11PixelShader *ps = nullptr;
+-  hr = device->CreatePixelShader(desc->PS.pShaderBytecode, desc->PS.BytecodeLength,
+-                                 nullptr, &ps);
++  if (desc->PS.BytecodeLength)
++    hr = device->CreatePixelShader(desc->PS.pShaderBytecode, desc->PS.BytecodeLength, nullptr, &ps);
++  else hr = S_OK;
+   if (shader_stage_failed(hr))
+     return hr;
+-  if (SUCCEEDED(hr)) {
++  if (SUCCEEDED(hr) && ps) {
+     ps_ = ps;
+     ps->Release();
+   }
+@@ -2133,6 +2607,7 @@ HRESULT DxmtD3D12PipelineState::init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *d
+   rs.DepthBiasClamp = desc->RasterizerState.DepthBiasClamp;
+   rs.SlopeScaledDepthBias = desc->RasterizerState.SlopeScaledDepthBias;
+   rs.DepthClipEnable = desc->RasterizerState.DepthClipEnable;
++  rs.ScissorEnable = TRUE;
+   rs.MultisampleEnable = desc->RasterizerState.MultisampleEnable;
+   rs.AntialiasedLineEnable = desc->RasterizerState.AntialiasedLineEnable;
+   ID3D11RasterizerState *rasterizer = nullptr;
+@@ -2155,8 +2630,7 @@ HRESULT DxmtD3D12PipelineState::init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *d
+     dst.SrcBlendAlpha = static_cast<D3D11_BLEND>(src.SrcBlendAlpha ? src.SrcBlendAlpha : D3D12_BLEND_ONE);
+     dst.DestBlendAlpha = static_cast<D3D11_BLEND>(src.DestBlendAlpha ? src.DestBlendAlpha : D3D12_BLEND_ZERO);
+     dst.BlendOpAlpha = static_cast<D3D11_BLEND_OP>(src.BlendOpAlpha ? src.BlendOpAlpha : D3D12_BLEND_OP_ADD);
+-    dst.RenderTargetWriteMask = src.RenderTargetWriteMask ? src.RenderTargetWriteMask
+-                                                          : D3D11_COLOR_WRITE_ENABLE_ALL;
++    dst.RenderTargetWriteMask = src.RenderTargetWriteMask;
+   }
+   ID3D11BlendState *blend_state = nullptr;
+   hr = device->CreateBlendState(&blend, &blend_state);
+@@ -2173,6 +2647,12 @@ HRESULT DxmtD3D12PipelineState::init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *d
+   ds.StencilEnable = desc->DepthStencilState.StencilEnable;
+   ds.StencilReadMask = desc->DepthStencilState.StencilReadMask;
+   ds.StencilWriteMask = desc->DepthStencilState.StencilWriteMask;
++  const auto &front = desc->DepthStencilState.FrontFace;
++  const auto &back = desc->DepthStencilState.BackFace;
++  ds.FrontFace = {D3D11_STENCIL_OP(front.StencilFailOp), D3D11_STENCIL_OP(front.StencilDepthFailOp),
++                   D3D11_STENCIL_OP(front.StencilPassOp), D3D11_COMPARISON_FUNC(front.StencilFunc)};
++  ds.BackFace = {D3D11_STENCIL_OP(back.StencilFailOp), D3D11_STENCIL_OP(back.StencilDepthFailOp),
++                  D3D11_STENCIL_OP(back.StencilPassOp), D3D11_COMPARISON_FUNC(back.StencilFunc)};
+   ID3D11DepthStencilState *depth_state = nullptr;
+   hr = device->CreateDepthStencilState(&ds, &depth_state);
+   if (FAILED(hr))
+@@ -2180,37 +2660,23 @@ HRESULT DxmtD3D12PipelineState::init(const D3D12_GRAPHICS_PIPELINE_STATE_DESC *d
+   depth_stencil_ = depth_state;
+   depth_state->Release();
+ 
+-  D3D11_SAMPLER_DESC sampler = {};
+-  sampler.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+-  sampler.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+-  sampler.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+-  sampler.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+-  sampler.MaxLOD = D3D11_FLOAT32_MAX;
+-  ID3D11SamplerState *sampler_state = nullptr;
+-  hr = device->CreateSamplerState(&sampler, &sampler_state);
+-  if (FAILED(hr))
+-    return hr;
+-  sampler_ = sampler_state;
+-  sampler_state->Release();
+ 
+   return S_OK;
+ }
+ 
+-void DxmtD3D12PipelineState::apply(ID3D11DeviceContext *context) {
++void DxmtD3D12PipelineState::apply(ID3D11DeviceContext *context, const FLOAT *blend_factor, UINT stencil_ref) {
+   context->IASetInputLayout(input_layout_.get());
+   context->VSSetShader(vs_.get(), nullptr, 0);
+   context->PSSetShader(ps_.get(), nullptr, 0);
+   context->RSSetState(rasterizer_.get());
+-  FLOAT factor[4] = {0, 0, 0, 0};
+-  context->OMSetBlendState(blend_.get(), factor, 0xffffffffu);
+-  context->OMSetDepthStencilState(depth_stencil_.get(), 0);
+-  ID3D11SamplerState *samplers[] = {sampler_.get()};
+-  context->PSSetSamplers(0, 1, samplers);
++  context->OMSetBlendState(blend_.get(), blend_factor, sample_mask_);
++  context->OMSetDepthStencilState(depth_stencil_.get(), stencil_ref);
+ }
+ 
+ class DxmtD3D12GraphicsCommandList final : public ID3D12GraphicsCommandList,
+                                            public D3D12ChildMethods,
+                                            public UnknownRef {
++  struct RecordedCommand;
+ public:
+   DxmtD3D12GraphicsCommandList(DxmtD3D12Device *device, D3D12_COMMAND_LIST_TYPE type,
+                                ID3D12PipelineState *initial_state)
+@@ -2244,6 +2710,16 @@ public:
+     commands_.clear();
+     closed_ = false;
+     pipeline_ = static_cast<DxmtD3D12PipelineState *>(initial_state);
++    vbvs_ = {}; ibv_ = {}; root_descriptors_ = {}; compute_root_descriptors_ = {};
++    graphics_root_arguments_.setLayout(nullptr); compute_root_arguments_.setLayout(nullptr);
++    graphics_root_signature_ = nullptr; compute_root_signature_ = nullptr;
++    graphics_root_resources_ = {}; compute_root_resources_ = {};
++    resource_heap_ = nullptr; sampler_heap_ = nullptr;
++    topology_ = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
++    viewport_ = {}; has_viewport_ = false;
++    scissor_ = {}; has_scissor_ = false;
++    render_target_ = {}; pending_depth_clear_ = false; pending_depth_value_ = 1;
++    blend_factor_ = {1,1,1,1}; stencil_ref_ = 0;
+     return S_OK;
+   }
+   void STDMETHODCALLTYPE ClearState(ID3D12PipelineState *pipeline_state) final {
+@@ -2258,24 +2734,18 @@ public:
+       return;
+ 
+     auto pipeline = pipeline_;
+-    auto vbv = vbv_;
+-    auto root0 = root_descriptors_[0];
+-    auto root1 = root_descriptors_[1];
++    auto vbvs = vbvs_;
++    auto bindings = legacy_root_bindings();
++    auto blend_factor = blend_factor_;
++    auto stencil_ref = stencil_ref_;
+     record([=, this]() {
+       auto context = device_->context();
+       if (pipeline)
+-        pipeline->apply(context);
++        pipeline->apply(context, blend_factor.data(), stencil_ref);
+ 
+-      bind_root_descriptors_d3d11(context, root0, root1);
++      bind_legacy_graphics(bindings);
+ 
+-      DxmtD3D12Resource *vb_res = device_->resource_from_gpu_va(vbv.BufferLocation);
+-      if (vb_res) {
+-        ID3D11Buffer *vb = vb_res->vertex_buffer();
+-        vb_res->update_buffer(vb, vbv.SizeInBytes);
+-        UINT stride = vbv.StrideInBytes;
+-        UINT offset = 0;
+-        context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+-      }
++      bind_legacy_vertex_buffers(vbvs);
+ 
+       context->DrawInstanced(vertex_count_per_instance, instance_count, start_vertex_location,
+                              start_instance_location);
+@@ -2291,8 +2761,9 @@ public:
+     if (!pipeline || !device_ || !device_->dxmt_device() || !render_target_.count)
+       return false;
+ 
+-    uint32_t strides[1] = {vbv_.StrideInBytes};
+-    WMT::RenderPipelineState metal = pipeline->metal_pipeline(strides, 1);
++    std::array<uint32_t, D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT> strides = {};
++    for (UINT i = 0; i < strides.size(); ++i) strides[i] = vbvs_[i].StrideInBytes;
++    WMT::RenderPipelineState metal = pipeline->metal_pipeline(strides.data(), strides.size());
+     if (!metal)
+       return false;
+ 
+@@ -2302,6 +2773,7 @@ public:
+ 
+     auto work = std::make_shared<GraphicsDrawWork>();
+     work->pipeline = metal;
++    work->pipeline_owner = pipeline_;
+     work->depth_stencil = pipeline->metal_depth_stencil();
+     work->primitive = primitive;
+     work->vertex_start = start_vertex;
+@@ -2313,11 +2785,14 @@ public:
+         static_cast<const uint8_t *>(graphics_root_arguments_.data()) + graphics_root_arguments_.size()
+     );
+ 
+-    if (DxmtD3D12Resource *vb = device_->resource_from_gpu_va(vbv_.BufferLocation)) {
+-      if (WMT::Buffer buffer = vb->metal_buffer()) {
+-        uint64_t base = vb->GetGPUVirtualAddress();
+-        uint64_t offset = vbv_.BufferLocation > base ? vbv_.BufferLocation - base : 0;
+-        work->vertex_buffers.push_back({buffer, offset, uint8_t(dxmt::kVertexBufferBindPoint)});
++    for (UINT i = 0; i < vbvs_.size(); ++i) {
++      if (auto *vb = device_->resource_from_gpu_va(vbvs_[i].BufferLocation)) {
++        if (WMT::Buffer buffer = vb->metal_buffer()) {
++          uint64_t offset = vb->metal_buffer_offset() + vbvs_[i].BufferLocation - vb->GetGPUVirtualAddress();
++          work->resident.push_back({WMT::Reference<WMT::Resource>(WMT::Resource(buffer.handle)), vb,
++                                     WMTResourceUsageRead});
++          work->vertex_buffers.push_back({buffer, offset, uint8_t(dxmt::kVertexBufferBindPoint + i)});
++        }
+       }
+     }
+ 
+@@ -2336,16 +2811,24 @@ public:
+       work->index_buffer = buffer;
+       /* D3D12 counts the first index from the view's start; Metal takes a byte
+        * offset into the buffer, so the two are added here. */
+-      work->index_buffer_offset = view_offset + uint64_t(start_vertex) * index_size;
++      work->index_buffer_offset = ib->metal_buffer_offset() + view_offset + uint64_t(start_vertex) * index_size;
++      work->resident.push_back({WMT::Reference<WMT::Resource>(WMT::Resource(buffer.handle)), ib,
++                                 WMTResourceUsageRead});
+       work->index_type = index_size == 2 ? WMTIndexTypeUInt16 : WMTIndexTypeUInt32;
+       work->base_vertex = base_vertex;
+     }
+ 
+     work->viewport = viewport_;
+     work->has_viewport = has_viewport_;
+-    /* D3D12 has no scissor by default and Metal's covers the whole attachment
+-     * unless told otherwise, so the target's extent is the right default. */
+-    work->scissor = WMTScissorRect{0, 0, render_target_.width, render_target_.height};
++    const auto width = render_target_.width, height = render_target_.height;
++    if (has_scissor_) {
++      const auto left = std::clamp<int64_t>(scissor_.left, 0, width);
++      const auto top = std::clamp<int64_t>(scissor_.top, 0, height);
++      const auto right = std::clamp<int64_t>(scissor_.right, left, width);
++      const auto bottom = std::clamp<int64_t>(scissor_.bottom, top, height);
++      if (left == right || top == bottom) return true;
++      work->scissor = WMTScissorRect{uint32_t(left), uint32_t(top), uint32_t(right-left), uint32_t(bottom-top)};
++    } else work->scissor = WMTScissorRect{0, 0, width, height};
+ 
+     collect_graphics_residency(*work);
+     commands_.push_back(RecordedCommand{{}, false, nullptr, work, nullptr, nullptr, false, {}});
+@@ -2384,35 +2867,29 @@ public:
+       return;
+ 
+     auto pipeline = pipeline_;
+-    auto vbv = vbv_;
++    auto vbvs = vbvs_;
+     auto ibv = ibv_;
+-    auto root0 = root_descriptors_[0];
+-    auto root1 = root_descriptors_[1];
++    auto bindings = legacy_root_bindings();
++    auto blend_factor = blend_factor_;
++    auto stencil_ref = stencil_ref_;
+     record([=, this]() {
+       auto context = device_->context();
+       if (pipeline)
+-        pipeline->apply(context);
++        pipeline->apply(context, blend_factor.data(), stencil_ref);
+ 
+-      bind_root_descriptors_d3d11(context, root0, root1);
++      bind_legacy_graphics(bindings);
+ 
+-      DxmtD3D12Resource *vb_res = device_->resource_from_gpu_va(vbv.BufferLocation);
+-      if (vb_res) {
+-        ID3D11Buffer *vb = vb_res->vertex_buffer();
+-        vb_res->update_buffer(vb, vbv.SizeInBytes);
+-        UINT stride = vbv.StrideInBytes;
+-        UINT offset = 0;
+-        context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+-      }
++      bind_legacy_vertex_buffers(vbvs);
+ 
+       DxmtD3D12Resource *ib_res = device_->resource_from_gpu_va(ibv.BufferLocation);
+       if (ib_res) {
+         ID3D11Buffer *ib = ib_res->index_buffer();
+         ib_res->update_buffer(ib, ibv.SizeInBytes);
+-        context->IASetIndexBuffer(ib, ibv.Format, 0);
++        context->IASetIndexBuffer(ib, ibv.Format, UINT(ibv.BufferLocation - ib_res->GetGPUVirtualAddress()));
+       }
+ 
+       context->DrawIndexedInstanced(index_count_per_instance, instance_count,
+-                                    start_index_location, base_vertex_location, 0);
++                                    start_index_location, base_vertex_location, start_instance_location);
+     });
+   }
+   void STDMETHODCALLTYPE Dispatch(UINT x, UINT y, UINT z) final {
+@@ -2420,14 +2897,25 @@ public:
+       return;
+ 
+     auto *pipeline = pipeline_.get();
+-    if (!pipeline || !pipeline->metal_compute_pipeline() || !device_ || !device_->dxmt_device())
++    if (!pipeline || !device_ || !device_->dxmt_device()) return;
++    if (pipeline->legacy_compute_shader()) {
++      auto owner = pipeline_;
++      LegacyRootBindings bindings = {compute_root_signature_, compute_root_arguments_, compute_root_descriptors_};
++      record([=, this]() {
++        device_->context()->CSSetShader(owner->legacy_compute_shader(), nullptr, 0);
++        bind_legacy_graphics(bindings, true);
++        device_->context()->Dispatch(x, y, z);
++      });
+       return;
++    }
++    if (!pipeline->metal_compute_pipeline()) return;
+ 
+     /* Everything the encoding needs is copied out here rather than read from
+      * the command list later: the application is free to change root arguments
+      * and rebind heaps for the next dispatch before this one is executed. */
+     auto work = std::make_shared<ComputeDispatchWork>();
+     work->pipeline = pipeline->metal_compute_pipeline();
++    work->pipeline_owner = pipeline_;
+     work->threadgroup_size = pipeline->compute_threadgroup_size();
+     work->threadgroups = {x, y, z};
+     work->root_arguments.assign(
+@@ -2453,8 +2941,10 @@ public:
+         copy->kind = CopyWork::Kind::BufferToBuffer;
+         copy->src_buffer = source;
+         copy->dst_buffer = destination;
+-        copy->src_offset = src_offset;
+-        copy->dst_offset = dst_offset;
++        copy->src_resource = src_res;
++        copy->dst_resource = dst_res;
++        copy->src_offset = src_res->metal_buffer_offset() + src_offset;
++        copy->dst_offset = dst_res->metal_buffer_offset() + dst_offset;
+         copy->length = num_bytes;
+         record_copy(copy);
+         return;
+@@ -2623,7 +3113,7 @@ public:
+       if (!copy->src_buffer || !copy->dst_texture)
+         return false;
+       copy->kind = CopyWork::Kind::BufferToTexture;
+-      copy->src_offset = src.PlacedFootprint.Offset;
++      copy->src_offset = src_res->metal_buffer_offset() + src.PlacedFootprint.Offset;
+       copy->bytes_per_row = footprint.RowPitch;
+       copy->bytes_per_image = footprint.RowPitch * footprint.Height;
+       copy->size = {footprint.Width, footprint.Height, std::max(1u, footprint.Depth)};
+@@ -2634,7 +3124,7 @@ public:
+       if (!copy->src_texture || !copy->dst_buffer)
+         return false;
+       copy->kind = CopyWork::Kind::TextureToBuffer;
+-      copy->dst_offset = dst.PlacedFootprint.Offset;
++      copy->dst_offset = dst_res->metal_buffer_offset() + dst.PlacedFootprint.Offset;
+       copy->bytes_per_row = footprint.RowPitch;
+       copy->bytes_per_image = footprint.RowPitch * footprint.Height;
+       copy->size = {footprint.Width, footprint.Height, std::max(1u, footprint.Depth)};
+@@ -2664,6 +3154,8 @@ public:
+ 
+     if (!copy->size.width || !copy->size.height || !copy->size.depth)
+       return false;
++    copy->src_resource = src_res;
++    copy->dst_resource = dst_res;
+     record_copy(copy);
+     return true;
+   }
+@@ -2761,13 +3253,17 @@ public:
+     record_state([=]() { device_->context()->RSSetViewports(count, copied.data()); });
+   }
+   void STDMETHODCALLTYPE RSSetScissorRects(UINT count, const D3D12_RECT *rects) final {
++    has_scissor_ = count && rects;
++    scissor_ = has_scissor_ ? rects[0] : D3D12_RECT{};
+     std::vector<D3D11_RECT> copied(count);
+     for (UINT i = 0; i < count; i++)
+       copied[i] = {rects[i].left, rects[i].top, rects[i].right, rects[i].bottom};
+     record_state([=]() { device_->context()->RSSetScissorRects(count, copied.data()); });
+   }
+-  void STDMETHODCALLTYPE OMSetBlendFactor(const FLOAT[4]) final {}
+-  void STDMETHODCALLTYPE OMSetStencilRef(UINT) final {}
++  void STDMETHODCALLTYPE OMSetBlendFactor(const FLOAT factor[4]) final {
++    std::copy(factor, factor + 4, blend_factor_.begin());
++  }
++  void STDMETHODCALLTYPE OMSetStencilRef(UINT value) final { stencil_ref_ = value; }
+   void STDMETHODCALLTYPE SetPipelineState(ID3D12PipelineState *pipeline_state) final {
+     pipeline_ = static_cast<DxmtD3D12PipelineState *>(pipeline_state);
+   }
+@@ -2845,6 +3341,7 @@ public:
+   }
+   void STDMETHODCALLTYPE SetComputeRootDescriptorTable(UINT index,
+                                                        D3D12_GPU_DESCRIPTOR_HANDLE handle) final {
++    if (index < compute_root_descriptors_.size()) compute_root_descriptors_[index] = handle;
+     compute_root_arguments_.setDescriptorTable(index, descriptor_table_address(handle));
+   }
+   void STDMETHODCALLTYPE SetGraphicsRootDescriptorTable(UINT index,
+@@ -2902,16 +3399,18 @@ public:
+   }
+   void STDMETHODCALLTYPE IASetVertexBuffers(UINT start_slot, UINT count,
+                                             const D3D12_VERTEX_BUFFER_VIEW *views) final {
+-    if (start_slot == 0 && count && views)
+-      vbv_ = views[0];
++    if (start_slot >= vbvs_.size()) return;
++    for (UINT i = 0; i < std::min<UINT>(count, vbvs_.size() - start_slot); ++i)
++      vbvs_[start_slot + i] = views ? views[i] : D3D12_VERTEX_BUFFER_VIEW{};
+   }
+   void STDMETHODCALLTYPE SOSetTargets(UINT, UINT, const D3D12_STREAM_OUTPUT_BUFFER_VIEW *) final {}
+   void STDMETHODCALLTYPE OMSetRenderTargets(UINT count,
+                                             const D3D12_CPU_DESCRIPTOR_HANDLE *rtv,
+-                                            BOOL, const D3D12_CPU_DESCRIPTOR_HANDLE *dsv) final {
++                                            BOOL contiguous, const D3D12_CPU_DESCRIPTOR_HANDLE *dsv) final {
+     std::vector<Descriptor *> rtvs;
+     for (UINT i = 0; i < count; i++)
+-      rtvs.push_back(DxmtD3D12DescriptorHeap::from_cpu(rtv[i]));
++      rtvs.push_back(contiguous ? DxmtD3D12DescriptorHeap::from_cpu(rtv[0]) + i :
++                                DxmtD3D12DescriptorHeap::from_cpu(rtv[i]));
+     Descriptor *dsv_desc = dsv ? DxmtD3D12DescriptorHeap::from_cpu(*dsv) : nullptr;
+ 
+     /* A placed render target has real Metal memory and is drawn into by our
+@@ -2924,16 +3423,27 @@ public:
+       D3D12_RESOURCE_DESC desc = {};
+       rtvs[i]->resource->GetDesc(&desc);
+       target->colors[i].texture = rtvs[i]->resource->metal_texture();
++      target->colors[i].resource = rtvs[i]->resource;
+       target->count = i + 1;
+       /* The pass extent is the first attachment's; D3D12 requires them to
+        * match anyway. */
+       if (!target->width) {
+         target->width = uint32_t(desc.Width);
+         target->height = desc.Height;
++        target->sample_count = uint8_t(desc.SampleDesc.Count);
+       }
+     }
+-    if (dsv_desc && dsv_desc->resource)
++    if (dsv_desc && dsv_desc->resource) {
+       target->depth_texture = dsv_desc->resource->metal_texture();
++      target->depth_resource = dsv_desc->resource;
++      if (!target->width) {
++        D3D12_RESOURCE_DESC desc = {};
++        dsv_desc->resource->GetDesc(&desc);
++        target->width = UINT(desc.Width);
++        target->height = desc.Height;
++        target->sample_count = uint8_t(desc.SampleDesc.Count);
++      }
++    }
+     /* A depth clear recorded before the targets were bound belongs to this
+      * pass: D3D12 lets the two come in either order. */
+     target->clear_depth = pending_depth_clear_;
+@@ -2942,12 +3452,14 @@ public:
+     render_target_ = *target;
+     commands_.push_back(RecordedCommand{{}, false, nullptr, nullptr, nullptr, target, false, {}});
+ 
++    std::vector<ComPtr<ID3D11RenderTargetView>> captured_views;
++    for (auto *descriptor : rtvs)
++      captured_views.emplace_back(descriptor ? descriptor->rtv.get() : nullptr);
++    ComPtr<ID3D11DepthStencilView> captured_depth(dsv_desc ? dsv_desc->dsv.get() : nullptr);
+     record([=]() {
+-      std::vector<ID3D11RenderTargetView *> views(rtvs.size());
+-      for (size_t i = 0; i < rtvs.size(); i++)
+-        views[i] = rtvs[i] && rtvs[i]->rtv ? rtvs[i]->rtv.get() : nullptr;
+-      device_->context()->OMSetRenderTargets(static_cast<UINT>(views.size()), views.data(),
+-                                             dsv_desc && dsv_desc->dsv ? dsv_desc->dsv.get() : nullptr);
++      std::vector<ID3D11RenderTargetView *> views(captured_views.size());
++      for (size_t i = 0; i < views.size(); i++) views[i] = captured_views[i].get();
++      device_->context()->OMSetRenderTargets(UINT(views.size()), views.data(), captured_depth.get());
+     });
+   }
+   void STDMETHODCALLTYPE ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE dsv,
+@@ -2955,6 +3467,12 @@ public:
+                                                UINT8 stencil, UINT, const D3D12_RECT *) final {
+     Descriptor *desc = DxmtD3D12DescriptorHeap::from_cpu(dsv);
+ 
++    if (desc && desc->resource && !desc->resource->is_placed() && desc->dsv) {
++      ComPtr<ID3D11DepthStencilView> view(desc->dsv);
++      record([=]() { device_->context()->ClearDepthStencilView(view.get(), flags, depth, stencil); });
++      return;
++    }
++
+     /* As for colour, a clear is a load action rather than a command. If this
+      * depth buffer is already the bound one the pass restarts with the clear;
+      * otherwise it is held until OMSetRenderTargets picks it up. */
+@@ -2987,6 +3505,12 @@ public:
+     Descriptor *desc = DxmtD3D12DescriptorHeap::from_cpu(rtv);
+     FLOAT clear[4] = {color[0], color[1], color[2], color[3]};
+ 
++    if (desc && desc->resource && !desc->resource->is_placed() && desc->rtv) {
++      ComPtr<ID3D11RenderTargetView> view(desc->rtv);
++      record([=]() { device_->context()->ClearRenderTargetView(view.get(), clear); });
++      return;
++    }
++
+     /* Metal clears with a load action rather than a command, so this becomes
+      * how the next pass into that target begins. */
+     if (desc && desc->resource && desc->resource->metal_texture()) {
+@@ -3012,10 +3536,12 @@ public:
+         target->depth_texture = render_target_.depth_texture;
+         target->width = uint32_t(resource_desc.Width);
+         target->height = resource_desc.Height;
++        target->sample_count = uint8_t(resource_desc.SampleDesc.Count);
+         slot = 0;
+         target->count = 1;
+       }
+       target->colors[slot].texture = texture;
++      target->colors[slot].resource = desc->resource;
+       target->colors[slot].clear = true;
+       target->colors[slot].clear_color = {clear[0], clear[1], clear[2], clear[3]};
+       render_target_ = *target;
+@@ -3053,7 +3579,12 @@ public:
+    * boundary -- which is both cheaper and the only place a barrier can be
+    * expressed at all. Anything that is not compute ends the batch first, so
+    * the order the application recorded stays the order things run in. */
+-  void replay() {
++  void replay_immediate() { replay(commands_); }
++  std::function<void()> capture_replay() {
++    ComPtr<DxmtD3D12GraphicsCommandList> owner(this);
++    return [owner = std::move(owner), commands = commands_]() mutable { owner->replay(commands); };
++  }
++  void replay(std::vector<RecordedCommand> &commands) {
+     std::vector<RecordedCommand *> compute_batch;
+     std::vector<GraphicsDrawWork *> draw_batch;
+     std::vector<CopyWork *> copy_batch;
+@@ -3070,7 +3601,7 @@ public:
+       copy_batch.clear();
+     };
+     auto flush_draws = [&]() {
+-      if (!draw_batch.empty()) {
++      if (!draw_batch.empty() || target.any_clear()) {
+         encode_render_batch(target, draw_batch);
+         /* One clear per pass: a second pass into the same targets loads what
+          * the first left rather than clearing them again. Depth as well as
+@@ -3081,7 +3612,7 @@ public:
+       draw_batch.clear();
+     };
+ 
+-    for (auto &command : commands_) {
++    for (auto &command : commands) {
+       if (command.dispatch) {
+         flush_draws();
+         flush_copies();
+@@ -3126,9 +3657,12 @@ private:
+   D3D12_COMMAND_LIST_TYPE type_;
+   bool closed_ = false;
+   ComPtr<DxmtD3D12PipelineState> pipeline_;
+-  D3D12_VERTEX_BUFFER_VIEW vbv_ = {};
++  std::array<D3D12_VERTEX_BUFFER_VIEW, D3D12_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT> vbvs_ = {};
+   D3D12_INDEX_BUFFER_VIEW ibv_ = {};
+-  std::array<D3D12_GPU_DESCRIPTOR_HANDLE, 16> root_descriptors_ = {};
++  std::array<FLOAT, 4> blend_factor_ = {1, 1, 1, 1};
++  UINT stencil_ref_ = 0;
++  std::array<D3D12_GPU_DESCRIPTOR_HANDLE, 64> root_descriptors_ = {};
++  std::array<D3D12_GPU_DESCRIPTOR_HANDLE, 64> compute_root_descriptors_ = {};
+   /* The root signature owns the layout the argument buffer points at, so it has
+    * to outlive it; graphics and compute keep separate sets, as in D3D12. */
+   ComPtr<DxmtD3D12RootSignature> graphics_root_signature_;
+@@ -3152,6 +3686,7 @@ private:
+   struct RenderTargetState {
+     struct ColorAttachment {
+       WMT::Texture texture;
++      ComPtr<DxmtD3D12Resource> resource;
+       bool clear = false;
+       WMTClearColor clear_color = {};
+     };
+@@ -3161,7 +3696,9 @@ private:
+     uint32_t count = 0;
+     uint32_t width = 0;
+     uint32_t height = 0;
++    uint8_t sample_count = 1;
+     WMT::Texture depth_texture;
++    ComPtr<DxmtD3D12Resource> depth_resource;
+     bool clear_depth = false;
+     float depth_value = 1.0f;
+ 
+@@ -3195,6 +3732,8 @@ private:
+   D3D12_PRIMITIVE_TOPOLOGY topology_ = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+   WMTViewport viewport_ = {};
+   bool has_viewport_ = false;
++  D3D12_RECT scissor_ = {};
++  bool has_scissor_ = false;
+   RenderTargetState render_target_;
+   bool pending_depth_clear_ = false;
+   float pending_depth_value_ = 1.0f;
+@@ -3208,9 +3747,12 @@ private:
+     uint32_t instance_count = 1;
+     uint32_t base_instance = 0;
+     std::vector<uint8_t> root_arguments;
+-    std::vector<std::pair<WMT::Buffer, WMTResourceUsage>> resident;
+-    WMT::Buffer resource_heap_buffer;
+-    WMT::Buffer sampler_heap_buffer;
++    std::vector<ResidentResource> resident;
++    ComPtr<DxmtD3D12DescriptorHeap> resource_heap;
++    ComPtr<DxmtD3D12DescriptorHeap> sampler_heap;
++    ComPtr<DxmtD3D12PipelineState> pipeline_owner;
++    WMT::Reference<WMT::Buffer> resource_heap_buffer;
++    WMT::Reference<WMT::Buffer> sampler_heap_buffer;
+     struct BoundVertexBuffer {
+       WMT::Buffer buffer;
+       uint64_t offset;
+@@ -3237,6 +3779,8 @@ private:
+     WMT::Buffer dst_buffer;
+     WMT::Texture src_texture;
+     WMT::Texture dst_texture;
++    ComPtr<DxmtD3D12Resource> src_resource;
++    ComPtr<DxmtD3D12Resource> dst_resource;
+     uint64_t src_offset = 0;
+     uint64_t dst_offset = 0;
+     uint64_t length = 0;
+@@ -3257,9 +3801,12 @@ private:
+     WMTSize threadgroups = {};
+     std::vector<uint8_t> root_arguments;
+     /* Buffers to make resident, with the usage each is reached with. */
+-    std::vector<std::pair<WMT::Buffer, WMTResourceUsage>> resident;
+-    WMT::Buffer resource_heap_buffer;
+-    WMT::Buffer sampler_heap_buffer;
++    std::vector<ResidentResource> resident;
++    ComPtr<DxmtD3D12DescriptorHeap> resource_heap;
++    ComPtr<DxmtD3D12DescriptorHeap> sampler_heap;
++    ComPtr<DxmtD3D12PipelineState> pipeline_owner;
++    WMT::Reference<WMT::Buffer> resource_heap_buffer;
++    WMT::Reference<WMT::Buffer> sampler_heap_buffer;
+   };
+ 
+   /* One recorded command. Exactly one of the three is set. Keeping dispatches
+@@ -3291,6 +3838,9 @@ private:
+   }
+ 
+ 
++  template <typename Work>
++  void collect_residency(Work &work, const std::array<ComPtr<DxmtD3D12Resource>, 64> &roots);
++  template <typename Work> void refresh_heap_residency(Work &work);
+   void collect_compute_residency(ComputeDispatchWork &work);
+   void encode_compute_batch(const std::vector<RecordedCommand *> &batch);
+   void collect_graphics_residency(GraphicsDrawWork &work);
+@@ -3313,30 +3863,136 @@ private:
+     graphics_root_resources_[index] = device_ ? device_->resource_from_gpu_va(address) : nullptr;
+   }
+ 
+-  /* The two root slots the d3d11 execution path understands. Shared by the
+-   * indexed and non-indexed draws so they cannot drift apart. */
+-  static void bind_root_descriptors_d3d11(ID3D11DeviceContext *context,
+-                                          D3D12_GPU_DESCRIPTOR_HANDLE root0,
+-                                          D3D12_GPU_DESCRIPTOR_HANDLE root1) {
+-    if (auto *cbv = DxmtD3D12DescriptorHeap::from_gpu(root0);
+-        cbv && cbv->type == DescriptorType::Cbv && cbv->resource) {
+-      ID3D11Buffer *cb = cbv->resource->constant_buffer();
+-      cbv->resource->update_buffer(cb, cbv->cbv.SizeInBytes);
+-      ID3D11Buffer *buffers[] = {cb};
+-      context->VSSetConstantBuffers(0, 1, buffers);
+-      context->PSSetConstantBuffers(0, 1, buffers);
++  void bind_legacy_vertex_buffers(const decltype(vbvs_) &views) {
++    std::array<ID3D11Buffer *, D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT> buffers = {};
++    std::array<UINT, D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT> strides = {}, offsets = {};
++    for (UINT i = 0; i < views.size(); ++i) {
++      if (auto *resource = device_->resource_from_gpu_va(views[i].BufferLocation)) {
++        buffers[i] = resource->vertex_buffer();
++        resource->update_buffer(buffers[i], views[i].SizeInBytes);
++        strides[i] = views[i].StrideInBytes;
++        offsets[i] = UINT(views[i].BufferLocation - resource->GetGPUVirtualAddress());
++      }
+     }
++    device_->context()->IASetVertexBuffers(0, buffers.size(), buffers.data(), strides.data(), offsets.data());
++  }
+ 
+-    if (auto *srv = DxmtD3D12DescriptorHeap::from_gpu(root1);
+-        srv && srv->type == DescriptorType::Srv && srv->srv) {
+-      ID3D11ShaderResourceView *views[] = {srv->srv.get()};
+-      context->PSSetShaderResources(0, 1, views);
++  struct LegacyRootBindings {
++    ComPtr<DxmtD3D12RootSignature> signature;
++    dxmt::RootArgumentBuffer arguments;
++    std::array<D3D12_GPU_DESCRIPTOR_HANDLE, 64> tables;
++  };
++
++  LegacyRootBindings legacy_root_bindings() const {
++    return {graphics_root_signature_, graphics_root_arguments_, root_descriptors_};
++  }
++
++  /* DXBC stages run through the shared D3D11 core, with the D3D12 signature
++   * deciding registers and stage visibility. Root arguments are captured per
++   * draw; volatile table descriptors are resolved when the list executes. */
++  void bind_legacy_graphics(const LegacyRootBindings &bindings, bool compute = false) {
++    if (!bindings.signature || !device_->context1()) return;
++    auto *context = device_->context1();
++    auto visible = [compute](UINT visibility, bool vertex) {
++      return !compute && (visibility == D3D12_SHADER_VISIBILITY_ALL ||
++             visibility == (vertex ? D3D12_SHADER_VISIBILITY_VERTEX : D3D12_SHADER_VISIBILITY_PIXEL));
++    };
++    auto cbv = [&](UINT slot, UINT visibility, UINT64 address, UINT bytes) {
++      if (slot >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT) return;
++      ID3D11Buffer *buffer = nullptr;
++      UINT first = 0, count = 0;
++      if (auto *resource = address ? device_->resource_from_gpu_va(address) : nullptr) {
++        D3D12_RESOURCE_DESC desc = {};
++        resource->GetDesc(&desc);
++        UINT64 offset = address - resource->GetGPUVirtualAddress();
++        UINT64 available = desc.Width > offset ? desc.Width - offset : 0;
++        UINT size = UINT(std::min<UINT64>(available, bytes ? bytes : 65536));
++        buffer = resource->constant_buffer();
++        first = UINT(offset / 16);
++        count = std::min(4096u, align_uint(size, 256) / 16);
++      }
++      if (compute) context->CSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      if (visible(visibility, true)) context->VSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++      if (visible(visibility, false)) context->PSSetConstantBuffers1(slot, 1, &buffer, &first, &count);
++    };
++    const auto &description = bindings.signature->description();
++    for (UINT index = 0; index < description.parameters.size(); ++index) {
++      const auto &parameter = description.parameters[index];
++      const auto *layout = bindings.signature->layout().parameter(index);
++      if (!layout || layout->offset + layout->size > bindings.arguments.size()) continue;
++      const auto *argument = static_cast<const uint8_t *>(bindings.arguments.data()) + layout->offset;
++      if (parameter.kind == dxmt::RootParameterKind::ConstantBufferView) {
++        UINT64 address = 0;
++        std::memcpy(&address, argument, sizeof(address));
++        cbv(parameter.shader_register, parameter.shader_visibility, address, 0);
++      } else if (parameter.kind == dxmt::RootParameterKind::Constants) {
++        if (parameter.shader_register >= D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT) continue;
++        UINT first = 0, count = 0;
++        ID3D11Buffer *buffer = device_->upload_root_constants(argument, parameter.num_32bit_values * 4, first, count);
++        if (compute) context->CSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
++        if (visible(parameter.shader_visibility, true))
++          context->VSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
++        if (visible(parameter.shader_visibility, false))
++          context->PSSetConstantBuffers1(parameter.shader_register, 1, &buffer, &first, &count);
++      } else if (parameter.kind == dxmt::RootParameterKind::DescriptorTable) {
++        Descriptor *table = index < bindings.tables.size() ? DxmtD3D12DescriptorHeap::from_gpu(bindings.tables[index]) : nullptr;
++        UINT available = 0;
++        if (table && table->owner) {
++          D3D12_DESCRIPTOR_HEAP_DESC heap = {};
++          table->owner->GetDesc(&heap);
++          available = heap.NumDescriptors > table->index ? heap.NumDescriptors - table->index : 0;
++        }
++        UINT append = 0;
++        for (UINT r = 0; r < parameter.range_count; ++r) {
++          const auto &range = description.ranges[parameter.first_range + r];
++          UINT offset = range.offset_in_descriptors_from_table_start;
++          if (offset == D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND) offset = append;
++          UINT limit = range.range_type == dxmt::DescriptorRangeType::ConstantBufferView ? 14 :
++                       range.range_type == dxmt::DescriptorRangeType::Sampler ? 16 :
++                       range.range_type == dxmt::DescriptorRangeType::UnorderedAccessView ? D3D11_PS_CS_UAV_REGISTER_COUNT : 128;
++          UINT length = range.base_shader_register < limit ?
++              std::min(range.descriptor_count, limit - range.base_shader_register) : 0;
++          for (UINT i = 0; i < length; ++i) {
++            Descriptor *entry = table && offset < available && i < available - offset ? table + offset + i : nullptr;
++            UINT slot = range.base_shader_register + i;
++            if (range.range_type == dxmt::DescriptorRangeType::ConstantBufferView) {
++              cbv(slot, parameter.shader_visibility, entry ? entry->cbv.BufferLocation : 0,
++                  entry ? entry->cbv.SizeInBytes : 0);
++            } else if (range.range_type == dxmt::DescriptorRangeType::ShaderResourceView) {
++              ID3D11ShaderResourceView *view = entry ? entry->srv.get() : nullptr;
++              if (compute) context->CSSetShaderResources(slot, 1, &view);
++              if (visible(parameter.shader_visibility, true)) context->VSSetShaderResources(slot, 1, &view);
++              if (visible(parameter.shader_visibility, false)) context->PSSetShaderResources(slot, 1, &view);
++            } else if (range.range_type == dxmt::DescriptorRangeType::UnorderedAccessView && compute) {
++              ID3D11UnorderedAccessView *view = entry ? entry->uav.get() : nullptr;
++              UINT keep = UINT_MAX;
++              context->CSSetUnorderedAccessViews(slot, 1, &view, &keep);
++            } else if (range.range_type == dxmt::DescriptorRangeType::Sampler) {
++              ID3D11SamplerState *sampler = entry ? entry->sampler11.get() : nullptr;
++              if (compute) context->CSSetSamplers(slot, 1, &sampler);
++              if (visible(parameter.shader_visibility, true)) context->VSSetSamplers(slot, 1, &sampler);
++              if (visible(parameter.shader_visibility, false)) context->PSSetSamplers(slot, 1, &sampler);
++            }
++          }
++          append = range.descriptor_count > UINT_MAX - offset ? UINT_MAX : offset + range.descriptor_count;
++        }
++      }
++    }
++    const auto &samplers = bindings.signature->samplers();
++    for (UINT i = 0; i < samplers.size(); ++i) {
++      const auto &desc = description.static_samplers[i];
++      if (desc.shader_register >= D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT) continue;
++      ID3D11SamplerState *sampler = samplers[i].get();
++      if (compute) context->CSSetSamplers(desc.shader_register, 1, &sampler);
++      if (visible(desc.shader_visibility, true)) context->VSSetSamplers(desc.shader_register, 1, &sampler);
++      if (visible(desc.shader_visibility, false)) context->PSSetSamplers(desc.shader_register, 1, &sampler);
+     }
+   }
+ 
+   void bind_root_signature(ID3D12RootSignature *root_signature,
+                            ComPtr<DxmtD3D12RootSignature> &slot,
+                            dxmt::RootArgumentBuffer &arguments) {
++    if (slot.get() == root_signature) return;
+     slot = static_cast<DxmtD3D12RootSignature *>(root_signature);
+     /* Changing the root signature invalidates every root argument, which is
+      * what a fresh layout gives: setLayout zeroes the storage. */
+@@ -3363,48 +4019,54 @@ private:
+   }
+ };
+ 
+-/* Metal has no residency by reachability: a shader that indexes a descriptor
+- * heap and dereferences the addresses inside it tells the driver nothing about
+- * which memory is live. Every buffer the dispatch can touch is listed here.
+- *
+- * Root descriptors are exact. Descriptor tables are not -- the shader picks
+- * indices at runtime -- so every resource the bound heap has a descriptor for
+- * is made resident, which is conservative and correct. */
+-void DxmtD3D12GraphicsCommandList::collect_compute_residency(ComputeDispatchWork &work) {
+-  auto add = [&](DxmtD3D12Resource *resource, WMTResourceUsage usage) {
+-    if (!resource)
+-      return;
+-    WMT::Buffer buffer = resource->metal_buffer();
+-    if (!buffer)
+-      return;
+-    for (auto &[existing, existing_usage] : work.resident) {
+-      if (existing == buffer) {
+-        existing_usage = WMTResourceUsage(existing_usage | usage);
++/* Descriptor-table resources are indirect Metal accesses. Retain the actual
++ * typed view as well as the D3D12 resource used by DXMT's hazard tracking. */
++template <typename Work>
++void DxmtD3D12GraphicsCommandList::collect_residency(
++    Work &work, const std::array<ComPtr<DxmtD3D12Resource>, 64> &roots) {
++  auto add = [&](DxmtD3D12Resource *resource, WMTResourceUsage usage, WMT::Texture view = {}) {
++    if (!resource) return;
++    WMT::Resource object;
++    if (view) object = WMT::Resource(view.handle);
++    else if (auto buffer = resource->metal_buffer()) object = WMT::Resource(buffer.handle);
++    else if (auto texture = resource->metal_texture()) object = WMT::Resource(texture.handle);
++    if (!object) return;
++    for (auto &existing : work.resident) {
++      if (existing.object == object) {
++        existing.usage = WMTResourceUsage(existing.usage | usage);
+         return;
+       }
+     }
+-    work.resident.emplace_back(buffer, usage);
++    work.resident.push_back({WMT::Reference<WMT::Resource>(object), resource, usage});
+   };
+-
+-  /* Read|Write for everything: which root parameter is a UAV is known, but a
+-   * table entry's usage is not, and understating it is a data race rather than
+-   * a missed optimisation. */
+   const auto both = WMTResourceUsage(WMTResourceUsageRead | WMTResourceUsageWrite);
++  for (auto &resource : roots) add(resource.get(), both);
++  work.resource_heap = resource_heap_;
++  work.sampler_heap = sampler_heap_;
++  if (resource_heap_)
++    if (auto *heap = resource_heap_->gpu_heap()) work.resource_heap_buffer = heap->buffer();
++  if (sampler_heap_)
++    if (auto *heap = sampler_heap_->gpu_heap()) work.sampler_heap_buffer = heap->buffer();
++}
+ 
+-  for (auto &resource : compute_root_resources_)
+-    add(resource.get(), both);
+-
+-  if (resource_heap_) {
+-    if (auto *gpu_heap = resource_heap_->gpu_heap())
+-      work.resource_heap_buffer = gpu_heap->buffer();
+-    resource_heap_->for_each_descriptor([&](Descriptor &descriptor) { add(descriptor.resource.get(), both); });
+-  }
+-  if (sampler_heap_) {
+-    if (auto *gpu_heap = sampler_heap_->gpu_heap())
+-      work.sampler_heap_buffer = gpu_heap->buffer();
++/* Resolve volatile table resources at submission, after descriptor writes
++ * made between recording and ExecuteCommandLists. Each execution owns its
++ * residency snapshot, including when the command list is reset afterward. */
++template <typename Work>
++void DxmtD3D12GraphicsCommandList::refresh_heap_residency(Work &work) {
++  if (!work.resource_heap) return;
++  for (const auto &entry : work.resource_heap->residency()) {
++    auto found = std::find_if(work.resident.begin(), work.resident.end(),
++                              [&](const auto &r) { return r.object == entry.object; });
++    if (found == work.resident.end()) work.resident.push_back(entry);
++    else found->usage = WMTResourceUsage(found->usage | entry.usage);
+   }
+ }
+ 
++void DxmtD3D12GraphicsCommandList::collect_compute_residency(ComputeDispatchWork &work) {
++  collect_residency(work, compute_root_resources_);
++}
++
+ /* Records a run of dispatches, and the barriers between them, into the command
+  * chunk d3d11 is also filling.
+  *
+@@ -3425,8 +4087,11 @@ void DxmtD3D12GraphicsCommandList::encode_compute_batch(const std::vector<Record
+   };
+   std::vector<Step> steps;
+   steps.reserve(batch.size());
+-  for (auto *command : batch)
+-    steps.push_back({command->dispatch, command->barrier_scope});
++  for (auto *command : batch) {
++    auto dispatch = command->dispatch ? std::make_shared<ComputeDispatchWork>(*command->dispatch) : nullptr;
++    if (dispatch) refresh_heap_residency(*dispatch);
++    steps.push_back({std::move(dispatch), command->barrier_scope});
++  }
+   if (steps.empty())
+     return;
+ 
+@@ -3492,11 +4157,24 @@ void DxmtD3D12GraphicsCommandList::encode_compute_batch(const std::vector<Record
+         cmd.index = 2;
+       }
+ 
+-      for (auto &[buffer, usage] : work.resident) {
++      /* Classic root tables reach the heap through an address in the TLAB.
++       * Binding an otherwise unused SM6.6 heap slot does not establish that
++       * indirect residency. The table buffer itself must be declared. */
++      for (const auto &buffer : {work.resource_heap_buffer, work.sampler_heap_buffer}) {
++        if (!buffer) continue;
+         auto &cmd = enc.encodeComputeCommand<wmtcmd_compute_useresource>();
+         cmd.type = WMTComputeCommandUseResource;
+         cmd.resource = WMT::Resource(buffer.handle);
+-        cmd.usage = usage;
++        cmd.usage = WMTResourceUsageRead;
++      }
++      for (auto &resident : work.resident) {
++        int access = (resident.usage & WMTResourceUsageWrite) ? ResourceAccess::Read | ResourceAccess::Write
++                                                          : ResourceAccess::Read;
++        resident.resource->track_access<PipelineStage::Compute>(enc, access);
++        auto &cmd = enc.encodeComputeCommand<wmtcmd_compute_useresource>();
++        cmd.type = WMTComputeCommandUseResource;
++        cmd.resource = resident.object;
++        cmd.usage = resident.usage;
+       }
+ 
+       /* D3D12 counts threadgroups, which is dispatchThreadgroups, not
+@@ -3510,36 +4188,8 @@ void DxmtD3D12GraphicsCommandList::encode_compute_batch(const std::vector<Record
+   });
+ }
+ 
+-/* Same shape as collect_compute_residency, for the graphics root set. */
+ void DxmtD3D12GraphicsCommandList::collect_graphics_residency(GraphicsDrawWork &work) {
+-  auto add = [&](DxmtD3D12Resource *resource, WMTResourceUsage usage) {
+-    if (!resource)
+-      return;
+-    WMT::Buffer buffer = resource->metal_buffer();
+-    if (!buffer)
+-      return;
+-    for (auto &[existing, existing_usage] : work.resident) {
+-      if (existing == buffer) {
+-        existing_usage = WMTResourceUsage(existing_usage | usage);
+-        return;
+-      }
+-    }
+-    work.resident.emplace_back(buffer, usage);
+-  };
+-
+-  const auto both = WMTResourceUsage(WMTResourceUsageRead | WMTResourceUsageWrite);
+-  for (auto &resource : graphics_root_resources_)
+-    add(resource.get(), both);
+-
+-  if (resource_heap_) {
+-    if (auto *gpu_heap = resource_heap_->gpu_heap())
+-      work.resource_heap_buffer = gpu_heap->buffer();
+-    resource_heap_->for_each_descriptor([&](Descriptor &descriptor) { add(descriptor.resource.get(), both); });
+-  }
+-  if (sampler_heap_) {
+-    if (auto *gpu_heap = sampler_heap_->gpu_heap())
+-      work.sampler_heap_buffer = gpu_heap->buffer();
+-  }
++  collect_residency(work, graphics_root_resources_);
+ }
+ 
+ /* Records a run of draws into one Metal render pass.
+@@ -3551,13 +4201,15 @@ void DxmtD3D12GraphicsCommandList::collect_graphics_residency(GraphicsDrawWork &
+ void DxmtD3D12GraphicsCommandList::encode_render_batch(const RenderTargetState &target,
+                                                        const std::vector<GraphicsDrawWork *> &draws) {
+   dxmt::Device *dxmt_device = device_ ? device_->dxmt_device() : nullptr;
+-  if (!dxmt_device || !target.count || draws.empty())
++  if (!dxmt_device || (!target.count && !target.depth_texture) || (draws.empty() && !target.any_clear()))
+     return;
+ 
+   std::vector<GraphicsDrawWork> steps;
+   steps.reserve(draws.size());
+-  for (auto *draw : draws)
++  for (auto *draw : draws) {
+     steps.push_back(*draw);
++    refresh_heap_residency(steps.back());
++  }
+ 
+   /* Ends whatever pass d3d11 has open; the chunk stays, so the ordering
+    * between its commands and these holds. */
+@@ -3587,6 +4239,10 @@ void DxmtD3D12GraphicsCommandList::encode_render_batch(const RenderTargetState &
+       [steps = std::move(steps), attachments = std::move(attachments),
+        depth_attachment = std::move(depth_attachment), target](ArgumentEncodingContext &enc) mutable {
+         auto *pass = static_cast<RenderEncoderData *>(enc.startRenderPass(0, 0, uint8_t(target.count), 0));
++        pass->render_target_width = target.width;
++        pass->render_target_height = target.height;
++        pass->render_target_array_length = 1;
++        pass->default_raster_sample_count = target.sample_count;
+         for (uint32_t i = 0; i < target.count; i++) {
+           if (!attachments[i])
+             continue;
+@@ -3597,6 +4253,8 @@ void DxmtD3D12GraphicsCommandList::encode_render_batch(const RenderTargetState &
+           pass->colors[i].level = 0;
+           pass->colors[i].slice = 0;
+           pass->colors[i].depth_plane = 0;
++          if (target.colors[i].resource)
++            target.colors[i].resource->track_access<PipelineStage::Pixel>(enc, ResourceAccess::Write);
+         }
+ 
+         if (depth_attachment) {
+@@ -3607,6 +4265,8 @@ void DxmtD3D12GraphicsCommandList::encode_render_batch(const RenderTargetState &
+           pass->depth.level = 0;
+           pass->depth.slice = 0;
+           pass->depth.depth_plane = 0;
++          if (target.depth_resource)
++            target.depth_resource->track_access<PipelineStage::Pixel>(enc, ResourceAccess::Write);
+         }
+ 
+         for (auto &work : steps) {
+@@ -3663,11 +4323,23 @@ void DxmtD3D12GraphicsCommandList::encode_render_batch(const RenderTargetState &
+             cmd.index = vertex_buffer.index;
+           }
+ 
+-          for (auto &[buffer, usage] : work.resident) {
++          for (const auto &buffer : {work.resource_heap_buffer, work.sampler_heap_buffer}) {
++            if (!buffer) continue;
+             auto &cmd = enc.encodeRenderCommand<wmtcmd_render_useresource>();
+             cmd.type = WMTRenderCommandUseResource;
+             cmd.resource = WMT::Resource(buffer.handle);
+-            cmd.usage = usage;
++            cmd.usage = WMTResourceUsageRead;
++            cmd.stages = WMTRenderStages(WMTRenderStageVertex | WMTRenderStageFragment);
++          }
++          for (auto &resident : work.resident) {
++            int access = (resident.usage & WMTResourceUsageWrite) ? ResourceAccess::Read | ResourceAccess::Write
++                                                              : ResourceAccess::Read;
++            resident.resource->track_access<PipelineStage::Vertex>(enc, access);
++            resident.resource->track_access<PipelineStage::Pixel>(enc, access);
++            auto &cmd = enc.encodeRenderCommand<wmtcmd_render_useresource>();
++            cmd.type = WMTRenderCommandUseResource;
++            cmd.resource = resident.object;
++            cmd.usage = resident.usage;
+             cmd.stages = WMTRenderStages(WMTRenderStageVertex | WMTRenderStageFragment);
+           }
+ 
+@@ -3722,6 +4394,10 @@ void DxmtD3D12GraphicsCommandList::encode_copy_batch(const std::vector<CopyWork
+     enc.startBlitPass();
+ 
+     for (auto &copy : steps) {
++      if (copy.src_resource)
++        copy.src_resource->track_access<PipelineStage::Compute>(enc, ResourceAccess::Read);
++      if (copy.dst_resource)
++        copy.dst_resource->track_access<PipelineStage::Compute>(enc, ResourceAccess::Write);
+       switch (copy.kind) {
+       case CopyWork::Kind::BufferToBuffer: {
+         auto &cmd = enc.encodeBlitCommand<wmtcmd_blit_copy_from_buffer_to_buffer>();
+@@ -4055,7 +4731,8 @@ HRESULT DxmtD3D12Device::CreateCommandList(UINT, D3D12_COMMAND_LIST_TYPE type,
+   if (!command_list)
+     return E_POINTER;
+   *command_list = nullptr;
+-  if (type != D3D12_COMMAND_LIST_TYPE_DIRECT)
++  if (type != D3D12_COMMAND_LIST_TYPE_DIRECT && type != D3D12_COMMAND_LIST_TYPE_COPY &&
++      type != D3D12_COMMAND_LIST_TYPE_COMPUTE)
+     return E_NOTIMPL;
+   auto object = new DxmtD3D12GraphicsCommandList(this, type, initial_state);
+   HRESULT hr = object->QueryInterface(riid, command_list);
+@@ -4077,9 +4754,15 @@ HRESULT DxmtD3D12Device::CreateCommittedResource(
+                                    : D3D12_HEAP_PROPERTIES{D3D12_HEAP_TYPE_DEFAULT,
+                                                            D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
+                                                            D3D12_MEMORY_POOL_UNKNOWN, 1, 1};
++  static std::atomic<unsigned> traced = 0;
++  if (d3d12_diagnostics() && traced.fetch_add(1) < 40)
++    Logger::warn(str::format("D3D12 committed dimension=", UINT(desc->Dimension), " format=", UINT(desc->Format),
++                             " width=", desc->Width, " height=", desc->Height));
+   auto object = new DxmtD3D12Resource(this, heap, *desc);
+-  if (desc->Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && heap.Type == D3D12_HEAP_TYPE_DEFAULT)
+-    object->d3d11_resource();
++  if (!object->initialize_backing()) {
++    object->Release();
++    return E_FAIL;
++  }
+   HRESULT hr = object->QueryInterface(riid, resource);
+   object->Release();
+   return hr;
+@@ -4135,6 +4818,10 @@ HRESULT DxmtD3D12Device::CreatePlacedResource(ID3D12Heap *heap, UINT64 heap_offs
+   if (!metal_heap)
+     return E_INVALIDARG;
+ 
++  static std::atomic<unsigned> traced = 0;
++  if (d3d12_diagnostics() && traced.fetch_add(1) < 40)
++    Logger::warn(str::format("D3D12 placed dimension=", UINT(desc->Dimension), " format=", UINT(desc->Format),
++                             " width=", desc->Width, " height=", desc->Height));
+   DxmtD3D12Resource *object = nullptr;
+ 
+   if (desc->Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
+@@ -4144,12 +4831,24 @@ HRESULT DxmtD3D12Device::CreatePlacedResource(ID3D12Heap *heap, UINT64 heap_offs
+     info.memory.set(nullptr);
+     info.gpu_address = 0;
+ 
+-    auto buffer = metal_heap.newBuffer(info, heap_offset);
++    uint64_t buffer_offset = 0;
++    WMT::Reference<WMT::Buffer> buffer;
++#if defined(__i386__)
++    /* MTLHeap contents can lie above 4GB. Keep CPU-visible placed buffers in
++     * one Wine-addressable allocation per heap, preserving placement aliases
++     * without truncating a host pointer or copying on Map/Unmap. */
++    auto properties = heap_desc_properties(dxmt_heap);
++    if (properties.Type == D3D12_HEAP_TYPE_UPLOAD || properties.Type == D3D12_HEAP_TYPE_READBACK) {
++      buffer = dxmt_heap->cpu_buffer(metal_device_, heap_offset, info.length, info);
++      buffer_offset = heap_offset;
++    } else
++#endif
++      buffer = metal_heap.newBuffer(info, heap_offset);
+     if (!buffer)
+       return E_OUTOFMEMORY;
+ 
+     object = new DxmtD3D12Resource(this, *desc, dxmt_heap, heap_offset, std::move(buffer), info.gpu_address,
+-                                   info.memory.get());
++                                   info.memory.get_accessible_or_null(), buffer_offset);
+   } else {
+     WMTTextureInfo info;
+     if (!texture_info_from_desc(metal_device_, *desc, dxmt_heap->resource_options(), info))
+@@ -4169,31 +4868,76 @@ HRESULT DxmtD3D12Device::CreatePlacedResource(ID3D12Heap *heap, UINT64 heap_offs
+ }
+ 
+ void DxmtD3D12Device::CreateRenderTargetView(ID3D12Resource *resource,
+-                                             const D3D12_RENDER_TARGET_VIEW_DESC *,
++                                             const D3D12_RENDER_TARGET_VIEW_DESC *desc,
+                                              D3D12_CPU_DESCRIPTOR_HANDLE descriptor) {
+   Descriptor *dst = DxmtD3D12DescriptorHeap::from_cpu(descriptor);
++  if (!dst) return;
+   dst->type = DescriptorType::Rtv;
+   dst->resource = static_cast<DxmtD3D12Resource *>(resource);
+-  ID3D11RenderTargetView *view = nullptr;
+-  if (dst->resource && SUCCEEDED(d3d11_device_->CreateRenderTargetView(
+-                           dst->resource->d3d11_resource(), nullptr, &view))) {
+-    dst->rtv = view;
+-    view->Release();
++  dst->rtv = nullptr;
++  D3D11_RENDER_TARGET_VIEW_DESC view_desc = {};
++  if (desc) {
++    view_desc.Format = desc->Format;
++    view_desc.ViewDimension = D3D11_RTV_DIMENSION(desc->ViewDimension);
++    switch (desc->ViewDimension) {
++    case D3D12_RTV_DIMENSION_BUFFER:
++      view_desc.Buffer = {UINT(desc->Buffer.FirstElement), desc->Buffer.NumElements}; break;
++    case D3D12_RTV_DIMENSION_TEXTURE1D:
++      view_desc.Texture1D = {desc->Texture1D.MipSlice}; break;
++    case D3D12_RTV_DIMENSION_TEXTURE1DARRAY:
++      view_desc.Texture1DArray = {desc->Texture1DArray.MipSlice, desc->Texture1DArray.FirstArraySlice,
++                                 desc->Texture1DArray.ArraySize}; break;
++    case D3D12_RTV_DIMENSION_TEXTURE2D:
++      view_desc.Texture2D = {desc->Texture2D.MipSlice}; break;
++    case D3D12_RTV_DIMENSION_TEXTURE2DARRAY:
++      view_desc.Texture2DArray = {desc->Texture2DArray.MipSlice, desc->Texture2DArray.FirstArraySlice,
++                                 desc->Texture2DArray.ArraySize}; break;
++    case D3D12_RTV_DIMENSION_TEXTURE2DMSARRAY:
++      view_desc.Texture2DMSArray = {desc->Texture2DMSArray.FirstArraySlice, desc->Texture2DMSArray.ArraySize}; break;
++    case D3D12_RTV_DIMENSION_TEXTURE3D:
++      view_desc.Texture3D = {desc->Texture3D.MipSlice, desc->Texture3D.FirstWSlice, desc->Texture3D.WSize}; break;
++    default: break;
++    }
+   }
++  HRESULT hr = dst->resource ? d3d11_device_->CreateRenderTargetView(dst->resource->d3d11_resource(),
++                                                                    desc ? &view_desc : nullptr, dst->rtv.put()) : E_INVALIDARG;
++  if (FAILED(hr) && d3d12_diagnostics())
++    Logger::warn(str::format("D3D12 RTV failed hr=", hr, " format=", desc ? UINT(desc->Format) : 0));
+ }
+ 
+ void DxmtD3D12Device::CreateDepthStencilView(ID3D12Resource *resource,
+-                                             const D3D12_DEPTH_STENCIL_VIEW_DESC *,
++                                             const D3D12_DEPTH_STENCIL_VIEW_DESC *desc,
+                                              D3D12_CPU_DESCRIPTOR_HANDLE descriptor) {
+   Descriptor *dst = DxmtD3D12DescriptorHeap::from_cpu(descriptor);
++  if (!dst) return;
+   dst->type = DescriptorType::Dsv;
+   dst->resource = static_cast<DxmtD3D12Resource *>(resource);
+-  ID3D11DepthStencilView *view = nullptr;
+-  if (dst->resource && SUCCEEDED(d3d11_device_->CreateDepthStencilView(
+-                           dst->resource->d3d11_resource(), nullptr, &view))) {
+-    dst->dsv = view;
+-    view->Release();
++  dst->dsv = nullptr;
++  D3D11_DEPTH_STENCIL_VIEW_DESC view_desc = {};
++  if (desc) {
++    view_desc.Format = desc->Format;
++    view_desc.Flags = UINT(desc->Flags);
++    view_desc.ViewDimension = D3D11_DSV_DIMENSION(desc->ViewDimension);
++    switch (desc->ViewDimension) {
++    case D3D12_DSV_DIMENSION_TEXTURE1D:
++      view_desc.Texture1D = {desc->Texture1D.MipSlice}; break;
++    case D3D12_DSV_DIMENSION_TEXTURE1DARRAY:
++      view_desc.Texture1DArray = {desc->Texture1DArray.MipSlice, desc->Texture1DArray.FirstArraySlice,
++                                 desc->Texture1DArray.ArraySize}; break;
++    case D3D12_DSV_DIMENSION_TEXTURE2D:
++      view_desc.Texture2D = {desc->Texture2D.MipSlice}; break;
++    case D3D12_DSV_DIMENSION_TEXTURE2DARRAY:
++      view_desc.Texture2DArray = {desc->Texture2DArray.MipSlice, desc->Texture2DArray.FirstArraySlice,
++                                 desc->Texture2DArray.ArraySize}; break;
++    case D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY:
++      view_desc.Texture2DMSArray = {desc->Texture2DMSArray.FirstArraySlice, desc->Texture2DMSArray.ArraySize}; break;
++    default: break;
++    }
+   }
++  HRESULT hr = dst->resource ? d3d11_device_->CreateDepthStencilView(dst->resource->d3d11_resource(),
++                                                                    desc ? &view_desc : nullptr, dst->dsv.put()) : E_INVALIDARG;
++  if (FAILED(hr) && d3d12_diagnostics())
++    Logger::warn(str::format("D3D12 DSV failed hr=", hr, " format=", desc ? UINT(desc->Format) : 0));
+ }
+ 
+ /* GPU address of a resource's buffer storage. A placed resource has real Metal
+@@ -4201,7 +4945,7 @@ void DxmtD3D12Device::CreateDepthStencilView(ID3D12Resource *resource,
+  * ends up writing a null descriptor rather than a wrong one. */
+ uint64_t DxmtD3D12Device::buffer_address(DxmtD3D12Resource *resource,
+                                          D3D12_GPU_VIRTUAL_ADDRESS location) const {
+-  if (!resource || !resource->is_placed())
++  if (!resource || !resource->metal_buffer())
+     return 0;
+   uint64_t base = resource->GetGPUVirtualAddress();
+   if (!base)
+@@ -4211,7 +4955,7 @@ uint64_t DxmtD3D12Device::buffer_address(DxmtD3D12Resource *resource,
+ }
+ 
+ dxmt::DescriptorEntry DxmtD3D12Device::encode_resource_descriptor(DxmtD3D12Resource *resource) const {
+-  if (!resource || !resource->is_placed())
++  if (!resource)
+     return dxmt::DescriptorEntry{};
+ 
+   D3D12_RESOURCE_DESC desc = {};
+@@ -4227,29 +4971,162 @@ dxmt::DescriptorEntry DxmtD3D12Device::encode_resource_descriptor(DxmtD3D12Resou
+ }
+ 
+ void DxmtD3D12Device::CreateShaderResourceView(ID3D12Resource *resource,
+-                                               const D3D12_SHADER_RESOURCE_VIEW_DESC *,
++                                               const D3D12_SHADER_RESOURCE_VIEW_DESC *desc,
+                                                D3D12_CPU_DESCRIPTOR_HANDLE descriptor) {
+   Descriptor *dst = DxmtD3D12DescriptorHeap::from_cpu(descriptor);
++  if (!dst) return;
+   dst->type = DescriptorType::Srv;
+   dst->resource = static_cast<DxmtD3D12Resource *>(resource);
+-  ID3D11ShaderResourceView *view = nullptr;
+-  if (dst->resource && SUCCEEDED(d3d11_device_->CreateShaderResourceView(
+-                           dst->resource->d3d11_resource(), nullptr, &view))) {
+-    dst->srv = view;
+-    view->Release();
++  dst->srv = nullptr;
++  dst->texture_view = nullptr;
++  D3D11_SHADER_RESOURCE_VIEW_DESC view_desc = {};
++  if (desc) {
++    view_desc.Format = desc->Format;
++    view_desc.ViewDimension = D3D11_SRV_DIMENSION(desc->ViewDimension);
++    switch (desc->ViewDimension) {
++    case D3D12_SRV_DIMENSION_BUFFER:
++      view_desc.Buffer.FirstElement = UINT(desc->Buffer.FirstElement);
++      view_desc.Buffer.NumElements = desc->Buffer.NumElements;
++      if (desc->Buffer.Flags & D3D12_BUFFER_SRV_FLAG_RAW) {
++        view_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
++        view_desc.BufferEx.Flags = D3D11_BUFFEREX_SRV_FLAG_RAW;
++      }
++      break;
++    case D3D12_SRV_DIMENSION_TEXTURE1D:
++      view_desc.Texture1D = {desc->Texture1D.MostDetailedMip, desc->Texture1D.MipLevels}; break;
++    case D3D12_SRV_DIMENSION_TEXTURE1DARRAY:
++      view_desc.Texture1DArray = {desc->Texture1DArray.MostDetailedMip, desc->Texture1DArray.MipLevels,
++                                 desc->Texture1DArray.FirstArraySlice, desc->Texture1DArray.ArraySize}; break;
++    case D3D12_SRV_DIMENSION_TEXTURE2D:
++      view_desc.Texture2D = {desc->Texture2D.MostDetailedMip, desc->Texture2D.MipLevels}; break;
++    case D3D12_SRV_DIMENSION_TEXTURE2DARRAY:
++      view_desc.Texture2DArray = {desc->Texture2DArray.MostDetailedMip, desc->Texture2DArray.MipLevels,
++                                 desc->Texture2DArray.FirstArraySlice, desc->Texture2DArray.ArraySize}; break;
++    case D3D12_SRV_DIMENSION_TEXTURE2DMSARRAY:
++      view_desc.Texture2DMSArray = {desc->Texture2DMSArray.FirstArraySlice, desc->Texture2DMSArray.ArraySize}; break;
++    case D3D12_SRV_DIMENSION_TEXTURE3D:
++      view_desc.Texture3D = {desc->Texture3D.MostDetailedMip, desc->Texture3D.MipLevels}; break;
++    case D3D12_SRV_DIMENSION_TEXTURECUBE:
++      view_desc.TextureCube = {desc->TextureCube.MostDetailedMip, desc->TextureCube.MipLevels}; break;
++    case D3D12_SRV_DIMENSION_TEXTURECUBEARRAY:
++      view_desc.TextureCubeArray = {desc->TextureCubeArray.MostDetailedMip, desc->TextureCubeArray.MipLevels,
++                                    desc->TextureCubeArray.First2DArrayFace, desc->TextureCubeArray.NumCubes}; break;
++    default: break;
++    }
++  }
++  ComPtr<ID3D11Buffer> structured;
++  ID3D11Resource *backing = dst->resource ? dst->resource->d3d11_resource() : nullptr;
++  if (backing && desc && desc->ViewDimension == D3D12_SRV_DIMENSION_BUFFER && desc->Buffer.StructureByteStride) {
++    ComPtr<ID3D11Buffer> original;
++    if (SUCCEEDED(backing->QueryInterface(IID_PPV_ARGS(original.put())))) {
++      D3D11_BUFFER_DESC buffer_desc = {};
++      original->GetDesc(&buffer_desc);
++      buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
++      buffer_desc.StructureByteStride = desc->Buffer.StructureByteStride;
++      using CreateAlias = HRESULT (WINAPI *)(ID3D11Buffer *, const D3D11_BUFFER_DESC *, ID3D11Buffer **);
++      auto create_alias = reinterpret_cast<CreateAlias>(GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateBufferAlias"));
++      if (create_alias && SUCCEEDED(create_alias(original.get(), &buffer_desc, structured.put())))
++        backing = structured.get();
++    }
++  }
++  HRESULT hr = E_INVALIDARG;
++  if (dst->resource)
++    hr = d3d11_device_->CreateShaderResourceView(backing, desc ? &view_desc : nullptr,
++                                                dst->srv.put());
++  if (FAILED(hr) && d3d12_diagnostics())
++    Logger::warn(str::format("D3D12 SRV failed hr=", hr, " format=", desc ? UINT(desc->Format) : 0,
++                             " dimension=", desc ? UINT(desc->ViewDimension) : 0));
++  auto entry = encode_resource_descriptor(dst->resource.get());
++  if (dst->srv) {
++    auto *view = static_cast<dxmt::D3D11ShaderResourceView *>(dst->srv.get());
++    if (auto texture = view->texture()) {
++      auto &typed = texture->view(dxmt::TextureViewKey(view->viewId()));
++      dst->texture_view = WMT::Texture(typed.texture);
++      float clamp = 0;
++      if (desc) {
++        switch (desc->ViewDimension) {
++        case D3D12_SRV_DIMENSION_TEXTURE1D: clamp = desc->Texture1D.ResourceMinLODClamp; break;
++        case D3D12_SRV_DIMENSION_TEXTURE1DARRAY: clamp = desc->Texture1DArray.ResourceMinLODClamp; break;
++        case D3D12_SRV_DIMENSION_TEXTURE2D: clamp = desc->Texture2D.ResourceMinLODClamp; break;
++        case D3D12_SRV_DIMENSION_TEXTURE2DARRAY: clamp = desc->Texture2DArray.ResourceMinLODClamp; break;
++        case D3D12_SRV_DIMENSION_TEXTURE3D: clamp = desc->Texture3D.ResourceMinLODClamp; break;
++        case D3D12_SRV_DIMENSION_TEXTURECUBE: clamp = desc->TextureCube.ResourceMinLODClamp; break;
++        case D3D12_SRV_DIMENSION_TEXTURECUBEARRAY: clamp = desc->TextureCubeArray.ResourceMinLODClamp; break;
++        default: break;
++        }
++      }
++      entry = dxmt::encodeTextureDescriptor(typed.gpuResourceID, clamp);
++    } else if (auto buffer = view->buffer()) {
++      auto slice = view->bufferSlice();
++      entry = dxmt::encodeBufferDescriptor(buffer->current()->gpuAddress() +
++                                           buffer->current()->currentSuballocationOffset() + slice.byteOffset,
++                                           slice.byteLength);
++    }
+   }
+-  write_gpu_descriptor(dst, encode_resource_descriptor(dst->resource.get()));
++  write_gpu_descriptor(dst, entry);
+ }
+ 
+-void DxmtD3D12Device::CreateUnorderedAccessView(ID3D12Resource *resource, ID3D12Resource *,
+-                                                const D3D12_UNORDERED_ACCESS_VIEW_DESC *,
++void DxmtD3D12Device::CreateUnorderedAccessView(ID3D12Resource *resource, ID3D12Resource *counter,
++                                                const D3D12_UNORDERED_ACCESS_VIEW_DESC *desc,
+                                                 D3D12_CPU_DESCRIPTOR_HANDLE descriptor) {
+-  /* A UAV and an SRV encode identically; what differs is the usage the texture
+-   * was created with and the barriers around it. */
+   Descriptor *dst = DxmtD3D12DescriptorHeap::from_cpu(descriptor);
+-  dst->type = DescriptorType::Srv;
++  if (!dst) return;
++  dst->type = DescriptorType::Uav;
+   dst->resource = static_cast<DxmtD3D12Resource *>(resource);
+-  write_gpu_descriptor(dst, encode_resource_descriptor(dst->resource.get()));
++  dst->srv = nullptr; dst->uav = nullptr; dst->texture_view = nullptr;
++  D3D11_UNORDERED_ACCESS_VIEW_DESC view_desc = {};
++  if (desc) {
++    view_desc.Format = desc->Format;
++    view_desc.ViewDimension = D3D11_UAV_DIMENSION(desc->ViewDimension);
++    switch (desc->ViewDimension) {
++    case D3D12_UAV_DIMENSION_BUFFER:
++      view_desc.Buffer = {UINT(desc->Buffer.FirstElement), desc->Buffer.NumElements,
++                          (desc->Buffer.Flags & D3D12_BUFFER_UAV_FLAG_RAW) ? D3D11_BUFFER_UAV_FLAG_RAW : 0u}; break;
++    case D3D12_UAV_DIMENSION_TEXTURE1D: view_desc.Texture1D.MipSlice = desc->Texture1D.MipSlice; break;
++    case D3D12_UAV_DIMENSION_TEXTURE1DARRAY:
++      view_desc.Texture1DArray = {desc->Texture1DArray.MipSlice, desc->Texture1DArray.FirstArraySlice,
++                                   desc->Texture1DArray.ArraySize}; break;
++    case D3D12_UAV_DIMENSION_TEXTURE2D: view_desc.Texture2D.MipSlice = desc->Texture2D.MipSlice; break;
++    case D3D12_UAV_DIMENSION_TEXTURE2DARRAY:
++      view_desc.Texture2DArray = {desc->Texture2DArray.MipSlice, desc->Texture2DArray.FirstArraySlice,
++                                   desc->Texture2DArray.ArraySize}; break;
++    case D3D12_UAV_DIMENSION_TEXTURE3D:
++      view_desc.Texture3D = {desc->Texture3D.MipSlice, desc->Texture3D.FirstWSlice, desc->Texture3D.WSize}; break;
++    default: break;
++    }
++  }
++  ID3D11Resource *backing = dst->resource ? dst->resource->d3d11_resource() : nullptr;
++  ComPtr<ID3D11Buffer> structured;
++  if (backing && desc && desc->ViewDimension == D3D12_UAV_DIMENSION_BUFFER && desc->Buffer.StructureByteStride) {
++    ComPtr<ID3D11Buffer> original;
++    if (SUCCEEDED(backing->QueryInterface(IID_PPV_ARGS(original.put())))) {
++      D3D11_BUFFER_DESC buffer_desc = {};
++      original->GetDesc(&buffer_desc);
++      buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
++      buffer_desc.StructureByteStride = desc->Buffer.StructureByteStride;
++      using CreateAlias = HRESULT (WINAPI *)(ID3D11Buffer *, const D3D11_BUFFER_DESC *, ID3D11Buffer **);
++      auto alias = reinterpret_cast<CreateAlias>(GetProcAddress(GetModuleHandleW(L"d3d11.dll"), "DXMTCreateBufferAlias"));
++      if (alias && SUCCEEDED(alias(original.get(), &buffer_desc, structured.put()))) backing = structured.get();
++    }
++  }
++  HRESULT hr = backing && !counter ? d3d11_device_->CreateUnorderedAccessView(backing, desc ? &view_desc : nullptr,
++                                                                             dst->uav.put()) : E_INVALIDARG;
++  if (FAILED(hr) && d3d12_diagnostics()) Logger::warn(str::format("D3D12 UAV failed hr=", hr));
++  auto entry = encode_resource_descriptor(dst->resource.get());
++  if (dst->uav) {
++    auto *view = static_cast<dxmt::D3D11UnorderedAccessView *>(dst->uav.get());
++    if (auto texture = view->texture()) {
++      auto &typed = texture->view(dxmt::TextureViewKey(view->viewId()));
++      dst->texture_view = WMT::Texture(typed.texture);
++      entry = dxmt::encodeTextureDescriptor(typed.gpuResourceID, 0);
++    } else if (auto buffer = view->buffer()) {
++      auto slice = view->bufferSlice();
++      entry = dxmt::encodeBufferDescriptor(buffer->current()->gpuAddress() +
++                                           buffer->current()->currentSuballocationOffset() + slice.byteOffset,
++                                           slice.byteLength);
++    }
++  }
++  write_gpu_descriptor(dst, entry);
+ }
+ 
+ void DxmtD3D12Device::CreateSampler(const D3D12_SAMPLER_DESC *desc,
+@@ -4257,10 +5134,24 @@ void DxmtD3D12Device::CreateSampler(const D3D12_SAMPLER_DESC *desc,
+   Descriptor *dst = DxmtD3D12DescriptorHeap::from_cpu(descriptor);
+   dst->type = DescriptorType::Sampler;
+   dst->sampler = {};
++  dst->sampler11 = nullptr;
+ 
+   if (!desc || !metal_device_)
+     return;
+ 
++  D3D11_SAMPLER_DESC legacy = {};
++  legacy.Filter = D3D11_FILTER(desc->Filter);
++  legacy.AddressU = D3D11_TEXTURE_ADDRESS_MODE(desc->AddressU);
++  legacy.AddressV = D3D11_TEXTURE_ADDRESS_MODE(desc->AddressV);
++  legacy.AddressW = D3D11_TEXTURE_ADDRESS_MODE(desc->AddressW);
++  legacy.MipLODBias = desc->MipLODBias;
++  legacy.MaxAnisotropy = desc->MaxAnisotropy;
++  legacy.ComparisonFunc = D3D11_COMPARISON_FUNC(desc->ComparisonFunc);
++  std::copy(std::begin(desc->BorderColor), std::end(desc->BorderColor), std::begin(legacy.BorderColor));
++  legacy.MinLOD = desc->MinLOD;
++  legacy.MaxLOD = desc->MaxLOD;
++  d3d11_device_->CreateSamplerState(&legacy, dst->sampler11.put());
++
+   WMTSamplerInfo info = {};
+   info.min_filter = (desc->Filter & kFilterMinLinear) ? WMTSamplerMinMagFilterLinear
+                                                       : WMTSamplerMinMagFilterNearest;
+@@ -4309,16 +5200,7 @@ void DxmtD3D12Device::CopyDescriptorsSimple(UINT descriptor_count,
+    * copy the pointers without a reference and drop the destination's. */
+   for (UINT i = 0; i < descriptor_count; i++) {
+     to[i].assign_contents(from[i]);
+-    if (to[i].owner && to[i].owner->gpu_heap()) {
+-      dxmt::DescriptorEntry entry = {};
+-      if (from[i].owner && from[i].owner->gpu_heap())
+-        entry = from[i].owner->gpu_heap()->readRaw(from[i].index);
+-      else if (from[i].type == DescriptorType::Sampler)
+-        entry = dxmt::encodeSamplerDescriptor(0, 0.0f);
+-      else
+-        entry = encode_resource_descriptor(from[i].resource.get());
+-      to[i].owner->gpu_heap()->writeRaw(to[i].index, entry);
+-    }
++    write_gpu_descriptor(&to[i], to[i].gpu_entry);
+   }
+ }
+ 
+@@ -4504,7 +5386,7 @@ HRESULT DxmtD3D12DXGIDevice::CreateSwapChain(
+     IDXGIFactory1 *factory, HWND hwnd, const DXGI_SWAP_CHAIN_DESC1 *desc,
+     const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *fullscreen_desc,
+     IDXGISwapChain1 **swap_chain) {
+-  DxmtD3D12SwapChainFactory swapchain_factory(device_.get());
++  DxmtD3D12SwapChainFactory swapchain_factory(device_.get(), queue_.get());
+   return swapchain_factory.CreateSwapChain(factory, hwnd, desc, fullscreen_desc, swap_chain);
+ }
+ 
+@@ -4518,7 +5400,11 @@ HRESULT DxmtD3D12DXGIDevice::CreateSwapChain(
+  *
+  * The chunk is shared with d3d11, which is what makes this the same timeline
+  * the rest of the device signals on. */
+-HRESULT DxmtD3D12CommandQueue::Signal(ID3D12Fence *fence, UINT64 value) {
++HRESULT DxmtD3D12CommandQueue::emit_signal(ID3D12Fence *fence, UINT64 value) {
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  static std::atomic<unsigned> traced = 0;
++  if (d3d12_diagnostics() && traced.fetch_add(1) < 32)
++    Logger::warn(str::format("D3D12 signal queue=", this, " type=", UINT(desc_.Type), " fence=", fence, " value=", value));
+   auto *timeline_fence = static_cast<DxmtD3D12Fence *>(fence);
+   if (!timeline_fence)
+     return E_INVALIDARG;
+@@ -4544,7 +5430,11 @@ HRESULT DxmtD3D12CommandQueue::Signal(ID3D12Fence *fence, UINT64 value) {
+   return S_OK;
+ }
+ 
+-HRESULT DxmtD3D12CommandQueue::Wait(ID3D12Fence *fence, UINT64 value) {
++HRESULT DxmtD3D12CommandQueue::emit_wait(ID3D12Fence *fence, UINT64 value) {
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  static std::atomic<unsigned> traced = 0;
++  if (d3d12_diagnostics() && traced.fetch_add(1) < 32)
++    Logger::warn(str::format("D3D12 wait queue=", this, " type=", UINT(desc_.Type), " fence=", fence, " value=", value));
+   auto *timeline_fence = static_cast<DxmtD3D12Fence *>(fence);
+   if (!timeline_fence)
+     return E_INVALIDARG;
+@@ -4563,14 +5453,93 @@ HRESULT DxmtD3D12CommandQueue::Wait(ID3D12Fence *fence, UINT64 value) {
+   return S_OK;
+ }
+ 
+-void DxmtD3D12CommandQueue::ExecuteCommandLists(UINT command_list_count,
+-                                                ID3D12CommandList *const *command_lists) {
+-  for (UINT i = 0; i < command_list_count; i++) {
+-    auto *list = static_cast<DxmtD3D12GraphicsCommandList *>(command_lists[i]);
+-    if (list)
+-      list->replay();
++DxmtD3D12CommandQueue::DxmtD3D12CommandQueue(DxmtD3D12Device *device, const D3D12_COMMAND_QUEUE_DESC &desc)
++    : D3D12ChildMethods(device), desc_(desc) { device_->register_queue(this); }
++DxmtD3D12CommandQueue::~DxmtD3D12CommandQueue() { device_->unregister_queue(this); }
++
++void DxmtD3D12Device::register_queue(DxmtD3D12CommandQueue *queue) {
++  std::lock_guard<std::recursive_mutex> lock(submission_mutex_);
++  queues_.push_back(queue);
++}
++void DxmtD3D12Device::unregister_queue(DxmtD3D12CommandQueue *queue) {
++  std::lock_guard<std::recursive_mutex> lock(submission_mutex_);
++  queues_.erase(std::remove(queues_.begin(), queues_.end(), queue), queues_.end());
++}
++
++/* Logical queues share one encoder. A wait for a not-yet-submitted signal
++ * must stay on its logical queue; putting that wait into the physical queue
++ * would also block the producer's later signal. Ready queues continue to run. */
++void DxmtD3D12Device::pump_queues() {
++  std::lock_guard<std::recursive_mutex> lock(submission_mutex_);
++  bool progressed;
++  do {
++    progressed = false;
++    for (auto *queue : queues_) {
++      while (!queue->pending_.empty()) {
++        auto &front = queue->pending_.front();
++        using Kind = DxmtD3D12CommandQueue::OperationKind;
++        if (front.kind == Kind::Wait && !front.fence->scheduled(front.value) &&
++            front.fence->GetCompletedValue() < front.value) break;
++        auto operation = std::move(front);
++        queue->pending_.pop_front();
++        if (operation.kind == Kind::Work) operation.work();
++        else if (operation.kind == Kind::Wait) queue->emit_wait(operation.fence.get(), operation.value);
++        else {
++          queue->emit_signal(operation.fence.get(), operation.value);
++          operation.fence->mark_scheduled(operation.value);
++        }
++        progressed = true;
++      }
++    }
++  } while (progressed);
++}
++
++HRESULT DxmtD3D12Fence::Signal(UINT64 value) {
++  value_ = value;
++  if (timeline_.ptr()) timeline_->signal(value);
++  if (device_) device_->pump_queues();
++  return S_OK;
++}
++HRESULT DxmtD3D12CommandQueue::Signal(ID3D12Fence *fence, UINT64 value) {
++  if (!fence) return E_INVALIDARG;
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  auto *local = static_cast<DxmtD3D12Fence *>(fence);
++  if (pending_.empty()) {
++    HRESULT hr = emit_signal(fence, value);
++    if (FAILED(hr)) return hr;
++    local->mark_scheduled(value);
++  } else pending_.push_back({OperationKind::Signal, {}, local, value});
++  device_->pump_queues();
++  return S_OK;
++}
++HRESULT DxmtD3D12CommandQueue::Wait(ID3D12Fence *fence, UINT64 value) {
++  if (!fence) return E_INVALIDARG;
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  auto *local = static_cast<DxmtD3D12Fence *>(fence);
++  if (pending_.empty() && (local->scheduled(value) || local->GetCompletedValue() >= value))
++    return emit_wait(fence, value);
++  pending_.push_back({OperationKind::Wait, {}, local, value});
++  device_->pump_queues();
++  return S_OK;
++}
++void DxmtD3D12CommandQueue::submit(std::function<void()> work) {
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  if (pending_.empty()) work();
++  else {
++    pending_.push_back({OperationKind::Work, std::move(work), {}, 0});
++    device_->pump_queues();
+   }
+ }
++void DxmtD3D12CommandQueue::ExecuteCommandLists(UINT count, ID3D12CommandList *const *lists) {
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  for (UINT i = 0; i < count; ++i) {
++    auto *list = static_cast<DxmtD3D12GraphicsCommandList *>(lists[i]);
++    if (!list) continue;
++    if (pending_.empty()) list->replay_immediate();
++    else pending_.push_back({OperationKind::Work, list->capture_replay(), {}, 0});
++  }
++  device_->pump_queues();
++}
+ 
+ HRESULT DxmtD3D12SwapChainFactory::CreateSwapChain(
+     IDXGIFactory1 *factory, HWND hwnd, const DXGI_SWAP_CHAIN_DESC1 *desc,
+@@ -4580,28 +5549,42 @@ HRESULT DxmtD3D12SwapChainFactory::CreateSwapChain(
+   *swap_chain = nullptr;
+   if (!desc)
+     return E_INVALIDARG;
++  if (desc->BufferCount < 2 || desc->BufferCount > 16 || desc->SampleDesc.Count != 1 ||
++      (desc->SwapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL && desc->SwapEffect != DXGI_SWAP_EFFECT_FLIP_DISCARD))
++    return DXGI_ERROR_INVALID_CALL;
++
++  /* The logical D3D12 ring owns its textures. The D3D11 presenter needs one
++   * surface; Present copies the selected logical buffer into it on the GPU. */
++  DXGI_SWAP_CHAIN_DESC1 presenter = *desc;
++  presenter.BufferCount = 1;
++  presenter.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+ 
+   IDXGISwapChain1 *inner = nullptr;
+   IMTLDXGIDevice *raw_dxgi_device = nullptr;
+   HRESULT hr = device_->d3d11_device()->QueryInterface(__uuidof(IMTLDXGIDevice),
+                                                        reinterpret_cast<void **>(&raw_dxgi_device));
+   if (SUCCEEDED(hr)) {
+-    hr = raw_dxgi_device->CreateSwapChain(factory, hwnd, desc, fullscreen_desc, &inner);
++    hr = raw_dxgi_device->CreateSwapChain(factory, hwnd, &presenter, fullscreen_desc, &inner);
+     raw_dxgi_device->Release();
+   } else {
+     IMTLSwapChainFactory *raw_factory = nullptr;
+     hr = device_->d3d11_device()->QueryInterface(__uuidof(IMTLSwapChainFactory),
+                                                  reinterpret_cast<void **>(&raw_factory));
+     if (SUCCEEDED(hr)) {
+-      hr = raw_factory->CreateSwapChain(factory, hwnd, desc, fullscreen_desc, &inner);
++      hr = raw_factory->CreateSwapChain(factory, hwnd, &presenter, fullscreen_desc, &inner);
+       raw_factory->Release();
+     }
+   }
+   if (FAILED(hr))
+     return hr;
+ 
+-  auto wrapper = new DxmtD3D12SwapChain(device_.get(), inner, *desc);
++  auto wrapper = new DxmtD3D12SwapChain(device_.get(), inner, *desc, queue_.get());
+   inner->Release();
++  hr = wrapper->initialize_buffers();
++  if (FAILED(hr)) {
++    wrapper->Release();
++    return hr;
++  }
+   *swap_chain = static_cast<IDXGISwapChain1 *>(wrapper);
+   return S_OK;
+ }
+@@ -4610,38 +5593,109 @@ HRESULT DxmtD3D12SwapChain::GetDevice(REFIID riid, void **device) {
+   return device_ ? device_->QueryInterface(riid, device) : E_NOINTERFACE;
+ }
+ 
+-HRESULT DxmtD3D12SwapChain::GetBuffer(UINT, REFIID riid, void **surface) {
++HRESULT DxmtD3D12SwapChain::initialize_buffers() {
++  DXGI_SWAP_CHAIN_DESC1 actual = {};
++  HRESULT hr = inner_->GetDesc1(&actual);
++  if (FAILED(hr)) return hr;
++  desc1_.Width = actual.Width;
++  desc1_.Height = actual.Height;
++  desc1_.Format = actual.Format;
++  std::vector<ComPtr<DxmtD3D12Resource>> buffers;
++  D3D12_HEAP_PROPERTIES heap = {D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN,
++                               D3D12_MEMORY_POOL_UNKNOWN, 1, 1};
++  D3D12_RESOURCE_DESC desc = {};
++  desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
++  desc.Width = desc1_.Width;
++  desc.Height = desc1_.Height;
++  desc.DepthOrArraySize = desc.MipLevels = 1;
++  desc.Format = desc1_.Format;
++  desc.SampleDesc = desc1_.SampleDesc;
++  desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
++  for (UINT i = 0; i < desc1_.BufferCount; ++i) {
++    ID3D12Resource *resource = nullptr;
++    hr = device_->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_PRESENT,
++                                           nullptr, IID_PPV_ARGS(&resource));
++    if (FAILED(hr)) return hr;
++    buffers.emplace_back(static_cast<DxmtD3D12Resource *>(resource));
++    resource->Release();
++  }
++  buffers_ = std::move(buffers);
++  current_ = 0;
++  return S_OK;
++}
++
++HRESULT DxmtD3D12SwapChain::Present1(UINT sync_interval, UINT flags, const DXGI_PRESENT_PARAMETERS *params) {
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  if (flags & DXGI_PRESENT_TEST) return inner_->Present1(sync_interval, flags, params);
++  if ((flags & DXGI_PRESENT_DO_NOT_WAIT) && queue_ && queue_->has_pending_work())
++    return DXGI_ERROR_WAS_STILL_DRAWING;
++  if (current_ >= buffers_.size()) return DXGI_ERROR_INVALID_CALL;
++  struct PresentRequest {
++    ComPtr<DxmtD3D12Device> device;
++    ComPtr<IDXGISwapChain1> inner;
++    ComPtr<DxmtD3D12Resource> buffer;
++    std::vector<RECT> rects;
++    RECT scroll_rect = {};
++    POINT scroll_offset = {};
++    bool has_scroll = false;
++    HRESULT result = S_OK;
++  };
++  auto request = std::make_shared<PresentRequest>();
++  request->device = device_;
++  request->inner = inner_;
++  request->buffer = buffers_[current_];
++  if (params) {
++    if (params->DirtyRectsCount && params->pDirtyRects)
++      request->rects.assign(params->pDirtyRects, params->pDirtyRects + params->DirtyRectsCount);
++    if (params->pScrollRect && params->pScrollOffset) {
++      request->has_scroll = true;
++      request->scroll_rect = *params->pScrollRect;
++      request->scroll_offset = *params->pScrollOffset;
++    }
++  }
++  auto present = [request, sync_interval, flags, identity = this]() {
++    ComPtr<ID3D11Resource> target;
++    auto &trace = present_trace();
++    auto start = trace.begin();
++    HRESULT hr = request->inner->GetBuffer(0, IID_PPV_ARGS(target.put()));
++    if (SUCCEEDED(hr)) {
++      auto *source = request->buffer->d3d11_resource();
++      if (!source) hr = E_FAIL;
++      else request->device->context()->CopyResource(target.get(), source);
++    }
++    if (SUCCEEDED(hr)) {
++      DXGI_PRESENT_PARAMETERS parameters = {UINT(request->rects.size()), request->rects.data(),
++        request->has_scroll ? &request->scroll_rect : nullptr,
++        request->has_scroll ? &request->scroll_offset : nullptr};
++      hr = request->inner->Present1(sync_interval, flags, &parameters);
++    }
++    request->result = hr;
++    trace.end(identity, start, hr);
++  };
++  if (queue_) queue_->submit(std::move(present));
++  else present();
++  if (request->result == S_OK) current_ = (current_ + 1) % desc1_.BufferCount;
++  return request->result;
++}
++
++HRESULT DxmtD3D12SwapChain::ResizeBuffers(UINT count, UINT width, UINT height, DXGI_FORMAT format, UINT flags) {
++  std::lock_guard<std::recursive_mutex> lock(device_->submission_mutex());
++  if (queue_ && queue_->has_pending_work()) return DXGI_ERROR_INVALID_CALL;
++  if (count && (count < 2 || count > 16)) return DXGI_ERROR_INVALID_CALL;
++  HRESULT hr = inner_->ResizeBuffers(1, width, height, format, flags);
++  if (FAILED(hr)) return hr;
++  if (count) desc1_.BufferCount = count;
++  desc1_.Flags = flags;
++  return initialize_buffers();
++}
++
++HRESULT DxmtD3D12SwapChain::GetBuffer(UINT index, REFIID riid, void **surface) {
+   if (!surface)
+     return E_POINTER;
+   *surface = nullptr;
+ 
+-  if (riid != __uuidof(ID3D12Resource))
+-    return inner_->GetBuffer(0, riid, surface);
+-
+-  ID3D11Resource *resource11 = nullptr;
+-  HRESULT hr = inner_->GetBuffer(0, __uuidof(ID3D11Resource),
+-                                 reinterpret_cast<void **>(&resource11));
+-  if (FAILED(hr))
+-    return hr;
+-
+-  DXGI_SWAP_CHAIN_DESC1 desc = {};
+-  inner_->GetDesc1(&desc);
+-  D3D12_RESOURCE_DESC resource_desc = {};
+-  resource_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+-  resource_desc.Width = desc.Width;
+-  resource_desc.Height = desc.Height;
+-  resource_desc.DepthOrArraySize = 1;
+-  resource_desc.MipLevels = 1;
+-  resource_desc.Format = desc.Format;
+-  resource_desc.SampleDesc = desc.SampleDesc;
+-  resource_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+-  resource_desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+-
+-  auto wrapper = new DxmtD3D12Resource(device_.get(), resource11, resource_desc);
+-  resource11->Release();
+-  hr = wrapper->QueryInterface(riid, surface);
+-  wrapper->Release();
+-  return hr;
++  if (index >= buffers_.size()) return DXGI_ERROR_INVALID_CALL;
++  return buffers_[index]->QueryInterface(riid, surface);
+ }
+ 
+ } // namespace
+@@ -4717,6 +5771,7 @@ describe_root_signature(const D3D12_ROOT_PARAMETER1 *parameters, UINT parameter_
+           versioned ? parameters[i].Descriptor.ShaderRegister : parameters10[i].Descriptor.ShaderRegister;
+       info.register_space =
+           versioned ? parameters[i].Descriptor.RegisterSpace : parameters10[i].Descriptor.RegisterSpace;
++      info.descriptor_flags = versioned ? parameters[i].Descriptor.Flags : D3D12_ROOT_DESCRIPTOR_FLAG_DATA_VOLATILE;
+       break;
+     default:
+       return false;
+@@ -4826,23 +5881,27 @@ extern "C" HRESULT WINAPI D3D12EnableExperimentalFeatures(UINT, const IID *, voi
+ }
+ 
+ /* Exported so that a game importing them loads; a game calling them is told no. */
+-extern "C" HRESULT WINAPI D3D12CreateRootSignatureDeserializer(const void *, SIZE_T, REFIID, void **deserializer) {
+-  if (deserializer)
+-    *deserializer = nullptr;
+-  static bool reported = false;
+-  if (!std::exchange(reported, true))
+-    dxmt::Logger::err("D3D12CreateRootSignatureDeserializer is not implemented");
+-  return E_NOTIMPL;
++static HRESULT create_root_signature_reader(const void *blob, SIZE_T size, REFIID iid, void **deserializer) {
++  if (!deserializer) return E_POINTER;
++  *deserializer = nullptr;
++  auto *reader = new dxmt::d3d12::RootSignatureDeserializer;
++  if (!reader->init(blob, size)) {
++    reader->Release();
++    return E_INVALIDARG;
++  }
++  HRESULT hr = reader->QueryInterface(iid, deserializer);
++  reader->Release();
++  return hr;
++}
++
++extern "C" HRESULT WINAPI D3D12CreateRootSignatureDeserializer(const void *blob, SIZE_T size, REFIID iid,
++                                                               void **deserializer) {
++  return create_root_signature_reader(blob, size, iid, deserializer);
+ }
+ 
+-extern "C" HRESULT WINAPI D3D12CreateVersionedRootSignatureDeserializer(const void *, SIZE_T, REFIID,
++extern "C" HRESULT WINAPI D3D12CreateVersionedRootSignatureDeserializer(const void *blob, SIZE_T size, REFIID iid,
+                                                                         void **deserializer) {
+-  if (deserializer)
+-    *deserializer = nullptr;
+-  static bool reported = false;
+-  if (!std::exchange(reported, true))
+-    dxmt::Logger::err("D3D12CreateVersionedRootSignatureDeserializer is not implemented");
+-  return E_NOTIMPL;
++  return create_root_signature_reader(blob, size, iid, deserializer);
+ }
+ 
+ extern "C" HRESULT WINAPI D3D12CreateDevice(IUnknown *adapter,
+diff --git a/src/dxmt/dxmt_root_signature.hpp b/src/dxmt/dxmt_root_signature.hpp
+index 5b67f49..0e4fff0 100644
+--- a/src/dxmt/dxmt_root_signature.hpp
++++ b/src/dxmt/dxmt_root_signature.hpp
+@@ -160,6 +160,7 @@ struct RootParameterInfo {
+   /* Constants and root descriptors. */
+   uint32_t shader_register;
+   uint32_t register_space;
++  uint32_t descriptor_flags;
+   /* Constants only. */
+   uint32_t num_32bit_values;
+   /* Descriptor tables: a window into RootSignatureDescription::ranges. */
+@@ -223,6 +224,18 @@ bool parseSerializedRootSignature(const void *blob, size_t size, RootSignatureDe
+  * A shader that carries its root signature inline needs none of this. One
+  * compiled against a separate root signature object does: without it the
+  * converter has nothing to lay the top-level argument buffer out from. */
++/* Metal Shader Converter runs in the 64-bit Unix host even for WoW64.
++ * Pointer-bearing mirror fields therefore always use the host ABI. */
++template <typename T> struct alignas(8) IRHostPointer {
++  uint64_t address;
++  IRHostPointer &operator=(const T *pointer) {
++    address = uint64_t(reinterpret_cast<uintptr_t>(pointer));
++    return *this;
++  }
++  operator const T *() const { return reinterpret_cast<const T *>(uintptr_t(address)); }
++  const T &operator[](size_t index) const { return static_cast<const T *>(*this)[index]; }
++};
++
+ struct IRDescriptorRange1 {
+   uint32_t range_type;
+   uint32_t num_descriptors;
+@@ -234,7 +247,7 @@ struct IRDescriptorRange1 {
+ 
+ struct IRRootDescriptorTable1 {
+   uint32_t num_ranges;
+-  const IRDescriptorRange1 *ranges;
++  IRHostPointer<IRDescriptorRange1> ranges;
+ };
+ 
+ struct IRRootConstants {
+@@ -277,9 +290,9 @@ struct IRStaticSamplerDescriptor {
+ 
+ struct IRRootSignatureDescriptor1 {
+   uint32_t num_parameters;
+-  const IRRootParameter1 *parameters;
++  IRHostPointer<IRRootParameter1> parameters;
+   uint32_t num_static_samplers;
+-  const IRStaticSamplerDescriptor *static_samplers;
++  IRHostPointer<IRStaticSamplerDescriptor> static_samplers;
+   uint32_t flags;
+ };
+ 
+@@ -291,6 +304,12 @@ struct IRVersionedRootSignatureDescriptorMirror {
+   };
+ };
+ 
++static_assert(sizeof(IRRootDescriptorTable1) == 16);
++static_assert(offsetof(IRRootParameter1, shader_visibility) == 24);
++static_assert(sizeof(IRRootParameter1) == 32);
++static_assert(sizeof(IRRootSignatureDescriptor1) == 40);
++static_assert(sizeof(IRVersionedRootSignatureDescriptorMirror) == 48);
++
+ /* Owns the arrays the descriptor points into, so it has to outlive any use of
+  * descriptor(). Rebuilding is cheap but not free, so callers keep one per root
+  * signature object rather than building it per pipeline. */
+diff --git a/src/dxmt/dxmt_root_signature.cpp b/src/dxmt/dxmt_root_signature.cpp
+index 65366f3..b9b0416 100644
+--- a/src/dxmt/dxmt_root_signature.cpp
++++ b/src/dxmt/dxmt_root_signature.cpp
+@@ -300,7 +300,7 @@ serializeRootSignature(const RootSignatureDescription &description, std::vector<
+       pushU32(chunk, parameter.register_space);
+       /* 1.1 descriptors carry a flags word the 1.0 layout does not have. */
+       if (descriptor_payload_size == 12)
+-        pushU32(chunk, 0);
++        pushU32(chunk, parameter.descriptor_flags);
+       break;
+     }
+   }
+@@ -440,6 +440,9 @@ parseSerializedRootSignature(const void *blob, size_t size, RootSignatureDescrip
+         if (version == 1) {
+           if (!reader.u32At(range_record + 16, range.offset_in_descriptors_from_table_start))
+             return false;
++          /* 1.0 descriptors and their data are volatile. Samplers have no
++           * data-volatility flag. These are the D3D12 1.1 flag values. */
++          range.flags = range.range_type == DescriptorRangeType::Sampler ? 1 : 3;
+         } else {
+           if (!reader.u32At(range_record + 16, range.flags) ||
+               !reader.u32At(range_record + 20, range.offset_in_descriptors_from_table_start))
+@@ -463,6 +466,9 @@ parseSerializedRootSignature(const void *blob, size_t size, RootSignatureDescrip
+         return false;
+       if (!reader.u32At(payload, info.shader_register) || !reader.u32At(size_t(payload) + 4, info.register_space))
+         return false;
++      info.descriptor_flags = 2; /* 1.0 root descriptors: DATA_VOLATILE. */
++      if (version == 2 && !reader.u32At(size_t(payload) + 8, info.descriptor_flags))
++        return false;
+       out.layout.addRootDescriptor(info.kind);
+       break;
+     }
+@@ -526,7 +532,7 @@ IRRootSignatureBuilder::build(const RootSignatureDescription &description) {
+     default:
+       out.descriptor.shader_register = parameter.shader_register;
+       out.descriptor.register_space = parameter.register_space;
+-      out.descriptor.flags = 0;
++      out.descriptor.flags = parameter.descriptor_flags;
+       break;
+     }
+     parameters_.push_back(out);
+diff --git a/src/dxmt/dxmt_context.hpp b/src/dxmt/dxmt_context.hpp
+index bb0d55e..46f8c5e 100644
+--- a/src/dxmt/dxmt_context.hpp
++++ b/src/dxmt/dxmt_context.hpp
+@@ -696,6 +696,13 @@ public:
+ 
+   void endPass();
+ 
++  /* D3D12 placed resources do not have a D3D11 allocation. They still need
++   * the same encoder dependencies when their Metal hazards are untracked. */
++  template <PipelineStage stage>
++  void trackExternalResource(GenericAccessTracker &tracker, int flags) {
++    track<stage>(tracker, flags);
++  }
++
+   constexpr EncoderData *
+   currentEncoder() {
+     assert(encoder_current);
+diff --git a/src/d3d11/d3d11_buffer.cpp b/src/d3d11/d3d11_buffer.cpp
+index 2cc4ee2..52f65ad 100644
+--- a/src/d3d11/d3d11_buffer.cpp
++++ b/src/d3d11/d3d11_buffer.cpp
+@@ -118,6 +118,15 @@ private:
+   };
+ 
+ public:
++  /* D3D12 permits a buffer to be used as vertex/index/constant storage. Its
++   * D3D11 views must share one allocation rather than upload separate copies. */
++  D3D11Buffer(const tag_buffer::DESC1 *pDesc, Rc<Buffer> &&backing, MTLD3D11Device *device) :
++      TResourceBase<tag_buffer>(*pDesc, device),
++      structured(pDesc->MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED),
++      allow_raw_view(pDesc->MiscFlags & D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS) {
++    buffer_ = std::move(backing);
++  }
++
+   D3D11Buffer(const tag_buffer::DESC1 *pDesc, const D3D11_SUBRESOURCE_DATA *pInitialData, MTLD3D11Device *device) :
+       TResourceBase<tag_buffer>(*pDesc, device) {
+     buffer_ = new Buffer(pDesc->ByteWidth, device->GetMTLDevice());
+@@ -422,4 +431,48 @@ CreateBuffer(
+   return S_OK;
+ }
+ 
++/* Private DXMT interop export. The resource supplied by our D3D12 device is
++ * already a DXMT D3D11 buffer; only a COM view is created, with a valid D3D11
++ * binding description. Ordinary D3D11 CreateBuffer keeps its allocation path. */
++extern "C" HRESULT WINAPI
++DXMTCreateBufferAlias(ID3D11Buffer *backing, const D3D11_BUFFER_DESC *desc, ID3D11Buffer **out) {
++  if (!out) return E_POINTER;
++  *out = nullptr;
++  if (!backing || !desc || !desc->ByteWidth || desc->Usage != D3D11_USAGE_DEFAULT)
++    return E_INVALIDARG;
++  D3D11_BUFFER_DESC original = {};
++  backing->GetDesc(&original);
++  if (desc->ByteWidth > original.ByteWidth || original.Usage != D3D11_USAGE_DEFAULT)
++    return E_INVALIDARG;
++  auto allocation = GetResourceCommon(backing)->buffer();
++  if (!allocation) return E_INVALIDARG;
++  ID3D11Device *device = nullptr;
++  backing->GetDevice(&device);
++  if (!device) return E_INVALIDARG;
++  *out = reinterpret_cast<ID3D11Buffer *>(ref(new D3D11Buffer(desc, std::move(allocation),
++                                                            static_cast<MTLD3D11Device *>(device))));
++  device->Release();
++  return S_OK;
++}
++
++/* D3D12 CPU-visible allocations cannot inherit a private DEFAULT buffer's
++ * storage. In WoW64 the backing must also lie in the 32-bit address space. */
++extern "C" HRESULT WINAPI
++DXMTCreateSharedBuffer(ID3D11Device *device, const D3D11_BUFFER_DESC *desc, ID3D11Buffer **out) {
++  if (!out) return E_POINTER;
++  *out = nullptr;
++  if (!device || !desc || !desc->ByteWidth || desc->Usage != D3D11_USAGE_DEFAULT) return E_INVALIDARG;
++  auto *owner = static_cast<MTLD3D11Device *>(device);
++  Rc<Buffer> backing = new Buffer(desc->ByteWidth, owner->GetMTLDevice());
++  Flags<BufferAllocationFlag> flags;
++#ifdef __i386__
++  flags.set(BufferAllocationFlag::CpuPlaced);
++#endif
++  auto allocation = backing->allocate(flags);
++  if (!allocation || !allocation->buffer()) return E_OUTOFMEMORY;
++  backing->rename(std::move(allocation));
++  *out = reinterpret_cast<ID3D11Buffer *>(ref(new D3D11Buffer(desc, std::move(backing), owner)));
++  return S_OK;
++}
++
+ } // namespace dxmt
+diff --git a/src/d3d11/d3d11.def b/src/d3d11/d3d11.def
+index b79deb7..92982b8 100644
+--- a/src/d3d11/d3d11.def
++++ b/src/d3d11/d3d11.def
+@@ -3,4 +3,7 @@ EXPORTS
+     D3D11CoreCreateDevice @18
+     D3D11CreateDevice @22
+     D3D11CreateDeviceAndSwapChain @23
+-    D3D11On12CreateDevice @24
+\ No newline at end of file
++    D3D11On12CreateDevice @24
++    DXMTCreateBufferAlias
++
++  DXMTCreateSharedBuffer
+diff --git a/src/dxmt/dxmt_descriptor_heap.cpp b/src/dxmt/dxmt_descriptor_heap.cpp
+index ebea29f..df0b5d9 100644
+--- a/src/dxmt/dxmt_descriptor_heap.cpp
++++ b/src/dxmt/dxmt_descriptor_heap.cpp
+@@ -19,6 +19,7 @@
+ #include "dxmt_descriptor_heap.hpp"
+ #include <algorithm>
+ #include <cstring>
++#include "wsi_platform.hpp"
+ 
+ namespace dxmt {
+ 
+@@ -27,25 +28,36 @@ DescriptorHeap::DescriptorHeap(WMT::Device device, uint32_t descriptor_count, bo
+     gpu_address_(0),
+     descriptor_count_(descriptor_count),
+     sampler_heap_(sampler_heap) {
+-  WMTBufferInfo info;
++  WMTBufferInfo info = {};
+   info.length = uint64_t(descriptor_count) * sizeof(DescriptorEntry);
+   /* Shader-visible heaps are written by the CPU every frame and read by the
+    * GPU, so they cannot be private. */
+   info.options = WMTResourceStorageModeShared;
+   info.memory.set(nullptr);
++#if defined(__i386__)
++  info.length = (info.length + 16383) & ~uint64_t(16383);
++  cpu_memory_ = wsi::aligned_malloc(info.length, 16384);
++  if (!cpu_memory_) return;
++  info.memory.set(cpu_memory_);
++#endif
+   info.gpu_address = 0;
+ 
+   buffer_ = device.newBuffer(info);
+   if (!buffer_)
+     return;
+ 
+-  entries_ = reinterpret_cast<DescriptorEntry *>(info.memory.get());
++  entries_ = reinterpret_cast<DescriptorEntry *>(info.memory.get_accessible_or_null());
+   gpu_address_ = info.gpu_address;
+ 
+   if (entries_)
+     std::memset(entries_, 0, info.length);
+ }
+ 
++DescriptorHeap::~DescriptorHeap() {
++  buffer_ = nullptr;
++  if (cpu_memory_) wsi::aligned_free(cpu_memory_);
++}
++
+ void
+ DescriptorHeap::writeBuffer(uint32_t index, uint64_t gpu_address, uint32_t size_in_bytes) {
+   if (auto e = entry(index))
+diff --git a/src/dxmt/dxmt_descriptor_heap.hpp b/src/dxmt/dxmt_descriptor_heap.hpp
+index 0feebd1..4021c88 100644
+--- a/src/dxmt/dxmt_descriptor_heap.hpp
++++ b/src/dxmt/dxmt_descriptor_heap.hpp
+@@ -169,6 +169,7 @@ planDescriptorCopy(
+ class DescriptorHeap {
+ public:
+   DescriptorHeap(WMT::Device device, uint32_t descriptor_count, bool sampler_heap);
++  ~DescriptorHeap();
+ 
+   DescriptorHeap(const DescriptorHeap &) = delete;
+   DescriptorHeap &operator=(const DescriptorHeap &) = delete;
+@@ -226,7 +227,7 @@ public:
+ private:
+   DescriptorEntry *
+   entry(uint32_t index) const {
+-    return index < descriptor_count_ ? entries_ + index : nullptr;
++    return entries_ && index < descriptor_count_ ? entries_ + index : nullptr;
+   }
+ 
+   WMT::Reference<WMT::Buffer> buffer_;
+@@ -234,6 +235,7 @@ private:
+   uint64_t gpu_address_;
+   uint32_t descriptor_count_;
+   bool sampler_heap_;
++  void *cpu_memory_ = nullptr;
+ };
+ 
+ } // namespace dxmt

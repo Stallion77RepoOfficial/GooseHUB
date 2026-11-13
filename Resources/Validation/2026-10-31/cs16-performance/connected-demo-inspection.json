@@ -1,0 +1,112 @@
+[
+  {
+    "description": "LOADING",
+    "seconds": 0.0,
+    "directoryFrames": 0,
+    "typeCounts": {
+      "0": 16,
+      "5": 1
+    },
+    "sampleCount": 16,
+    "ranges": {
+      "origin": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "angles": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "healthRange": [
+      0,
+      0
+    ],
+    "onlyClientDraw": [
+      0
+    ],
+    "commands": [],
+    "bytesParsed": 37767,
+    "entryLength": 37767
+  },
+  {
+    "description": "Playback",
+    "seconds": 18.11663818359375,
+    "directoryFrames": 2095,
+    "typeCounts": {
+      "2": 1,
+      "9": 2095,
+      "4": 2095,
+      "1": 2095,
+      "3": 4,
+      "8": 35,
+      "5": 1
+    },
+    "sampleCount": 2095,
+    "ranges": {
+      "origin": [
+        [
+          45.671875,
+          496.0859375
+        ],
+        [
+          2064.03125,
+          2512.0234375
+        ],
+        [
+          -75.97433471679688,
+          -72.34251403808594
+        ]
+      ],
+      "angles": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.3131103515625,
+          359.945068359375
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "healthRange": [
+      100,
+      100
+    ],
+    "onlyClientDraw": [
+      0
+    ],
+    "commands": [
+      "+right",
+      "+forward",
+      "-forward",
+      "-right"
+    ],
+    "bytesParsed": 1206239,
+    "entryLength": 1206239
+  }
+]

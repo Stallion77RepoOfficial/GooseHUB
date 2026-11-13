@@ -1,0 +1,658 @@
+[
+  {
+    "sha": "3b252590cb0290e36fca6f088b5255b871d2d95a",
+    "node_id": "C_kwDOKrKJutoAKDNiMjUyNTkwY2IwMjkwZTM2ZmNhNmYwODhiNTI1NWI4NzFkMmQ5NWE",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-27T10:26:42Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-27T10:26:57Z"
+      },
+      "message": "fix(d3d12): remove double-free of `sm50_err`\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "4dfd85fd41c3525a20455567dee586efe37798ec",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/4dfd85fd41c3525a20455567dee586efe37798ec"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/3b252590cb0290e36fca6f088b5255b871d2d95a",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/3b252590cb0290e36fca6f088b5255b871d2d95a",
+    "html_url": "https://github.com/3Shain/dxmt/commit/3b252590cb0290e36fca6f088b5255b871d2d95a",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/3b252590cb0290e36fca6f088b5255b871d2d95a/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "d162ea44a31fbf9089ea09977337f0beb30bd082",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/d162ea44a31fbf9089ea09977337f0beb30bd082",
+        "html_url": "https://github.com/3Shain/dxmt/commit/d162ea44a31fbf9089ea09977337f0beb30bd082"
+      }
+    ]
+  },
+  {
+    "sha": "d162ea44a31fbf9089ea09977337f0beb30bd082",
+    "node_id": "C_kwDOKrKJutoAKGQxNjJlYTQ0YTMxZmJmOTA4OWVhMDk5NzczMzdmMGJlYjMwYmQwODI",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-27T06:39:14Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-27T06:39:53Z"
+      },
+      "message": "fix(airconv): set point size and primitive count for gs pointlist output\n\nMetal requires `[point_size]` to be set for point primtive.\nAnd `primitive_count` is zero but but `next_write_vertex` contains the actual count for point primitive.\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "b33286f589c16d0acc6f6324bfd1fdc495ddfd8e",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/b33286f589c16d0acc6f6324bfd1fdc495ddfd8e"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/d162ea44a31fbf9089ea09977337f0beb30bd082",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/d162ea44a31fbf9089ea09977337f0beb30bd082",
+    "html_url": "https://github.com/3Shain/dxmt/commit/d162ea44a31fbf9089ea09977337f0beb30bd082",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/d162ea44a31fbf9089ea09977337f0beb30bd082/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "a159fb3c9af8058a1d9e65cbcf82260071d99ac3",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/a159fb3c9af8058a1d9e65cbcf82260071d99ac3",
+        "html_url": "https://github.com/3Shain/dxmt/commit/a159fb3c9af8058a1d9e65cbcf82260071d99ac3"
+      }
+    ]
+  },
+  {
+    "sha": "a159fb3c9af8058a1d9e65cbcf82260071d99ac3",
+    "node_id": "C_kwDOKrKJutoAKGExNTlmYjNjOWFmODA1OGExZDllNjVjYmNmODIyNjAwNzFkOTlhYzM",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T13:13:25Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-27T06:39:53Z"
+      },
+      "message": "feat(d3d12): implement tessellation render pipeline\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "98a996130c660806fd733d13542a3fa62669cd69",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/98a996130c660806fd733d13542a3fa62669cd69"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/a159fb3c9af8058a1d9e65cbcf82260071d99ac3",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/a159fb3c9af8058a1d9e65cbcf82260071d99ac3",
+    "html_url": "https://github.com/3Shain/dxmt/commit/a159fb3c9af8058a1d9e65cbcf82260071d99ac3",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/a159fb3c9af8058a1d9e65cbcf82260071d99ac3/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "77be3b9fa5f820c20410df9901bd0818bdf3114b",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/77be3b9fa5f820c20410df9901bd0818bdf3114b",
+        "html_url": "https://github.com/3Shain/dxmt/commit/77be3b9fa5f820c20410df9901bd0818bdf3114b"
+      }
+    ]
+  },
+  {
+    "sha": "77be3b9fa5f820c20410df9901bd0818bdf3114b",
+    "node_id": "C_kwDOKrKJutoAKDc3YmUzYjlmYTVmODIwYzIwNDEwZGY5OTAxYmQwODE4YmRmMzExNGI",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T12:56:10Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-27T06:39:53Z"
+      },
+      "message": "feat(airconv): implement ts with dynamic index buffer view\n\nBasically the same to the gs counterpart.\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "f809558300d172a85897dad450ab4e506e6f4c80",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/f809558300d172a85897dad450ab4e506e6f4c80"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/77be3b9fa5f820c20410df9901bd0818bdf3114b",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/77be3b9fa5f820c20410df9901bd0818bdf3114b",
+    "html_url": "https://github.com/3Shain/dxmt/commit/77be3b9fa5f820c20410df9901bd0818bdf3114b",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/77be3b9fa5f820c20410df9901bd0818bdf3114b/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "9839e55f98d4aca103957ee4132d6395a325a9ed",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/9839e55f98d4aca103957ee4132d6395a325a9ed",
+        "html_url": "https://github.com/3Shain/dxmt/commit/9839e55f98d4aca103957ee4132d6395a325a9ed"
+      }
+    ]
+  },
+  {
+    "sha": "9839e55f98d4aca103957ee4132d6395a325a9ed",
+    "node_id": "C_kwDOKrKJutoAKDk4MzllNTVmOThkNGFjYTEwMzk1N2VlNDEzMmQ2Mzk1YTMyNWE5ZWQ",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T11:18:58Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T11:34:34Z"
+      },
+      "message": "fix(airconv): store call return point before redirecting to branch\n\nIn this case `bb->target` stores `call` before assigned uncondition branch, but later `call->return_point` is accessed again, a typical use-after-free.\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "642ebe025a95e5f4c03a4c0062212e98b1638a31",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/642ebe025a95e5f4c03a4c0062212e98b1638a31"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/9839e55f98d4aca103957ee4132d6395a325a9ed",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/9839e55f98d4aca103957ee4132d6395a325a9ed",
+    "html_url": "https://github.com/3Shain/dxmt/commit/9839e55f98d4aca103957ee4132d6395a325a9ed",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/9839e55f98d4aca103957ee4132d6395a325a9ed/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+        "html_url": "https://github.com/3Shain/dxmt/commit/d815f7f4b3cb2b86be96302ffde55dd916c3f251"
+      }
+    ]
+  },
+  {
+    "sha": "d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+    "node_id": "C_kwDOKrKJutoAKGQ4MTVmN2Y0YjNjYjJiODZiZTk2MzAyZmZkZTU1ZGQ5MTZjM2YyNTE",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T10:47:48Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T10:48:47Z"
+      },
+      "message": "fix(winemetal): fix memory leaks in `WMTQueryDisplaySettingForLayer()`\n\nFix #237\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "179e917319b75b8157690ad5eb3788d1998f8ee7",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/179e917319b75b8157690ad5eb3788d1998f8ee7"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+    "html_url": "https://github.com/3Shain/dxmt/commit/d815f7f4b3cb2b86be96302ffde55dd916c3f251",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/d815f7f4b3cb2b86be96302ffde55dd916c3f251/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+        "html_url": "https://github.com/3Shain/dxmt/commit/a741a3fad14a4bc5fc899f85bfa35de8f933e74b"
+      }
+    ]
+  },
+  {
+    "sha": "a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+    "node_id": "C_kwDOKrKJutoAKGE3NDFhM2ZhZDE0YTRiYzVmYzg5OWY4NWJmYTM1ZGU4ZjkzM2U3NGI",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T10:45:56Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T10:48:47Z"
+      },
+      "message": "fix(winemetal): fix memory leaks in `WMTGetDisplayDescription()`\n\nFix #236\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "be232836ffb0f45c5bfba36119b775548b625bc6",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/be232836ffb0f45c5bfba36119b775548b625bc6"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+    "html_url": "https://github.com/3Shain/dxmt/commit/a741a3fad14a4bc5fc899f85bfa35de8f933e74b",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/a741a3fad14a4bc5fc899f85bfa35de8f933e74b/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "310d5d04a7b9824192c96725128bdc63c01e35b3",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/310d5d04a7b9824192c96725128bdc63c01e35b3",
+        "html_url": "https://github.com/3Shain/dxmt/commit/310d5d04a7b9824192c96725128bdc63c01e35b3"
+      }
+    ]
+  },
+  {
+    "sha": "310d5d04a7b9824192c96725128bdc63c01e35b3",
+    "node_id": "C_kwDOKrKJutoAKDMxMGQ1ZDA0YTdiOTgyNDE5MmM5NjcyNTEyOGJkYzYzYzAxZTM1YjM",
+    "commit": {
+      "author": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T10:34:29Z"
+      },
+      "committer": {
+        "name": "Feifan He",
+        "email": "feifan@codeweavers.com",
+        "date": "2026-10-26T10:48:47Z"
+      },
+      "message": "fix(winemetal): create a `MTLCompileOptions` for `newLibraryWithSource`\n\nAnd set `languageVersion` to 3.1\nPer doc:\n> By default, Metal uses the most recent language version.\nBut unfortunately this isn't the case, without this patch a shader uses icb with mesh pipeline will be failed to compile.\n\nSigned-off-by: Feifan He <feifan@codeweavers.com>",
+      "tree": {
+        "sha": "fb677b7bd54fe03fb94825e50b1f0206bbcbab25",
+        "url": "https://api.github.com/repos/3Shain/dxmt/git/trees/fb677b7bd54fe03fb94825e50b1f0206bbcbab25"
+      },
+      "url": "https://api.github.com/repos/3Shain/dxmt/git/commits/310d5d04a7b9824192c96725128bdc63c01e35b3",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/3Shain/dxmt/commits/310d5d04a7b9824192c96725128bdc63c01e35b3",
+    "html_url": "https://github.com/3Shain/dxmt/commit/310d5d04a7b9824192c96725128bdc63c01e35b3",
+    "comments_url": "https://api.github.com/repos/3Shain/dxmt/commits/310d5d04a7b9824192c96725128bdc63c01e35b3/comments",
+    "author": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "9Shain",
+      "id": 177799428,
+      "node_id": "U_kgDOCpkBBA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177799428?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/9Shain",
+      "html_url": "https://github.com/9Shain",
+      "followers_url": "https://api.github.com/users/9Shain/followers",
+      "following_url": "https://api.github.com/users/9Shain/following{/other_user}",
+      "gists_url": "https://api.github.com/users/9Shain/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/9Shain/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/9Shain/subscriptions",
+      "organizations_url": "https://api.github.com/users/9Shain/orgs",
+      "repos_url": "https://api.github.com/users/9Shain/repos",
+      "events_url": "https://api.github.com/users/9Shain/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/9Shain/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "5cafc4305cddd659f72ff8cd0cc660ffaf7ffa1f",
+        "url": "https://api.github.com/repos/3Shain/dxmt/commits/5cafc4305cddd659f72ff8cd0cc660ffaf7ffa1f",
+        "html_url": "https://github.com/3Shain/dxmt/commit/5cafc4305cddd659f72ff8cd0cc660ffaf7ffa1f"
+      }
+    ]
+  }
+]

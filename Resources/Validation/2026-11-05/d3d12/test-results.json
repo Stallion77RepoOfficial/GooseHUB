@@ -1,0 +1,607 @@
+{
+  "records": [
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-clear",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-compute-dxbc-offset",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 32
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-compute-dxbc",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 32
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-compute-offset",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 31
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-compute-root-uav",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 31
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-compute",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 31
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-copy-cbv",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-dxbc-root-cbv",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-dxbc-root-constants",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-dxbc",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-future-queue",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 30
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-null-event",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 27
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-render",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-root-cbv",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-root-constants",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-scissor",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-stencil",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-streams",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-structured",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-swapchain",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 34
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-texture-sm6-volatile",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-texture-sm6",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "ec4bc84671e04bd3686f424a29c8a5be616df7f9b9f5b56e8188a56ae2933a78",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-native-texture",
+      "phase": "full_native_before_WoW64_extension",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-compute-dxbc",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 32
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-compute",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 31
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-dxbc",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-future-queue",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 30
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-render",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-swapchain",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 34
+    },
+    {
+      "dllSHA256": "2cc6fe315ea9598fdd8d6463efae42ec00792a4db271ff98fcd688e800f32477",
+      "exeSHA256": "8a25ae5726c3493063234519f611721b8c564290ca0ddd5248810e2646f8b143",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x64-texture",
+      "phase": "x64_before_WoW64_extension",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-compute-dxbc-offset",
+      "phase": "current_WoW64",
+      "passLines": 32
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-compute-dxbc",
+      "phase": "current_WoW64",
+      "passLines": 32
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-compute-offset",
+      "phase": "current_WoW64",
+      "passLines": 31
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-compute",
+      "phase": "current_WoW64",
+      "passLines": 31
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-dxbc",
+      "phase": "current_WoW64",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "681a715caaf2afc1cba5454d175eaff8918c3a1beee54407cf2d426eddc3440f",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-future-queue",
+      "phase": "current_WoW64",
+      "passLines": 30
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-render",
+      "phase": "current_WoW64",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "681a715caaf2afc1cba5454d175eaff8918c3a1beee54407cf2d426eddc3440f",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-swapchain",
+      "phase": "current_WoW64",
+      "passLines": 34
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-texture-sm6-volatile",
+      "phase": "current_WoW64",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-texture-sm6",
+      "phase": "current_WoW64",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "fbb1208ac84d6adc8df79d4445b6053be49a1a3c790746f3161f2f717b7df9bf",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-x86-hostabi-texture",
+      "phase": "current_WoW64",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-arm64ec-compute-dxbc-offset",
+      "phase": "current_final_smoke",
+      "passLines": 32
+    },
+    {
+      "dllSHA256": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-arm64ec-future-queue",
+      "phase": "current_final_smoke",
+      "passLines": 30
+    },
+    {
+      "dllSHA256": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-arm64ec-heap-offset",
+      "phase": "current_final_smoke",
+      "passLines": 25
+    },
+    {
+      "dllSHA256": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-arm64ec-render",
+      "phase": "current_final_smoke",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-arm64ec-swapchain",
+      "phase": "current_final_smoke",
+      "passLines": 34
+    },
+    {
+      "dllSHA256": "4c845d698c61e7839a070a1d0bbf97e678be547e04cb60842902a68bce70d2d2",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_arm64ec_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-arm64ec-texture-sm6-volatile",
+      "phase": "current_final_smoke",
+      "passLines": 29
+    },
+    {
+      "dllSHA256": "0dd484985fb2bf33b3463511ba602ca15a39582a1550cfa0f2a1f002003ff1d0",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-x64-heap-offset",
+      "phase": "current_final_smoke",
+      "passLines": 25
+    },
+    {
+      "dllSHA256": "0dd484985fb2bf33b3463511ba602ca15a39582a1550cfa0f2a1f002003ff1d0",
+      "exeSHA256": "1d3ef71194a6dba24ce257ea14b90f189f576080f558830f013784b156785f16",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x64_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-x64-render",
+      "phase": "current_final_smoke",
+      "passLines": 28
+    },
+    {
+      "dllSHA256": "502f32336a182181dce079040106f13960069d0106825c5405aebbc1e81a3c6f",
+      "exeSHA256": "681a715caaf2afc1cba5454d175eaff8918c3a1beee54407cf2d426eddc3440f",
+      "dllSource": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/.build_x86_release/src/d3d12/d3d12.dll",
+      "render": false,
+      "returnCode": 0,
+      "label": "final-host-x86-heap-offset",
+      "phase": "current_final_smoke",
+      "passLines": 25
+    },
+    {
+      "arch": "arm64ec",
+      "returnCode": 0,
+      "exeSHA256": "a1d755979dfd9a95c00a10f206163c021773cabb213df22378eb1815e199d311",
+      "label": "regression-arm64ec-d3d11-geometry-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 3
+    },
+    {
+      "arch": "arm64ec",
+      "returnCode": 0,
+      "exeSHA256": "3bcd6bf757b01234d79ff52daa948b8824b85f23b67e48bcca3f87b986638205",
+      "label": "regression-arm64ec-d3d9-constant-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 21
+    },
+    {
+      "arch": "arm64ec",
+      "returnCode": 0,
+      "exeSHA256": "38ceab79e5561b2fe405a78b9ac579e62c6b59df5427b00f9fe1e66518857736",
+      "label": "regression-arm64ec-d3d9-process-vertices-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 5
+    },
+    {
+      "arch": "arm64ec",
+      "returnCode": 0,
+      "exeSHA256": "b77e0c72f44ac070f00ab791892d3d6f85d34f0165eaf4678d7af8e2aa497b8e",
+      "label": "regression-arm64ec-d3d9-sampler-benchmark",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 14
+    },
+    {
+      "arch": "x64",
+      "returnCode": 0,
+      "exeSHA256": "a1d755979dfd9a95c00a10f206163c021773cabb213df22378eb1815e199d311",
+      "label": "regression-x64-d3d11-geometry-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 3
+    },
+    {
+      "arch": "x64",
+      "returnCode": 0,
+      "exeSHA256": "3bcd6bf757b01234d79ff52daa948b8824b85f23b67e48bcca3f87b986638205",
+      "label": "regression-x64-d3d9-constant-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 21
+    },
+    {
+      "arch": "x64",
+      "returnCode": 0,
+      "exeSHA256": "38ceab79e5561b2fe405a78b9ac579e62c6b59df5427b00f9fe1e66518857736",
+      "label": "regression-x64-d3d9-process-vertices-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 5
+    },
+    {
+      "arch": "x64",
+      "returnCode": 0,
+      "exeSHA256": "b77e0c72f44ac070f00ab791892d3d6f85d34f0165eaf4678d7af8e2aa497b8e",
+      "label": "regression-x64-d3d9-sampler-benchmark",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 14
+    },
+    {
+      "arch": "x86",
+      "returnCode": 0,
+      "exeSHA256": "06a5ef65ec65de7234ecf055af0688d02bfcd1f7c98811dc774b33278a196a82",
+      "label": "regression-x86-d3d11-geometry-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 3
+    },
+    {
+      "arch": "x86",
+      "returnCode": 0,
+      "exeSHA256": "baff71b6aacc2c5b2fc818a2bc5d86716b89af92a868ebebd8e8913d00fc506e",
+      "label": "regression-x86-d3d9-constant-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 21
+    },
+    {
+      "arch": "x86",
+      "returnCode": 0,
+      "exeSHA256": "5ac83a98c00451d3a20e9fe665b9f556c84ea8945dcec4da1e4c3ca76132da83",
+      "label": "regression-x86-d3d9-process-vertices-validation",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 5
+    },
+    {
+      "arch": "x86",
+      "returnCode": 0,
+      "exeSHA256": "ffd6f4a974fe0097583e9b22b6c2306c7887a7cb6ba42fd57dc997de64d5eff7",
+      "label": "regression-x86-d3d9-sampler-benchmark",
+      "phase": "D3D9_D3D11_regressions_before_new_private_export",
+      "passLines": 14
+    }
+  ],
+  "allIncludedRunsSucceeded": true,
+  "game": "Unmodified official ULTRAKILL Prelude 1.05b, -force-d3d12; Apple M4; user confirmed W/F and barrier break and reported good fluidity, without numeric FPS or repeatable combat comparison.",
+  "limits": [
+    "No complete D3D12 conformance claim",
+    "No CrossOver performance comparison",
+    "No combat FPS uplift claim"
+  ]
+}

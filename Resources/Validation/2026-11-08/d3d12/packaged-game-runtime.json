@@ -1,0 +1,11 @@
+{
+  "label": "d3d12-packaged-final",
+  "totalSuccessfulPresents": 13440,
+  "medianRecentPresentIntervalMS": 37.993650019168854,
+  "asyncPipelineSkips": 0,
+  "fatalErrors": [],
+  "normalSkinCacheAndOcclusion": true,
+  "gameSpecificOverrides": false,
+  "userVisualConfirmation": "pending; previous source run confirmed models and improved FPS",
+  "comparisonLimit": "Uncontrolled moving scene; not a D3D11 parity benchmark"
+}

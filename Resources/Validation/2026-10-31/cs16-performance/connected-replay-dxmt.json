@@ -1,0 +1,40 @@
+{
+  "label": "connected-replay-dxmt",
+  "backend": "dxmt",
+  "nativeTimedemo": {
+    "frames": 2110,
+    "seconds": 14.209,
+    "fps": 148.493
+  },
+  "metalHUD": false,
+  "seconds": 23.050240459037013,
+  "exitCode": -9,
+  "controlledStopAfterResult": true,
+  "arguments": [
+    "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/cs16-performance-20261031/data/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix/drive_c/Program Files (x86)/cs16v2017_oyunyoneticisi/hl.exe",
+    "-game",
+    "cstrike",
+    "-windowed",
+    "-w",
+    "960",
+    "-h",
+    "600",
+    "-nojoy",
+    "-noipx",
+    "-d3d",
+    "-32bpp",
+    "+condebug",
+    "+developer",
+    "1",
+    "+fps_max",
+    "999",
+    "+timedemo",
+    "codex_moving"
+  ],
+  "graphicsModules": [
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\Program Files (x86)\\\\cs16v2017_oyunyoneticisi\\\\DDRAW.dll\" at 66480000: native",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\winemetal.dll\" at 61E50000: builtin",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\D3D11.DLL\" at 62990000: native",
+    "0024:trace:loaddll:build_module Loaded L\"C:\\\\windows\\\\system32\\\\d3d9.dll\" at 63960000: native"
+  ]
+}

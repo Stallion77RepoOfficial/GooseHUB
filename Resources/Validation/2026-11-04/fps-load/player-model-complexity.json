@@ -1,0 +1,256 @@
+[
+  {
+    "model": "arctic",
+    "bones": 55,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 372,
+        "triangles": 721,
+        "stripsOrFans": 170,
+        "submittedVertices": 1061
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 24,
+        "triangles": 44,
+        "stripsOrFans": 12,
+        "submittedVertices": 68
+      }
+    ]
+  },
+  {
+    "model": "gign",
+    "bones": 53,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 371,
+        "triangles": 740,
+        "stripsOrFans": 209,
+        "submittedVertices": 1158
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 44,
+        "triangles": 80,
+        "stripsOrFans": 12,
+        "submittedVertices": 104
+      }
+    ]
+  },
+  {
+    "model": "gsg9",
+    "bones": 53,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 391,
+        "triangles": 766,
+        "stripsOrFans": 172,
+        "submittedVertices": 1110
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 44,
+        "triangles": 80,
+        "stripsOrFans": 12,
+        "submittedVertices": 104
+      }
+    ]
+  },
+  {
+    "model": "guerilla",
+    "bones": 53,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 393,
+        "triangles": 784,
+        "stripsOrFans": 176,
+        "submittedVertices": 1136
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 24,
+        "triangles": 44,
+        "stripsOrFans": 12,
+        "submittedVertices": 68
+      }
+    ]
+  },
+  {
+    "model": "leet",
+    "bones": 55,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 390,
+        "triangles": 752,
+        "stripsOrFans": 205,
+        "submittedVertices": 1162
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 24,
+        "triangles": 44,
+        "stripsOrFans": 12,
+        "submittedVertices": 68
+      }
+    ]
+  },
+  {
+    "model": "sas",
+    "bones": 55,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 382,
+        "triangles": 752,
+        "stripsOrFans": 150,
+        "submittedVertices": 1052
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 44,
+        "triangles": 80,
+        "stripsOrFans": 12,
+        "submittedVertices": 104
+      }
+    ]
+  },
+  {
+    "model": "terror",
+    "bones": 53,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 372,
+        "triangles": 740,
+        "stripsOrFans": 169,
+        "submittedVertices": 1078
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 24,
+        "triangles": 44,
+        "stripsOrFans": 12,
+        "submittedVertices": 68
+      }
+    ]
+  },
+  {
+    "model": "urban",
+    "bones": 53,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 400,
+        "triangles": 790,
+        "stripsOrFans": 170,
+        "submittedVertices": 1130
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 0,
+        "verts": 0,
+        "triangles": 0,
+        "stripsOrFans": 0,
+        "submittedVertices": 0
+      },
+      {
+        "bodypart": "backpack",
+        "variant": 1,
+        "verts": 44,
+        "triangles": 80,
+        "stripsOrFans": 12,
+        "submittedVertices": 104
+      }
+    ]
+  },
+  {
+    "model": "vip",
+    "bones": 53,
+    "models": [
+      {
+        "bodypart": "studio",
+        "variant": 0,
+        "verts": 355,
+        "triangles": 704,
+        "stripsOrFans": 163,
+        "submittedVertices": 1030
+      }
+    ]
+  }
+]

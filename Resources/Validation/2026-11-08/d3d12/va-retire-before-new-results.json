@@ -1,0 +1,9 @@
+{
+  "dllSHA256": "239d0a2908e135e6776c11dfaf58520031da6e2563ecbd40f4a9681c2a9f5b80",
+  "tests": [
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-new",
+      "exit": 1
+    }
+  ]
+}

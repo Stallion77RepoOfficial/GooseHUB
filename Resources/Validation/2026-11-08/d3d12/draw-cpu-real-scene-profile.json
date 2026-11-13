@@ -1,0 +1,115 @@
+{
+  "scope": "User confirmed same ~100FPS D11 scene and says D12 FPS considerably higher now",
+  "cadenceMs": {
+    "median": 16.034000039100647,
+    "p95": 20.66069996356964,
+    "mean": 15.96326187302835
+  },
+  "stats": {
+    "record_draw_ms": {
+      "median": 0.7751,
+      "mean": 0.8982,
+      "max": 3.0661
+    },
+    "legacy_draw_ms": {
+      "median": 1.581,
+      "mean": 1.6214,
+      "max": 3.1687
+    },
+    "legacy_bind_ms": {
+      "median": 1.2485,
+      "mean": 1.2754,
+      "max": 2.0246
+    },
+    "gpu_va_ms": {
+      "median": 0.6208,
+      "mean": 0.6284,
+      "max": 1.2948
+    },
+    "gpu_va_lookups": {
+      "median": 5456.5,
+      "mean": 5377.91,
+      "max": 6522.0
+    },
+    "gpu_va_steps": {
+      "median": 5456.5,
+      "mean": 5377.91,
+      "max": 6522.0
+    },
+    "query_jobs": {
+      "median": 2.0,
+      "mean": 2.0033,
+      "max": 3.0
+    },
+    "query_queue_ms": {
+      "median": 0.0379,
+      "mean": 0.2319,
+      "max": 4.7427
+    },
+    "query_wait_ms": {
+      "median": 1.7772,
+      "mean": 2.0791,
+      "max": 6.9221
+    },
+    "query_cpu_ms": {
+      "median": 0.0265,
+      "mean": 0.0307,
+      "max": 0.2016
+    },
+    "query_prepare_ms": {
+      "median": 0.089,
+      "mean": 0.0984,
+      "max": 0.2736
+    },
+    "gpu_barriers": {
+      "median": 47.0,
+      "mean": 48.5767,
+      "max": 66.0
+    },
+    "execute_calls": {
+      "median": 3.0,
+      "mean": 3.0,
+      "max": 4.0
+    },
+    "command_lists": {
+      "median": 20.0,
+      "mean": 19.9033,
+      "max": 31.0
+    },
+    "command_buffers": {
+      "median": 16.0,
+      "mean": 16.0033,
+      "max": 17.0
+    },
+    "render_passes": {
+      "median": 49.0,
+      "mean": 47.7933,
+      "max": 58.0
+    },
+    "compute_passes": {
+      "median": 10.0,
+      "mean": 10.0,
+      "max": 10.0
+    },
+    "encode_ms": {
+      "median": 0.3796,
+      "mean": 0.3785,
+      "max": 0.5017
+    },
+    "present_ms": {
+      "median": 0.051,
+      "mean": 0.0589,
+      "max": 0.292
+    }
+  },
+  "HUD": {
+    "intervalMedianMs": 13.055,
+    "gpuMedianMs": 5.335
+  },
+  "errors": {
+    "asynchronous query result failed": 0,
+    "Pure virtual": 0,
+    "Device error": 0,
+    "made no progress": 0
+  }
+}

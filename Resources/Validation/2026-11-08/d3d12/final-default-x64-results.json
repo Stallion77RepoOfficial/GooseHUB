@@ -1,0 +1,93 @@
+{
+  "dllSHA256": "469d35acb95c2ab30e0455d1460519da7d215fd6100c41e688fce55fb16603e9",
+  "tests": [
+    {
+      "mode": "dxbc-placed-cold-single",
+      "exit": 0
+    },
+    {
+      "mode": "multi-list-queries",
+      "exit": 0
+    },
+    {
+      "mode": "queries",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-occlusion-reuse",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-binary-occlusion-reuse",
+      "exit": 0
+    },
+    {
+      "mode": "fence-allocation",
+      "exit": 0
+    },
+    {
+      "mode": "future-queue",
+      "exit": 0
+    },
+    {
+      "mode": "null-event",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-unused-uav",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-dual-raw",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-aliasing-pingpong",
+      "exit": 0
+    },
+    {
+      "mode": "compute-aliasing-pingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-compute-texpingpong",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-structured-vertex-resource-skin-cache-typed",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-old",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-root-cbv-retire-alias-new",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-streams-retire-alias-old",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-streams-retire-alias-new",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-geometry",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-prepass-depthcopy",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-prepass-depth32s8-mrt",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-texture-table64",
+      "exit": 0
+    }
+  ]
+}

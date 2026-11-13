@@ -1,0 +1,412 @@
+[
+  {
+    "sha": "c44867ad20d683ba30104d790c41dae746c27697",
+    "node_id": "C_kwDOAVqN-toAKGM0NDg2N2FkMjBkNjgzYmEzMDEwNGQ3OTBjNDFkYWU3NDZjMjc2OTc",
+    "commit": {
+      "author": {
+        "name": "Derek Lesho",
+        "email": "dlesho@codeweavers.com",
+        "date": "2026-08-06T08:47:07Z"
+      },
+      "committer": {
+        "name": "Alexandre Julliard",
+        "email": "julliard@winehq.org",
+        "date": "2026-10-27T20:36:32Z"
+      },
+      "message": "opengl32: Implement wow64 buffer mapping on MESA_map_buffer_client_pointer.",
+      "tree": {
+        "sha": "9d15a44fce3dbb8372c396b5c27d59214ad6c56a",
+        "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/9d15a44fce3dbb8372c396b5c27d59214ad6c56a"
+      },
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/c44867ad20d683ba30104d790c41dae746c27697",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/commits/c44867ad20d683ba30104d790c41dae746c27697",
+    "html_url": "https://github.com/wine-mirror/wine/commit/c44867ad20d683ba30104d790c41dae746c27697",
+    "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/c44867ad20d683ba30104d790c41dae746c27697/comments",
+    "author": {
+      "login": "Guy1524",
+      "id": 35645466,
+      "node_id": "MDQ6VXNlcjM1NjQ1NDY2",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35645466?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/Guy1524",
+      "html_url": "https://github.com/Guy1524",
+      "followers_url": "https://api.github.com/users/Guy1524/followers",
+      "following_url": "https://api.github.com/users/Guy1524/following{/other_user}",
+      "gists_url": "https://api.github.com/users/Guy1524/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/Guy1524/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/Guy1524/subscriptions",
+      "organizations_url": "https://api.github.com/users/Guy1524/orgs",
+      "repos_url": "https://api.github.com/users/Guy1524/repos",
+      "events_url": "https://api.github.com/users/Guy1524/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/Guy1524/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "julliard",
+      "id": 1130500,
+      "node_id": "MDQ6VXNlcjExMzA1MDA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/julliard",
+      "html_url": "https://github.com/julliard",
+      "followers_url": "https://api.github.com/users/julliard/followers",
+      "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+      "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+      "organizations_url": "https://api.github.com/users/julliard/orgs",
+      "repos_url": "https://api.github.com/users/julliard/repos",
+      "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/julliard/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+        "url": "https://api.github.com/repos/wine-mirror/wine/commits/afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+        "html_url": "https://github.com/wine-mirror/wine/commit/afcea18dfe9d296548a1a3fe690f4f228e1a2f77"
+      }
+    ]
+  },
+  {
+    "sha": "afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+    "node_id": "C_kwDOAVqN-toAKGFmY2VhMThkZmU5ZDI5NjU0OGExYTNmZTY5MGY0ZjIyOGUxYTJmNzc",
+    "commit": {
+      "author": {
+        "name": "R\u00e9mi Bernon",
+        "email": "rbernon@codeweavers.com",
+        "date": "2026-10-09T13:45:32Z"
+      },
+      "committer": {
+        "name": "Alexandre Julliard",
+        "email": "julliard@winehq.org",
+        "date": "2026-10-27T20:36:32Z"
+      },
+      "message": "opengl32: Update registry for GL_MESA_map_buffer_client_pointer.",
+      "tree": {
+        "sha": "134f8d0135494dc7df793fd589b438f35c3db767",
+        "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/134f8d0135494dc7df793fd589b438f35c3db767"
+      },
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/commits/afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+    "html_url": "https://github.com/wine-mirror/wine/commit/afcea18dfe9d296548a1a3fe690f4f228e1a2f77",
+    "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/afcea18dfe9d296548a1a3fe690f4f228e1a2f77/comments",
+    "author": {
+      "login": "rbernon",
+      "id": 4134719,
+      "node_id": "MDQ6VXNlcjQxMzQ3MTk=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4134719?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rbernon",
+      "html_url": "https://github.com/rbernon",
+      "followers_url": "https://api.github.com/users/rbernon/followers",
+      "following_url": "https://api.github.com/users/rbernon/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rbernon/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rbernon/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rbernon/subscriptions",
+      "organizations_url": "https://api.github.com/users/rbernon/orgs",
+      "repos_url": "https://api.github.com/users/rbernon/repos",
+      "events_url": "https://api.github.com/users/rbernon/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rbernon/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "julliard",
+      "id": 1130500,
+      "node_id": "MDQ6VXNlcjExMzA1MDA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/julliard",
+      "html_url": "https://github.com/julliard",
+      "followers_url": "https://api.github.com/users/julliard/followers",
+      "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+      "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+      "organizations_url": "https://api.github.com/users/julliard/orgs",
+      "repos_url": "https://api.github.com/users/julliard/repos",
+      "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/julliard/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "8023acff4a03bd40454ec84282e928296b3f3dae",
+        "url": "https://api.github.com/repos/wine-mirror/wine/commits/8023acff4a03bd40454ec84282e928296b3f3dae",
+        "html_url": "https://github.com/wine-mirror/wine/commit/8023acff4a03bd40454ec84282e928296b3f3dae"
+      }
+    ]
+  },
+  {
+    "sha": "f4691495173cdd9c1fae788e90c4efc0df7268bc",
+    "node_id": "C_kwDOAVqN-toAKGY0NjkxNDk1MTczY2RkOWMxZmFlNzg4ZTkwYzRlZmMwZGY3MjY4YmM",
+    "commit": {
+      "author": {
+        "name": "Vasiliy Stelmachenok",
+        "email": "ventureo@cachyos.org",
+        "date": "2026-10-14T17:15:48Z"
+      },
+      "committer": {
+        "name": "Alexandre Julliard",
+        "email": "julliard@winehq.org",
+        "date": "2026-10-19T15:55:16Z"
+      },
+      "message": "win32u: Always create OpenGL 3.1 context using compatibility profile.\n\nWine-Bug: https://bugs.winehq.org/show_bug.cgi?id=60283\nSigned-off-by: Vasiliy Stelmachenok <ventureo@cachyos.org>",
+      "tree": {
+        "sha": "270e547f892bec812d2ddb380254ad9c80844ffb",
+        "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/270e547f892bec812d2ddb380254ad9c80844ffb"
+      },
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/f4691495173cdd9c1fae788e90c4efc0df7268bc",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/commits/f4691495173cdd9c1fae788e90c4efc0df7268bc",
+    "html_url": "https://github.com/wine-mirror/wine/commit/f4691495173cdd9c1fae788e90c4efc0df7268bc",
+    "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/f4691495173cdd9c1fae788e90c4efc0df7268bc/comments",
+    "author": {
+      "login": "ventureoo",
+      "id": 92667539,
+      "node_id": "U_kgDOBYX-kw",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92667539?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/ventureoo",
+      "html_url": "https://github.com/ventureoo",
+      "followers_url": "https://api.github.com/users/ventureoo/followers",
+      "following_url": "https://api.github.com/users/ventureoo/following{/other_user}",
+      "gists_url": "https://api.github.com/users/ventureoo/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/ventureoo/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/ventureoo/subscriptions",
+      "organizations_url": "https://api.github.com/users/ventureoo/orgs",
+      "repos_url": "https://api.github.com/users/ventureoo/repos",
+      "events_url": "https://api.github.com/users/ventureoo/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/ventureoo/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "julliard",
+      "id": 1130500,
+      "node_id": "MDQ6VXNlcjExMzA1MDA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/julliard",
+      "html_url": "https://github.com/julliard",
+      "followers_url": "https://api.github.com/users/julliard/followers",
+      "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+      "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+      "organizations_url": "https://api.github.com/users/julliard/orgs",
+      "repos_url": "https://api.github.com/users/julliard/repos",
+      "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/julliard/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "0ebc62f5673ad4c434839ec18bbb598a644632e6",
+        "url": "https://api.github.com/repos/wine-mirror/wine/commits/0ebc62f5673ad4c434839ec18bbb598a644632e6",
+        "html_url": "https://github.com/wine-mirror/wine/commit/0ebc62f5673ad4c434839ec18bbb598a644632e6"
+      }
+    ]
+  },
+  {
+    "sha": "0ebc62f5673ad4c434839ec18bbb598a644632e6",
+    "node_id": "C_kwDOAVqN-toAKDBlYmM2MmY1NjczYWQ0YzQzNDgzOWVjMThiYmI1OThhNjQ0NjMyZTY",
+    "commit": {
+      "author": {
+        "name": "R\u00e9mi Bernon",
+        "email": "rbernon@codeweavers.com",
+        "date": "2026-10-15T12:15:26Z"
+      },
+      "committer": {
+        "name": "Alexandre Julliard",
+        "email": "julliard@winehq.org",
+        "date": "2026-10-19T15:55:16Z"
+      },
+      "message": "opengl32/tests: Check that 3.1 context without flags supports deprecated features.\n\nWine-Bug: https://bugs.winehq.org/show_bug.cgi?id=60283",
+      "tree": {
+        "sha": "fb509383b3fe51bea582400ecfbced30d577f752",
+        "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/fb509383b3fe51bea582400ecfbced30d577f752"
+      },
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/0ebc62f5673ad4c434839ec18bbb598a644632e6",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/commits/0ebc62f5673ad4c434839ec18bbb598a644632e6",
+    "html_url": "https://github.com/wine-mirror/wine/commit/0ebc62f5673ad4c434839ec18bbb598a644632e6",
+    "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/0ebc62f5673ad4c434839ec18bbb598a644632e6/comments",
+    "author": {
+      "login": "rbernon",
+      "id": 4134719,
+      "node_id": "MDQ6VXNlcjQxMzQ3MTk=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4134719?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rbernon",
+      "html_url": "https://github.com/rbernon",
+      "followers_url": "https://api.github.com/users/rbernon/followers",
+      "following_url": "https://api.github.com/users/rbernon/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rbernon/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rbernon/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rbernon/subscriptions",
+      "organizations_url": "https://api.github.com/users/rbernon/orgs",
+      "repos_url": "https://api.github.com/users/rbernon/repos",
+      "events_url": "https://api.github.com/users/rbernon/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rbernon/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "julliard",
+      "id": 1130500,
+      "node_id": "MDQ6VXNlcjExMzA1MDA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/julliard",
+      "html_url": "https://github.com/julliard",
+      "followers_url": "https://api.github.com/users/julliard/followers",
+      "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+      "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+      "organizations_url": "https://api.github.com/users/julliard/orgs",
+      "repos_url": "https://api.github.com/users/julliard/repos",
+      "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/julliard/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "882ed0afffc098f388ac3ccc00cbbd4f06dfd20d",
+        "url": "https://api.github.com/repos/wine-mirror/wine/commits/882ed0afffc098f388ac3ccc00cbbd4f06dfd20d",
+        "html_url": "https://github.com/wine-mirror/wine/commit/882ed0afffc098f388ac3ccc00cbbd4f06dfd20d"
+      }
+    ]
+  },
+  {
+    "sha": "882ed0afffc098f388ac3ccc00cbbd4f06dfd20d",
+    "node_id": "C_kwDOAVqN-toAKDg4MmVkMGFmZmZjMDk4ZjM4OGFjM2NjYzAwY2JiZDRmMDZkZmQyMGQ",
+    "commit": {
+      "author": {
+        "name": "R\u00e9mi Bernon",
+        "email": "rbernon@codeweavers.com",
+        "date": "2026-10-15T12:23:40Z"
+      },
+      "committer": {
+        "name": "Alexandre Julliard",
+        "email": "julliard@winehq.org",
+        "date": "2026-10-19T15:55:16Z"
+      },
+      "message": "opengl32/tests: Fix some broken tests on AMD.",
+      "tree": {
+        "sha": "892df636e88eae3125fe12603457bcd455a86987",
+        "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/892df636e88eae3125fe12603457bcd455a86987"
+      },
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/882ed0afffc098f388ac3ccc00cbbd4f06dfd20d",
+      "comment_count": 0,
+      "verification": {
+        "verified": false,
+        "reason": "unsigned",
+        "signature": null,
+        "payload": null,
+        "verified_at": null
+      }
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/commits/882ed0afffc098f388ac3ccc00cbbd4f06dfd20d",
+    "html_url": "https://github.com/wine-mirror/wine/commit/882ed0afffc098f388ac3ccc00cbbd4f06dfd20d",
+    "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/882ed0afffc098f388ac3ccc00cbbd4f06dfd20d/comments",
+    "author": {
+      "login": "rbernon",
+      "id": 4134719,
+      "node_id": "MDQ6VXNlcjQxMzQ3MTk=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4134719?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/rbernon",
+      "html_url": "https://github.com/rbernon",
+      "followers_url": "https://api.github.com/users/rbernon/followers",
+      "following_url": "https://api.github.com/users/rbernon/following{/other_user}",
+      "gists_url": "https://api.github.com/users/rbernon/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/rbernon/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/rbernon/subscriptions",
+      "organizations_url": "https://api.github.com/users/rbernon/orgs",
+      "repos_url": "https://api.github.com/users/rbernon/repos",
+      "events_url": "https://api.github.com/users/rbernon/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/rbernon/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "committer": {
+      "login": "julliard",
+      "id": 1130500,
+      "node_id": "MDQ6VXNlcjExMzA1MDA=",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/julliard",
+      "html_url": "https://github.com/julliard",
+      "followers_url": "https://api.github.com/users/julliard/followers",
+      "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+      "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+      "organizations_url": "https://api.github.com/users/julliard/orgs",
+      "repos_url": "https://api.github.com/users/julliard/repos",
+      "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/julliard/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "parents": [
+      {
+        "sha": "c8937ebbdd02a9ec27199a4e6f3d112ceb8bdc54",
+        "url": "https://api.github.com/repos/wine-mirror/wine/commits/c8937ebbdd02a9ec27199a4e6f3d112ceb8bdc54",
+        "html_url": "https://github.com/wine-mirror/wine/commit/c8937ebbdd02a9ec27199a4e6f3d112ceb8bdc54"
+      }
+    ]
+  }
+]

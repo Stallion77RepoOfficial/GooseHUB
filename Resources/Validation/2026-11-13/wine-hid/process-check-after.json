@@ -1,0 +1,18 @@
+{
+  "notRunning": {
+    "exit": 0,
+    "output": ""
+  },
+  "running": {
+    "exit": 0,
+    "output": "\"Throne Monarch Mouse Software v1.0.exe\",\"244\",\"Console\",\"1\",\"0 K\""
+  },
+  "pipeline": {
+    "exit": 0,
+    "output": "\"Throne Monarch Mouse Software v1.0.exe\",\"244\",\"Console\",\"1\",\"0 K\""
+  },
+  "stopped": {
+    "exit": 0,
+    "output": ""
+  }
+}

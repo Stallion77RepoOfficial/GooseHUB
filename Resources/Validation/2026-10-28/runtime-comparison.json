@@ -1,0 +1,208 @@
+{
+  "results": [
+    {
+      "version": "11.11",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.808933,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.7391,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 2.932357,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.20",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.585758,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.583433,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.735967,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.20",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.520113,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.535143,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.684753,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.11",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.769502,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.759178,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.921185,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.11",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.75953,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.764028,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.953525,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.20",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.566218,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.566322,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.723878,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.20",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.550842,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.586732,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.7191,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    },
+    {
+      "version": "11.11",
+      "benchmarks": [
+        {
+          "mode": "stable",
+          "draws": 60000,
+          "submit_us_per_draw": 1.81213,
+          "pixel": 4278255360
+        },
+        {
+          "mode": "change_every_64",
+          "draws": 60000,
+          "submit_us_per_draw": 1.822527,
+          "pixel": 4286545664
+        },
+        {
+          "mode": "change_every_draw",
+          "draws": 60000,
+          "submit_us_per_draw": 1.909828,
+          "pixel": 4286545664
+        }
+      ],
+      "pixelChecksPassed": 13
+    }
+  ],
+  "medianMicrosecondsPerDraw": {
+    "11.11": {
+      "stable": 1.7892175,
+      "change_every_64": 1.761603,
+      "change_every_draw": 1.937355
+    },
+    "11.20": {
+      "stable": 1.5585300000000002,
+      "change_every_64": 1.5748775,
+      "change_every_draw": 1.721489
+    }
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "sha": "f4691495173cdd9c1fae788e90c4efc0df7268bc",
+  "node_id": "C_kwDOAVqN-toAKGY0NjkxNDk1MTczY2RkOWMxZmFlNzg4ZTkwYzRlZmMwZGY3MjY4YmM",
+  "commit": {
+    "author": {
+      "name": "Vasiliy Stelmachenok",
+      "email": "ventureo@cachyos.org",
+      "date": "2026-10-14T17:15:48Z"
+    },
+    "committer": {
+      "name": "Alexandre Julliard",
+      "email": "julliard@winehq.org",
+      "date": "2026-10-19T15:55:16Z"
+    },
+    "message": "win32u: Always create OpenGL 3.1 context using compatibility profile.\n\nWine-Bug: https://bugs.winehq.org/show_bug.cgi?id=60283\nSigned-off-by: Vasiliy Stelmachenok <ventureo@cachyos.org>",
+    "tree": {
+      "sha": "270e547f892bec812d2ddb380254ad9c80844ffb",
+      "url": "https://api.github.com/repos/wine-mirror/wine/git/trees/270e547f892bec812d2ddb380254ad9c80844ffb"
+    },
+    "url": "https://api.github.com/repos/wine-mirror/wine/git/commits/f4691495173cdd9c1fae788e90c4efc0df7268bc",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null,
+      "verified_at": null
+    }
+  },
+  "url": "https://api.github.com/repos/wine-mirror/wine/commits/f4691495173cdd9c1fae788e90c4efc0df7268bc",
+  "html_url": "https://github.com/wine-mirror/wine/commit/f4691495173cdd9c1fae788e90c4efc0df7268bc",
+  "comments_url": "https://api.github.com/repos/wine-mirror/wine/commits/f4691495173cdd9c1fae788e90c4efc0df7268bc/comments",
+  "author": {
+    "login": "ventureoo",
+    "id": 92667539,
+    "node_id": "U_kgDOBYX-kw",
+    "avatar_url": "https://avatars.githubusercontent.com/u/92667539?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/ventureoo",
+    "html_url": "https://github.com/ventureoo",
+    "followers_url": "https://api.github.com/users/ventureoo/followers",
+    "following_url": "https://api.github.com/users/ventureoo/following{/other_user}",
+    "gists_url": "https://api.github.com/users/ventureoo/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/ventureoo/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/ventureoo/subscriptions",
+    "organizations_url": "https://api.github.com/users/ventureoo/orgs",
+    "repos_url": "https://api.github.com/users/ventureoo/repos",
+    "events_url": "https://api.github.com/users/ventureoo/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/ventureoo/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "julliard",
+    "id": 1130500,
+    "node_id": "MDQ6VXNlcjExMzA1MDA=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1130500?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/julliard",
+    "html_url": "https://github.com/julliard",
+    "followers_url": "https://api.github.com/users/julliard/followers",
+    "following_url": "https://api.github.com/users/julliard/following{/other_user}",
+    "gists_url": "https://api.github.com/users/julliard/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/julliard/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/julliard/subscriptions",
+    "organizations_url": "https://api.github.com/users/julliard/orgs",
+    "repos_url": "https://api.github.com/users/julliard/repos",
+    "events_url": "https://api.github.com/users/julliard/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/julliard/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "0ebc62f5673ad4c434839ec18bbb598a644632e6",
+      "url": "https://api.github.com/repos/wine-mirror/wine/commits/0ebc62f5673ad4c434839ec18bbb598a644632e6",
+      "html_url": "https://github.com/wine-mirror/wine/commit/0ebc62f5673ad4c434839ec18bbb598a644632e6"
+    }
+  ],
+  "stats": {
+    "total": 8,
+    "additions": 4,
+    "deletions": 4
+  },
+  "files": [
+    {
+      "sha": "7324a7e6829aa87d94083d911a4c61fb46130589",
+      "filename": "dlls/opengl32/tests/opengl.c",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 3,
+      "changes": 6,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/f4691495173cdd9c1fae788e90c4efc0df7268bc/dlls%2Fopengl32%2Ftests%2Fopengl.c",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/f4691495173cdd9c1fae788e90c4efc0df7268bc/dlls%2Fopengl32%2Ftests%2Fopengl.c",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fopengl32%2Ftests%2Fopengl.c?ref=f4691495173cdd9c1fae788e90c4efc0df7268bc",
+      "patch": "@@ -3540,9 +3540,9 @@ static void test_wglCreateContextAttribsARB( HDC hdc )\n     ok_x4( flags, ==, 0 );\n \n     extension = glGetString( GL_EXTENSIONS );\n-    todo_wine ok_ret( 0, glGetError() );\n-    ptr = extension ? strstr( (const char *)extension, \"GL_ARB_compatibility\" ) : NULL;\n-    todo_wine ok_ptr( ptr, !=, NULL );\n+    ok_ret( 0, glGetError() );\n+    ptr = strstr( (const char *)extension, \"GL_ARB_compatibility\" );\n+    ok_ptr( ptr, !=, NULL );\n \n     ok_ret( TRUE, wglDeleteContext( ctx ) );\n "
+    },
+    {
+      "sha": "eb191a1aa22b027ca173d1f645c4e896d4afc78d",
+      "filename": "dlls/win32u/opengl.c",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1,
+      "changes": 2,
+      "blob_url": "https://github.com/wine-mirror/wine/blob/f4691495173cdd9c1fae788e90c4efc0df7268bc/dlls%2Fwin32u%2Fopengl.c",
+      "raw_url": "https://github.com/wine-mirror/wine/raw/f4691495173cdd9c1fae788e90c4efc0df7268bc/dlls%2Fwin32u%2Fopengl.c",
+      "contents_url": "https://api.github.com/repos/wine-mirror/wine/contents/dlls%2Fwin32u%2Fopengl.c?ref=f4691495173cdd9c1fae788e90c4efc0df7268bc",
+      "patch": "@@ -3045,7 +3045,7 @@ static struct opengl_context *win32u_context_create( HDC hdc, struct opengl_cont\n         attrs.flags &= WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;\n     }\n \n-    if ((attrs.major >= 0 && attrs.major < 3) || (attrs.major == 3 && attrs.minor == 0 && !attrs.flags))\n+    if ((attrs.major >= 0 && attrs.major < 3) || (attrs.major == 3 && attrs.minor <= 1 && !attrs.flags))\n     {\n         WARN( \"Ignoring legacy OpenGL version %d.%d\\n\", attrs.major, attrs.minor == -1 ? 0 : attrs.minor );\n         attrs.profile = WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB;"
+    }
+  ]
+}

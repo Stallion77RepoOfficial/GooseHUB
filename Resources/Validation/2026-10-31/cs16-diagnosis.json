@@ -1,0 +1,38 @@
+{
+  "cause": "Shortcut stored -game cstrike as one argument, so GoldSrc did not select the cstrike mod.",
+  "reaEvidence": "ev_86a305534280b255d0b37403ec618a05579d939461014ad35bb7e2f73bae9f93",
+  "probeWindowsArgv": {
+    "before": [
+      "-game cstrike"
+    ],
+    "after": [
+      "-game",
+      "cstrike"
+    ]
+  },
+  "controlledGameValidation": {
+    "isolation": "APFS clone of user bottle; original game files unchanged",
+    "correctedArgumentsProcessStayedAliveSeconds": 100,
+    "mapArgumentsProcessStayedAliveSeconds": 50,
+    "clientLoaded": "0024:trace:loaddll:build_module Loaded L\"c:\\\\program files (x86)\\\\cs16v2017_oyunyoneticisi\\\\cstrike\\\\cl_dlls\\\\client.dll\" at 08E10000: native",
+    "gameUILoaded": "0024:trace:loaddll:build_module Loaded L\"c:\\\\program files (x86)\\\\cs16v2017_oyunyoneticisi\\\\cstrike\\\\cl_dlls\\\\GameUI.dll\" at 09070000: native",
+    "mapRequested": "de_dust2",
+    "renderingVisuallyVerified": false,
+    "limitation": "Wine game window was not discoverable through the enabled CUA app surfaces; evidence is loaded modules, process lifetime and local server initialization."
+  },
+  "swiftTests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "engineChanges": "None; custom Wine and DXMT payload preserved.",
+  "shortcutUpdatedThroughUI": true,
+  "savedArguments": [
+    "-game",
+    "cstrike"
+  ],
+  "otherShortcutAndBottleSettingsUnchanged": true,
+  "temporaryBottleRemoved": true,
+  "onlyAppInDist": [
+    "Goose HUB latest.app"
+  ]
+}

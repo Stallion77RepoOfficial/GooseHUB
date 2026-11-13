@@ -1,0 +1,34 @@
+{
+  "removedPatternsChecked": [
+    "Engine ready",
+    "Built for Apple silicon",
+    "JUMP BACK IN",
+    "PLAYING NOW",
+    "IN YOUR LIBRARY",
+    "Make room for your first game",
+    "StatusPill",
+    "GameArtwork",
+    "\"Ready\"",
+    "\"Included\"",
+    "seamless",
+    "cutting-edge",
+    "game changer",
+    "empower",
+    "leverage",
+    "delve",
+    "ultimate",
+    "premium"
+  ],
+  "remainingMatches": {},
+  "copyReview": "Visible labels describe actions, settings, versions, errors, or current activity. Removed slogans, featured hero, generated artwork, decorative status pills, duplicate running indicators and static ready status.",
+  "featuresRetained": [
+    "search",
+    "favorites",
+    "bottle filter",
+    "sort",
+    "grid/list",
+    "runtime settings",
+    "logs",
+    "MetalGoose controls"
+  ]
+}

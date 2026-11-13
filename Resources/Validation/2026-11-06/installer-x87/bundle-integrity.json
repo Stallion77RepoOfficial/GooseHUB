@@ -1,0 +1,17 @@
+{
+  "version": "0.2.8",
+  "build": "11",
+  "candidate": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/.build/installer-path-20261106/Goose HUB candidate.app",
+  "assetCount": 2276,
+  "allHashesMatch": true,
+  "deepStrictSignature": true,
+  "unchangedPreviousAssets": 2267,
+  "allWineAndDXMTAssetsByteIdentical": true,
+  "changedExistingEngineAssets": [
+    "Sources/engine-sources.json"
+  ],
+  "dxmt": "Adrenalin 2026.11.06",
+  "wine": "11.11 Adrenalin 2026.11.04",
+  "installedPath": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app",
+  "atomicBundleSwap": true
+}

@@ -1,0 +1,41 @@
+{
+  "scope": "Own synthetic query fixture; NOT game FPS or matched-scene D11 comparison",
+  "measurements": [
+    {
+      "variant": "before",
+      "iteration": 0,
+      "submissionMs": 35.7409,
+      "completionMs": 39.2076
+    },
+    {
+      "variant": "after",
+      "iteration": 0,
+      "submissionMs": 2.4422,
+      "completionMs": 6.1662
+    },
+    {
+      "variant": "after",
+      "iteration": 1,
+      "submissionMs": 0.8771,
+      "completionMs": 5.9913
+    },
+    {
+      "variant": "before",
+      "iteration": 1,
+      "submissionMs": 63.009,
+      "completionMs": 68.1282
+    },
+    {
+      "variant": "before",
+      "iteration": 2,
+      "submissionMs": 27.8012,
+      "completionMs": 34.6984
+    },
+    {
+      "variant": "after",
+      "iteration": 2,
+      "submissionMs": 1.7726,
+      "completionMs": 5.3386
+    }
+  ]
+}

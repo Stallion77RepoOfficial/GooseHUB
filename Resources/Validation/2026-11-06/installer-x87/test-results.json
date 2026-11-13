@@ -1,0 +1,40 @@
+{
+  "setupSHA256": "48fc7e5361f708bf6ac9aadffb9d3adf1b9a99a57b79a016b6804d42bbb8b06d",
+  "reducedPrecision": {
+    "mathBits": 64,
+    "result": "Path characters corrupted before installer startup; path-not-found dialog; no Inno log."
+  },
+  "fullPrecision": {
+    "mathBits": 80,
+    "result": "Installer opened; user confirmed."
+  },
+  "productionLaunch": {
+    "arguments": [
+      "/Users/berkegulacar/Downloads/SvrdSteel-oyunindir.vip/SvrdSteel/setup.exe",
+      "/DIR=C:\\Games\\Severed Steel",
+      "/SILENT",
+      "/NORESTART",
+      "/NOCLOSEAPPLICATIONS",
+      "/NOICONS",
+      "/TASKS=",
+      "/LOG=Z:\\Users\\berkegulacar\\Downloads\\Github\\dxmt-adrenalin-edition\\GooseHUB\\.build\\installer-path-20261106\\inno-c-drive.log"
+    ],
+    "executable": "/Users/berkegulacar/Downloads/Github/dxmt-adrenalin-edition/GooseHUB/dist/Goose HUB latest.app/Contents/Resources/Engines/Wine/bin/wine",
+    "legacyOpenGLBatching": true,
+    "prefix": "/Users/berkegulacar/Library/Application Support/GooseHUB/Bottles/77d0fb5a-9d0d-44c5-b53f-20a3bd53b226/prefix",
+    "workingDirectory": "/Users/berkegulacar/Downloads/SvrdSteel-oyunindir.vip/SvrdSteel",
+    "x87MathBits": 80
+  },
+  "installation": {
+    "target": "C:\\Games\\Severed Steel",
+    "innoReportedSuccess": true,
+    "fileVerification": "User confirmed QuickSFV: all files OK.",
+    "exitCode": 0,
+    "status": "exited"
+  },
+  "swiftTests": {
+    "count": 14,
+    "failures": 0
+  },
+  "globalGameAccelerationPreserved": true
+}

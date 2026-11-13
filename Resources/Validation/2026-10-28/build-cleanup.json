@@ -1,0 +1,30 @@
+{
+  "removed": [
+    ".build_x64",
+    ".build_x86",
+    "GooseHUB/.build/goose-fixed-boot-wh3x06jr",
+    "GooseHUB/.build/goose-normal-boot-77mpbj1f",
+    "GooseHUB/.build/goose-runtime-smoke-_k5ywse5",
+    "GooseHUB/.build/packaged-smoke-p44v9jpn",
+    "GooseHUB/dist/Goose HUB 2026.10.app",
+    "GooseHUB/dist/Goose HUB Preview.app",
+    "GooseHUB/dist/Goose HUB performance.app",
+    "wine-adrenalin-edition: generated in-tree build files only",
+    "GooseHUB/.build/upstream-review-20261028",
+    "GooseHUB/.build/dxmt-performance-20261027",
+    "build: September 2026 DXMT DLL package",
+    "GooseHUB/.build/wine-current/test-game",
+    "GooseHUB/.build/wine-current/game-prefix",
+    "GooseHUB/.build/wine-current/test-data",
+    "GooseHUB/.build/wine-current/install",
+    "GooseHUB/.build/wine-current/Engines",
+    "GooseHUB/.build/MetalGoose Test.app",
+    "GooseHUB/.build/metalgoose-test",
+    "GooseHUB/.build/dxmt-guest-smoke",
+    "GooseHUB/.build/fex-guest-smoke",
+    "GooseHUB/.build/out/Products/Debug",
+    "GooseHUB/.build/out/Intermediates.noindex/GooseHUB.build/Debug"
+  ],
+  "kept": "One app in dist, current canonical engines, current Wine build and per-architecture DXMT release builds, sources, patches and validation records.",
+  "wineSourceFilesVerifiedAfterCleanup": 14080
+}

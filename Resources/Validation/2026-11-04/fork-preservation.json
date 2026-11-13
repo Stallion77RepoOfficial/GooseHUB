@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-04",
+  "policy": "Local forks remain authoritative; only the listed performance changes were applied.",
+  "wine": {
+    "canonicalSource": "wine-adrenalin-edition/",
+    "baselineCommit": "11114aaca915120b0c8e714dd04129bd75583db5",
+    "previousSourceTreeSHA256": "38e20b09323bc31162ac413b1d88c7793021f5695ba8f372a6b6f55614f90eb9",
+    "reconstructedPreviousSourceTreeSHA256": "38e20b09323bc31162ac413b1d88c7793021f5695ba8f372a6b6f55614f90eb9",
+    "previousSourceMatches": true,
+    "sourceTreeSHA256": "f0afd6b0b11bf4888adda03039f6dea33f5177e4730af27def7d169db8f3c5d3",
+    "enhancementFiles": [
+      "dlls/ntdll/unix/loader.c",
+      "dlls/opengl32/legacy_gl.h",
+      "dlls/opengl32/make_opengl",
+      "dlls/opengl32/thunks.c",
+      "dlls/opengl32/unix_private.h",
+      "dlls/opengl32/unix_thunks.c",
+      "dlls/opengl32/unix_wgl.c",
+      "dlls/opengl32/unixlib.h",
+      "dlls/opengl32/wgl.c"
+    ],
+    "snapshotMatchesCanonical": true,
+    "sourceFilesCompared": 13256,
+    "newPatchReverseCheck": true,
+    "retainedUpstreamPatchChecks": [
+      {
+        "patch": "2026-11-04-legacy-opengl-batching.patch",
+        "reverseCheck": true
+      },
+      {
+        "patch": "48e2d504.patch",
+        "reverseCheck": true
+      },
+      {
+        "patch": "53a91cdc.patch",
+        "reverseCheck": true
+      },
+      {
+        "patch": "80e1217a.patch",
+        "reverseCheck": true
+      },
+      {
+        "patch": "81e52628.patch",
+        "reverseCheck": true
+      },
+      {
+        "patch": "8c284041.patch",
+        "reverseCheck": true
+      }
+    ]
+  },
+  "dxmt": {
+    "canonicalSource": "src/",
+    "previousSourceTreeSHA256": "ae16462eb17fdb5ddd8ff0f3a983527061f1c341bbaaaf8d2466263c05e92521",
+    "reconstructedPreviousSourceTreeSHA256": "ae16462eb17fdb5ddd8ff0f3a983527061f1c341bbaaaf8d2466263c05e92521",
+    "previousSourceMatches": true,
+    "sourceTreeSHA256": "b13f86574dad8cd5d53a38f02376b09f597f8152706737f6e2e14681c18831c4",
+    "enhancementFiles": [
+      "src/d3d9/d3d9_device.cpp",
+      "src/d3d9/d3d9_device.hpp"
+    ],
+    "customComponents": {
+      "src/d3d8": true,
+      "src/d3d9/sm3": true,
+      "src/d3d9/sm4": true,
+      "src/d3d9/d3d9_vertex_processing.cpp": true,
+      "src/d3d12": true,
+      "src/winemetal/msc_thunks.c": true
+    },
+    "newPatchReverseCheck": true
+  }
+}

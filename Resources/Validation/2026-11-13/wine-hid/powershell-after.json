@@ -1,0 +1,10 @@
+[
+  {
+    "architecturePath": "system32",
+    "unsupportedCapabilityProbeExit": 1
+  },
+  {
+    "architecturePath": "syswow64",
+    "unsupportedCapabilityProbeExit": 1
+  }
+]

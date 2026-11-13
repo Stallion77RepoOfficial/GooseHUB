@@ -1,0 +1,24 @@
+From 53a91cdcbe21125913b24a48cf0f429597017d6a Mon Sep 17 00:00:00 2001
+From: Brendan Shanks <bshanks@codeweavers.com>
+Date: Sun, 30 Aug 2026 21:12:22 -0700
+Subject: [PATCH] winemac: Fix memory leak in get_format_entries().
+
+---
+ dlls/winemac.drv/clipboard.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/dlls/winemac.drv/clipboard.c b/dlls/winemac.drv/clipboard.c
+index 061e10ff..c9e2d231 100644
+--- a/dlls/winemac.drv/clipboard.c
++++ b/dlls/winemac.drv/clipboard.c
+@@ -1067,6 +1067,7 @@ struct format_entry *get_format_entries(CFTypeRef pasteboard, UINT *entries_size
+         }
+ 
+         free(import);
++        CFRelease(data);
+     }
+ 
+     CFRelease(types);
+-- 
+2.55.0
+

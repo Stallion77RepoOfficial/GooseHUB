@@ -1,0 +1,29 @@
+{
+  "dllSHA256": "9ab2d0aaf634cb71d0531d4591bb9ef92cba87f4a8bb32693457f4b5e3047661",
+  "tests": [
+    {
+      "mode": "dxbc-placed-cold-single",
+      "exit": 0
+    },
+    {
+      "mode": "multi-list-queries",
+      "exit": 0
+    },
+    {
+      "mode": "queries",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-geometry",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-structured-vertex-resource-skin-cache-typed",
+      "exit": 0
+    },
+    {
+      "mode": "dxbc-placed-prepass-depthcopy",
+      "exit": 0
+    }
+  ]
+}

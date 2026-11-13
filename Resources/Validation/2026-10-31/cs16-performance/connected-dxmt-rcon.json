@@ -1,0 +1,97 @@
+{
+  "activePlayer": true,
+  "exitCode": 0,
+  "seconds": 53.75825291604269,
+  "events": [
+    {
+      "time": 12.34821883297991,
+      "command": "status",
+      "response": ""
+    },
+    {
+      "time": 13.955425624968484,
+      "command": "status",
+      "response": ""
+    },
+    {
+      "time": 16.88513845799025,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: -1023 x, 2688 y, 208 z\nplayers :  1 active (8 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:04    0    0\n1 users\n\u0000\u0000"
+    },
+    {
+      "time": 17.499280416057445,
+      "command": "jointeam 2",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 18.11970908299554,
+      "command": "joinclass 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 18.743477208074182,
+      "command": "developer 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 19.354680916061625,
+      "command": "fps_max 999",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 19.966803165967576,
+      "command": "sv_cheats 1",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 20.579528791015036,
+      "command": "noclip",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 21.20330933306832,
+      "command": "cl_yawspeed 60",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 21.82159787497949,
+      "command": "record codex_moving",
+      "response": "\u00ff\u00ff\u00ff\u00fflrecording to codex_moving.dem.\n\u0000\u0000"
+    },
+    {
+      "time": 25.448434708057903,
+      "command": "+right",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 26.067299040965736,
+      "command": "+forward",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 38.68806287506595,
+      "command": "-forward",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 39.31170600000769,
+      "command": "-right",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    },
+    {
+      "time": 39.93537845800165,
+      "command": "stop",
+      "response": "\u00ff\u00ff\u00ff\u00fflCompleted demo\n\u0000\u0000"
+    },
+    {
+      "time": 40.549068375024945,
+      "command": "status",
+      "response": "\u00ff\u00ff\u00ff\u00fflhostname:  www.OyunYoneticisi.Com\nversion :  48/1.1.2.6 4554 insecure  (10)\ntcp/ip  :  172.20.10.2:27615\nmap     :  de_dust2 at: 245 x, 2064 y, -74 z\nplayers :  1 active (8 max)\n\n#      name userid uniqueid frag time ping loss adr\n# 1 \"[OyunYoneticisi] Savasci\" 1 STEAM_ID_LAN   0 00:28    0    0\n1 users\n\u0000\u0000"
+    },
+    {
+      "time": 41.23079233302269,
+      "command": "quit",
+      "response": "\u00ff\u00ff\u00ff\u00ffl\u0000\u0000"
+    }
+  ]
+}

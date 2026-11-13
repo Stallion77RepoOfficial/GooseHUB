@@ -1,0 +1,68 @@
+{
+  "baselineVerified": true,
+  "policy": "Local DXMT and Wine forks remain authoritative. Incremental bridge changes; no upstream tree or binary replacement.",
+  "files": {
+    "src/d3d12/d3d12.def": {
+      "beforeSHA256": "35285bc55451890240ebec13af79c405a7be508dc4a52773d3f6d6855116085e",
+      "afterSHA256": "35285bc55451890240ebec13af79c405a7be508dc4a52773d3f6d6855116085e",
+      "changed": false
+    },
+    "src/d3d12/d3d12_state_map.hpp": {
+      "beforeSHA256": "83058521e80be70475b59b093dc80e0eeeac54b17429ae65beed50e408805221",
+      "afterSHA256": "83058521e80be70475b59b093dc80e0eeeac54b17429ae65beed50e408805221",
+      "changed": false
+    },
+    "src/d3d12/meson.build": {
+      "beforeSHA256": "19a48a9681b6ae105bb951c56c4296730864418098092f3fa9c02ee4bfcb34ee",
+      "afterSHA256": "19a48a9681b6ae105bb951c56c4296730864418098092f3fa9c02ee4bfcb34ee",
+      "changed": false
+    },
+    "src/d3d12/d3d12.cpp": {
+      "beforeSHA256": "206044002c3394da8ae1f763d9347af62cf70887fd6bcaeb7cb196dd70c0a593",
+      "afterSHA256": "f17126ab3076ad1ee4832b17ebf7fbeb8ab23ae79be73c6529d58d48c4db2059",
+      "changed": true
+    },
+    "src/d3d12/version.rc": {
+      "beforeSHA256": "603348843b8672873dab3578c21978ba31c919fa8ed21c8b1a77afada0ba7f54",
+      "afterSHA256": "603348843b8672873dab3578c21978ba31c919fa8ed21c8b1a77afada0ba7f54",
+      "changed": false
+    },
+    "src/dxmt/dxmt_root_signature.hpp": {
+      "beforeSHA256": "ee6e15f8db868ea468aecde898916685f0563a381cdf91b3f31110d46d3ee23f",
+      "afterSHA256": "205d47cf127d65467d5ae67063f26dc89a33759b9c272fdf5733dbf9fe6db341",
+      "changed": true
+    },
+    "src/dxmt/dxmt_root_signature.cpp": {
+      "beforeSHA256": "a2affe36e34ef5c8d2e1642607de84ab4a245b8041104a63a365b7117379d9ed",
+      "afterSHA256": "0ff008585eb27e4d3e8a8560171af6fa53173ed18113398ca3bd9ee476380561",
+      "changed": true
+    },
+    "src/dxmt/dxmt_context.hpp": {
+      "beforeSHA256": "943e91673162297045d1931d0e00ed3ff8769edf89e8776669e87744d1148236",
+      "afterSHA256": "231fbab8c85930e4859b0ecab29aaebafc316e4a9934fa6a9d82cf73bcc310a2",
+      "changed": true
+    },
+    "src/d3d11/d3d11_buffer.cpp": {
+      "beforeSHA256": "8930ec6335a8d3511d07b03924d45f78943da79f8288b38ede9e77375177c1a3",
+      "afterSHA256": "119ccdaea346a1447529dd76cdc90b75e7e9664f9d24b4bbfbf3ecd4f8214872",
+      "changed": true
+    },
+    "src/d3d11/d3d11.def": {
+      "beforeSHA256": "7eac2d74195567b45c11cc541ba7967d195982278cb86dabe1ebe7963e2800d8",
+      "afterSHA256": "daf117e41e2d46dbeb9c348df2d4aa7581e24b04c663514862ca1a6cb515b9ac",
+      "changed": true
+    },
+    "src/dxmt/dxmt_descriptor_heap.cpp": {
+      "beforeSHA256": "c549e8946022613d5a1f9ce42c44ab1e087ac2777d4db45be8b7d428c6277277",
+      "afterSHA256": "452b4968454b3dc232412db43a351b2a9238e34238e676169a388a1d1b9ed075",
+      "changed": true
+    },
+    "src/dxmt/dxmt_descriptor_heap.hpp": {
+      "beforeSHA256": "7ef865e126cdf9ea0f69ce4e4c2060cc4b7eb151f1cff14e30d72a9e8ee258f4",
+      "afterSHA256": "717ad2273088678455e693309288f0db7803ca535a6e193c82f3df453182ff79",
+      "changed": true
+    }
+  },
+  "patchSHA256": "21ddaa58649f97ade9f988935f16f830578351578a335ba52b96693dd4a0da95",
+  "reversePatchDryRunPassed": true
+}
