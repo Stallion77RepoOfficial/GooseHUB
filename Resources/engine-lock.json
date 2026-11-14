@@ -4,14 +4,14 @@
     "wine": {
       "directory": "wine-adrenalin-edition",
       "url": "https://github.com/Stallion77RepoOfficial/wine-adrenalin-edition.git",
-      "revision": "cffa31cd62ce05158dae3c68b513cd648d6ca3e1",
-      "version": "11.11 Adrenalin 2026.11.13",
+      "revision": "43d78febf9e71d63ffcfd5d605b1edc03b5174b2",
+      "version": "11.11 Adrenalin 2026.11.14",
       "branch": "main"
     },
     "fex": {
       "directory": "fex-adrenalin-edition",
       "url": "https://github.com/Stallion77RepoOfficial/fex-adrenalin-edition.git",
-      "revision": "8027126f7049dad78ebc9bd69b26fb962f6f36fb",
+      "revision": "58e670d13a0c879dcf0f6ed0325c617c875d2d90",
       "version": "FEX-2610 Adrenalin Edition",
       "branch": "main"
     },

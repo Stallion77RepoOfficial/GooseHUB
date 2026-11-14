@@ -1,6 +1,6 @@
 {
   "date": "2026-11-14",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "launcherUpdaterReference": "https://github.com/Stallion77RepoOfficial/MetalGoose/tree/7a968444db82a92f85d00c2941ae20f3540a5f5f",
   "launcherUpdates": {
     "source": "GitHub latest release",
@@ -9,7 +9,10 @@
     "checksReleaseDigest": true,
     "checksAppSignatureAndIdentity": true,
     "atomicReplacement": true,
-    "relaunch": true
+    "relaunch": true,
+    "liveDownloadInstallAndRelaunchVerified": true,
+    "livePreservedEngineFiles": 2093,
+    "completedSheetAllowsTermination": true
   },
   "componentUpdates": {
     "source": "configured public branch HEAD",
@@ -27,9 +30,22 @@
     "installer": 11
   },
   "releaseAsset": {
-    "name": "GooseHUB-v0.4.1-arm64.zip",
-    "bytes": 3399995,
-    "sha256": "90595bb79a399c9bdaba2c0dda66c3d3448e9548f20b40ea554fddeea78aea54",
+    "name": "GooseHUB-v0.4.2-arm64.zip",
+    "bytes": 3401437,
+    "sha256": "46c4e5a009b5427da35e95313a68535683a11c8740994fe6387e01e9834266e3",
     "bundledEngines": false
+  },
+  "executionPolicy": {
+    "wineCommit": "43d78febf9e71d63ffcfd5d605b1edc03b5174b2",
+    "fexCommit": "58e670d13a0c879dcf0f6ed0325c617c875d2d90",
+    "legacyReadableCode": true,
+    "explicitExecutableCodeAfterDEPEnabled": true,
+    "nonExecutableCodeRejectedAfterDEPEnabled": true,
+    "runtimeSmoke": [
+      "x64-process",
+      "x86-process",
+      "x64-D3D9-pixels",
+      "x86-D3D9-pixels"
+    ]
   }
 }

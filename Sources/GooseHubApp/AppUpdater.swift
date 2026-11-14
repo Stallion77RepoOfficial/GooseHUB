@@ -214,6 +214,10 @@ final class AutoUpdater: ObservableObject {
         shell.standardOutput = FileHandle.nullDevice
         shell.standardError = FileHandle.nullDevice
         try? shell.run()
+        // The completed progress sheet must allow the updater's termination request.
+        for window in NSApplication.shared.windows {
+            window.attachedSheet?.preventsApplicationTerminationWhenModal = false
+        }
         NSApplication.shared.terminate(nil)
     }
 }
