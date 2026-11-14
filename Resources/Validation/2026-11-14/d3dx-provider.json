@@ -1,0 +1,96 @@
+{
+  "version": "0.4.3",
+  "policy": "Prefer supplied D3DX9_24 through D3DX9_43 redistributables, with builtin fallback.",
+  "initializationUnchanged": true,
+  "rendererPolicyUnchanged": true,
+  "regression": {
+    "game": "Transformers The Game",
+    "symptom": "Menu audio and navigation work, image black.",
+    "nativeD3DX9_31RestoresImage": "user confirmed",
+    "dxmtD3D9Retained": true
+  },
+  "validation": [
+    {
+      "test": "x86",
+      "exitCode": 0,
+      "checks": [
+        "D3DX provider: builtin",
+        "Shader bytes: 160; pixel shader 2.0: PASS"
+      ]
+    },
+    {
+      "test": "x64",
+      "exitCode": 0,
+      "checks": [
+        "D3DX provider: builtin",
+        "Shader bytes: 160; pixel shader 2.0: PASS"
+      ]
+    },
+    {
+      "test": "native-x86",
+      "exitCode": 0,
+      "checks": [
+        "D3DX provider: native",
+        "Shader bytes: 188; pixel shader 2.0: PASS"
+      ]
+    },
+    {
+      "test": "d3d9-x86.exe",
+      "exitCode": 0,
+      "checks": [
+        "PASS low vertex register",
+        "PASS larger vertex span without a setter",
+        "PASS relative vertex constant indexing",
+        "PASS low pixel register",
+        "PASS larger pixel span without a setter",
+        "PASS recorded constants apply",
+        "PASS state block reapplies after an intervening setter",
+        "PASS integer and boolean extra constants",
+        "PASS boolean constant changes",
+        "PASS boolean normalization and unchanged setter",
+        "PASS integer constant changes",
+        "PASS integer unchanged setter",
+        "PASS vertex ring wraps: 0 mismatched pixels, submission 7.952 ms",
+        "PASS pixel ring wraps: 0 mismatched pixels, submission 9.255 ms",
+        "PASS pixel snapshot before vertex wraps",
+        "PASS vertex wraps preserve unchanged pixel constants",
+        "PASS fixed vertex stage with programmable pixel constants",
+        "PASS vertex constants restored after fixed function",
+        "PASS programmable vertex constants with fixed pixel stage",
+        "PASS pixel constants restored after fixed function",
+        "PASS unchanged constant ranges restored after StretchRect"
+      ]
+    },
+    {
+      "test": "d3d9-x64.exe",
+      "exitCode": 0,
+      "checks": [
+        "PASS low vertex register",
+        "PASS larger vertex span without a setter",
+        "PASS relative vertex constant indexing",
+        "PASS low pixel register",
+        "PASS larger pixel span without a setter",
+        "PASS recorded constants apply",
+        "PASS state block reapplies after an intervening setter",
+        "PASS integer and boolean extra constants",
+        "PASS boolean constant changes",
+        "PASS boolean normalization and unchanged setter",
+        "PASS integer constant changes",
+        "PASS integer unchanged setter",
+        "PASS vertex ring wraps: 0 mismatched pixels, submission 4.168 ms",
+        "PASS pixel ring wraps: 0 mismatched pixels, submission 3.904 ms",
+        "PASS pixel snapshot before vertex wraps",
+        "PASS vertex wraps preserve unchanged pixel constants",
+        "PASS fixed vertex stage with programmable pixel constants",
+        "PASS vertex constants restored after fixed function",
+        "PASS programmable vertex constants with fixed pixel stage",
+        "PASS pixel constants restored after fixed function",
+        "PASS unchanged constant ranges restored after StretchRect"
+      ]
+    }
+  ],
+  "tests": {
+    "swift": 21,
+    "installer": 11
+  }
+}

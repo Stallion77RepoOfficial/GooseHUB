@@ -162,6 +162,11 @@ struct RuntimeEnvironment {
         } else {
             result["WINEDLLOVERRIDES"] = "d3d8,d3d9,d3d10core,d3d11,d3d12,dxgi=b;winemetal=b"
         }
+        if !initialize {
+            // Prefer supplied D3DX9 redistributables, with Wine as the fallback.
+            let helpers = (24...43).map { "d3dx9_\($0)" }.joined(separator: ",")
+            result["WINEDLLOVERRIDES", default: ""] += ";\(helpers)=n,b"
+        }
         return result
     }
 }
