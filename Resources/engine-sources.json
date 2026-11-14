@@ -140,6 +140,13 @@
         "priorForkSourceTreeSHA256": "b0c464ca38960d1a3721f0dfddd2e02ac3910d8a412a5b50536843d8fe11fa20",
         "sourceTreeSHA256": "ee3ec3944fcf8b1d14c45c98e31c43d3129c9c33930e3ccef50d9ba3f78a4d5d",
         "status": "69 three-architecture GPU checks passed; isolated submission timing improved; game FPS parity not claimed"
+      },
+      {
+        "id": "d3d9-backbuffer-capture-20261114",
+        "date": "2026-11-14",
+        "commit": "2fff1f4679b57373d95c37ed428d0e9fd4b793ac",
+        "scope": "Allow shader reads from implicit and additional D3D9 swap-chain back buffers so scaled StretchRect captures succeed.",
+        "validation": "Resources/Validation/2026-11-14/d3d9-backbuffer-capture.json"
       }
     ],
     "latestCheckedCommit": "647b0020ba5764e5593b12407afd76964fa11e20",

@@ -1,0 +1,69 @@
+{
+  "date": "2026-11-14",
+  "dxmtCommit": "2fff1f4679b57373d95c37ed428d0e9fd4b793ac",
+  "scope": "Scaled D3D9 swap-chain back-buffer capture.",
+  "sourceTest": "https://github.com/Stallion77RepoOfficial/dxmt-adrenalin-edition/blob/2fff1f4679b57373d95c37ed428d0e9fd4b793ac/scripts/d3d9-backbuffer-validation.cpp",
+  "before": {
+    "scenario": "Actual window, Present, 1024x665 X8 back buffer scaled to 256x166 A8 target",
+    "stretchRectHRESULT": "0x8876086c",
+    "exitCode": 9,
+    "logSHA256": "18645a45c48ef014f1ae409f880e0c9915913839c00e6331ee08eecb6663eb22"
+  },
+  "after": [
+    {
+      "scenario": "Native D3DX9_31 BMP export with actual swapchain and Present",
+      "exitCode": 0,
+      "captures": 3,
+      "logSHA256": "07d6b0ec994ebf3d757c82109b72a1379aa884effa5bf2722000393a9aef0868"
+    },
+    {
+      "scenario": "x86, implicit/additional/Reset, complete compilation",
+      "exitCode": 0,
+      "captures": 18,
+      "logSHA256": "a0ef534d1a2ab8be29192687ffc25503474e75d2acc62976a584568b1bd63f45"
+    },
+    {
+      "scenario": "x64, implicit/additional/Reset, complete compilation",
+      "exitCode": 0,
+      "captures": 18,
+      "logSHA256": "b377d30d33dca7e9159e0aa1ae83b5e2565ccefdbf6bbf6315226894acb2eb7a"
+    },
+    {
+      "scenario": "x86, implicit/additional/Reset, background compilation",
+      "exitCode": 0,
+      "captures": 18,
+      "logSHA256": "56f29adaefd68feb8ba4c4d390031594f04ec06c4f8dd76ae10fbfa503b20b6e"
+    }
+  ],
+  "gameVerification": {
+    "game": "Transformers The Game",
+    "missionEnd": "User confirmed transition without freezing",
+    "missionRunExitCode": 0,
+    "normalStartup": "User confirmed main menu with no extra launch arguments",
+    "savedShortcutArguments": [],
+    "dxmtD3D9Retained": true,
+    "nativeD3DXHelperSelectionRetained": true,
+    "x87MathBits": 64
+  },
+  "publicComponentCommits": {
+    "wine": "43d78febf9e71d63ffcfd5d605b1edc03b5174b2",
+    "fex": "58e670d13a0c879dcf0f6ed0325c617c875d2d90",
+    "dxmt": "2fff1f4679b57373d95c37ed428d0e9fd4b793ac",
+    "metalgoose": "7a968444db82a92f85d00c2941ae20f3540a5f5f"
+  },
+  "updateCheck": {
+    "anonymousPublicBranchAccess": true,
+    "result": "up-to-date",
+    "rebuilt": false,
+    "logSHA256": "97ed7594004b9cdb547116dac904139faa179e585d45598d78c67e390c082c6c"
+  },
+  "installerTests": {
+    "passed": 11
+  },
+  "limitations": [
+    "One mission-end replay passed; every mission has not been individually tested.",
+    "The original hang was not captured in a debugger. The StretchRect defect is directly reproduced and fixed.",
+    "Normal startup still logged an invalid SEH frame on one thread; the user confirmed the menu rendered. The origin of that log entry is unresolved.",
+    "No game FPS claim is made by these capture tests."
+  ]
+}
